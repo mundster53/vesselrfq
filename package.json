@@ -1,20 +1,5 @@
 {
   "name": "vesselrfq",
   "version": "0.1.0",
-  "description": "VesselRFQ - The Compressed Marketplace for ASME Pressure Vessel RFQs",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "keywords": [
-    "asme",
-    "pressure-vessel",
-    "rfq",
-    "marketplace",
-    "fabrication"
-  ],
-  "author": "Bret Mundt",
-  "license": "UNLICENSED",
   "private": true
 }
