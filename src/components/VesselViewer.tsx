@@ -85,14 +85,16 @@ function fitCamera(
   if (isV) {
     // Vertical: vessel height along Y
     const halfH = shellLen / 2 + hd
-    const totalBelow = supportExtent
     const radBound = r + extraRadial + 4
-    const boundR = Math.sqrt(radBound ** 2 + (halfH + totalBelow / 2 + 4) ** 2)
-    const dist = (boundR / Math.sin(fov / 2)) * 1.1
-    cam.position.set(r * 0.4 + od * 0.22, (halfH - totalBelow * 0.15), dist * 0.88)
+    const boundR = Math.sqrt(radBound ** 2 + (halfH + supportExtent + 4) ** 2)
+    const dist = (boundR / Math.sin(fov / 2)) * 1.4
+    const topY = shellLen / 2 + hd
+    const bottomY = -(shellLen / 2 + hd + supportExtent)
+    const centerY = (topY + bottomY) / 2 - supportExtent * 0.6
+    cam.position.set(r * 0.4 + od * 0.22, centerY, dist * 1.15)
     cam.near = boundR * 0.003; cam.far = dist * 8
     cam.updateProjectionMatrix()
-    ctl.target.set(0, (halfH / 2 - totalBelow * 0.25), 0)
+    ctl.target.set(0, centerY, 0)
   } else {
     // Horizontal: vessel axis along X
     const halfX = shellLen / 2 + hd
@@ -449,89 +451,180 @@ function buildVessel(
     }
   }
 
+  // ╔══════════════════════════════════════════════════════════════════╗
+  // ║  LEG GEOMETRY - LOCKED. DO NOT MODIFY WITHOUT EXPLICIT         ║
+  // ║  WRITTEN PERMISSION FROM BRET MUNDT.                           ║
+  // ╚══════════════════════════════════════════════════════════════════╝
   // ── Legs (vertical only) ────────────────────────────────────────────────────
-  // 4 legs at 90° intervals, extending outward and downward from lower vessel shell.
+  // 4 legs at 0°/90°/180°/270°. 4×4 square column, straight vertical, with a 45° miter
+  // wedge at the top (outer top corner cut diagonally to the vessel contact point).
   else if (form.supportType === 'legs') {
-    const legVertH = Math.max(r * 1.3, 18)    // vertical drop
-    const legR     = Math.max(r * 0.048, 1.5)  // pipe radius
-    const spread   = legVertH * 0.45            // radial outward spread at floor
-    const attachY  = -(L / 2 * 0.62)           // attachment point on lower vessel shell
-    const legLen   = Math.sqrt(legVertH ** 2 + spread ** 2)  // actual diagonal length
+    const legVertH   = Math.max(r * 1.3, 18)
+    const legAttachY = -(L / 2 - L / 4)         // 1/4 shell up from bottom tangent = −L/4
+    const legBottomY = -(L / 2 + hd + legVertH)  // grade level
+    const legActualH = legAttachY - legBottomY
+    const legOff     = r + 2                     // column center radial distance
 
-    // Camera extent: legs go from attachY down to (attachY − legVertH), spreading to (r + spread)
-    const legBottomY = attachY - legVertH
-    supportExtent = Math.max(0, -(legBottomY) - (L / 2 + hd))
-    extraRadial   = spread + legR * 2
+    supportExtent = legVertH
+    extraRadial   = 10
+
+    // Miter wedge: triangular prism (4" tall) replacing the top 4" of the column.
+    // Local coords: x∈[−2,+2] radial (−2=inner/vessel, +2=outer),
+    //               y∈[0,4] vertical, z∈[−2,+2] tangential.
+    // 45° cut: inner edge rises to y=4, outer edge stays at y=0.
+    const makeLegWedge = (): THREE.BufferGeometry => {
+      const p = new Float32Array([
+        // Front face (z=−2): triangle
+        -2,0,-2,  +2,0,-2,  -2,4,-2,
+        // Back face (z=+2): triangle
+        -2,0,+2,  -2,4,+2,  +2,0,+2,
+        // Inner face (x=−2): rectangle
+        -2,0,-2,  -2,4,-2,  -2,4,+2,
+        -2,0,-2,  -2,4,+2,  -2,0,+2,
+        // Bottom face (y=0): rectangle
+        -2,0,-2,  -2,0,+2,  +2,0,+2,
+        -2,0,-2,  +2,0,+2,  +2,0,-2,
+        // Slanted face: diagonal from inner-top to outer-bottom
+        -2,4,-2,  +2,0,-2,  +2,0,+2,
+        -2,4,-2,  +2,0,+2,  -2,4,+2,
+      ])
+      const geo = new THREE.BufferGeometry()
+      geo.setAttribute('position', new THREE.BufferAttribute(p, 3))
+      geo.computeVertexNormals()
+      return geo
+    }
+
+    for (let i = 0; i < 4; i++) {
+      const ang = (i / 4) * Math.PI * 2
+      const ca = Math.cos(ang), sa = Math.sin(ang)
+      const tx = -sa, tz = ca  // tangential unit vector
+
+      const cx = legOff * ca, cz = legOff * sa
+
+      // Straight column (bottom portion, 4" shorter than full height for the miter wedge)
+      const colH = legActualH - 4
+      const col = new THREE.Mesh(new THREE.BoxGeometry(4, colH, 4), saddleSolid)
+      col.position.set(cx, (legBottomY + legAttachY - 4) / 2, cz)
+      grp.add(col)
+
+      // Miter wedge: top of column. Local y=0 sits at (legAttachY − 4), inner top at legAttachY.
+      const wedge = new THREE.Mesh(makeLegWedge(), saddleMat)
+      wedge.rotation.y = -ang
+      wedge.position.set(cx, legAttachY - 4, cz)
+      grp.add(wedge)
+
+      // Base plate: 12×1×12 at grade
+      const bp = new THREE.Mesh(new THREE.BoxGeometry(12, 1, 12), saddleSolid)
+      bp.position.set(cx, legBottomY - 0.5, cz)
+      grp.add(bp)
+
+      // Gussets: two per leg, mitered triangular prism on each tangential side.
+      // Same 45° right-triangle shape as the front miter wedge (gusH=4).
+      // Local x=radial (0=vessel shell, 4=outer leg face), y=vertical (0=bottom, 4=top),
+      // z=tangential (±0.375" thick). Inner-bottom corner placed at vessel shell ±sideOff.
+      const makeLegGusset = (): THREE.BufferGeometry => {
+        const t = 0.375, h = 4  // half-thickness and height (=radial extent for 45°)
+        const p = new Float32Array([
+          // Front face (z=−t): triangle inner-bottom, outer-bottom, inner-top
+           0,0,-t,  h,0,-t,  0,h,-t,
+          // Back face (z=+t): triangle inner-bottom, inner-top, outer-bottom
+           0,0,+t,  0,h,+t,  h,0,+t,
+          // Inner face (x=0): rectangle bottom→top
+           0,0,-t,  0,h,-t,  0,h,+t,
+           0,0,-t,  0,h,+t,  0,0,+t,
+          // Bottom face (y=0): rectangle inner→outer
+           0,0,-t,  0,0,+t,  h,0,+t,
+           0,0,-t,  h,0,+t,  h,0,-t,
+          // Slanted face (hypotenuse): inner-top to outer-bottom
+           0,h,-t,  h,0,-t,  h,0,+t,
+           0,h,-t,  h,0,+t,  0,h,+t,
+        ])
+        const geo = new THREE.BufferGeometry()
+        geo.setAttribute('position', new THREE.BufferAttribute(p, 3))
+        geo.computeVertexNormals()
+        return geo
+      }
+
+      for (const side of [-1, 1]) {
+        const gus = new THREE.Mesh(makeLegGusset(), saddleMat)
+        gus.rotation.y = -ang
+        // Inner-bottom corner at vessel shell (r), ±2.375" tangentially from leg center
+        gus.position.set(
+          r * ca - side * sa * 2.375,
+          legAttachY - 4,
+          r * sa + side * ca * 2.375
+        )
+        grp.add(gus)
+      }
+    }
+  }
+
+  // ╔══════════════════════════════════════════════════════════════════╗
+  // ║  LUG GEOMETRY - LOCKED. DO NOT MODIFY WITHOUT EXPLICIT         ║
+  // ║  WRITTEN PERMISSION FROM BRET MUNDT.                           ║
+  // ╚══════════════════════════════════════════════════════════════════╝
+
+  // ── Lugs (vertical only) ────────────────────────────────────────────────────
+  // 4 support lugs at 90° intervals at y = +L/4 (upper quarter of shell).
+  // Each lug: two triangular web plates (6" apart, radial-vertical plane with 45° miter)
+  // + a horizontal bearing plate connecting the web bottoms.
+  else if (form.supportType === 'lugs') {
+    const lugY  = L * 0.25  // vessel shell connection height (upper quarter)
+    const webH  = 8         // web height at inner edge = radial extent (45° miter)
+    const webThk = 0.75     // tangential thickness of each web plate
+    supportExtent = 0
+    extraRadial   = 12
+
+    // Triangular web plate: right triangle prism in local XY.
+    // x=0: inner edge (vessel shell, local origin). x=webH: outer edge.
+    // y=0: bottom (bearing plate level = lugY−webH in world). y=webH: inner-top (vessel connection = lugY).
+    // 45° miter: slanted face from (0,webH) to (webH,0).
+    const makeWebGeo = (): THREE.BufferGeometry => {
+      const t = webThk / 2, h = webH
+      const p = new Float32Array([
+        // Front face (z=−t): triangle A(0,0), C(h,0), B(0,h)
+         0,0,-t,   h,0,-t,   0,h,-t,
+        // Back face (z=+t): triangle A, B, C
+         0,0,+t,   0,h,+t,   h,0,+t,
+        // Inner face (x=0): rectangle A→B
+         0,0,-t,   0,h,-t,   0,h,+t,
+         0,0,-t,   0,h,+t,   0,0,+t,
+        // Bottom face (y=0): rectangle A→C
+         0,0,-t,   0,0,+t,   h,0,+t,
+         0,0,-t,   h,0,+t,   h,0,-t,
+        // Slanted face (hypotenuse B→C): diagonal inner-top to outer-bottom
+         0,h,-t,   h,0,-t,   h,0,+t,
+         0,h,-t,   h,0,+t,   0,h,+t,
+      ])
+      const geo = new THREE.BufferGeometry()
+      geo.setAttribute('position', new THREE.BufferAttribute(p, 3))
+      geo.computeVertexNormals()
+      return geo
+    }
 
     for (let i = 0; i < 4; i++) {
       const ang = (i / 4) * Math.PI * 2
       const ca = Math.cos(ang), sa = Math.sin(ang)
 
-      // Attach point: on vessel surface at lower shell
-      const ax = r * ca, ay = attachY, az = r * sa
-      // Base point: spread outward + dropped vertically
-      const bx = (r + spread) * ca, by = legBottomY, bz = (r + spread) * sa
+      // Bearing plate: 8" radial × 1" thick × 10" tangential, top flush with web bottoms.
+      // Web bottoms are at lugY − webH, so plate center at lugY − webH − 0.5.
+      const plate = new THREE.Mesh(new THREE.BoxGeometry(8, 1, 10), saddleSolid)
+      plate.rotation.y = -ang
+      plate.position.set((r + 4) * ca, lugY - webH - 0.5, (r + 4) * sa)
+      grp.add(plate)
 
-      // Direction from attach (top) to base (bottom)
-      const dlen = Math.sqrt((bx-ax)**2 + (by-ay)**2 + (bz-az)**2)
-      const dir = new THREE.Vector3((bx-ax)/dlen, (by-ay)/dlen, (bz-az)/dlen)
-
-      // Align CylinderGeometry's +Y with the leg direction (attach→base)
-      const leg = new THREE.Mesh(new THREE.CylinderGeometry(legR * 1.1, legR, legLen, 8), suppSolid)
-      leg.setRotationFromQuaternion(
-        new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir),
-      )
-      leg.position.set((ax + bx) / 2, (ay + by) / 2, (az + bz) / 2)
-      grp.add(leg)
-
-      // Base plate at floor
-      const bp = new THREE.Mesh(new THREE.BoxGeometry(legR * 5, 1.5, legR * 5), suppSolid)
-      bp.position.set(bx, by - 0.75, bz)
-      grp.add(bp)
-
-      // Gusset plate at vessel attachment (radially oriented)
-      const gusH = legVertH * 0.28
-      const gusW = legR * 3.5
-      const gus  = new THREE.Mesh(new THREE.BoxGeometry(gusW, gusH, 0.75), suppSolid)
-      gus.rotation.y = -ang
-      gus.position.set((r + gusW / 2) * ca, attachY + gusH * 0.4, (r + gusW / 2) * sa)
-      grp.add(gus)
-    }
-  }
-
-  // ── Lugs (vertical only) ────────────────────────────────────────────────────
-  else if (form.supportType === 'lugs') {
-    const lugW   = Math.max(r * 0.28, 5)
-    const lugH   = Math.max(r * 0.32, 6)
-    const lugThk = Math.max(r * 0.055, 0.75)
-    const lugY   = L * 0.34  // upper portion of vessel
-    const pinR   = lugH * 0.12
-    supportExtent = 0
-
-    for (let i = 0; i < 4; i++) {
-      const ang = (i / 4) * Math.PI * 2
-      const nx = Math.cos(ang), nz = Math.sin(ang)
-
-      // Lug plate: BoxGeometry(lugW, lugH, lugThk)
-      //   lugW = radial width, lugH = vertical height, lugThk = tangential thickness
-      // rotation.y = −ang: maps local X-axis to (cos ang, 0, sin ang) = radially outward
-      const lug = new THREE.Mesh(new THREE.BoxGeometry(lugW, lugH, lugThk), suppSolid)
-      lug.rotation.y = -ang
-      lug.position.set((r + lugW / 2) * nx, lugY, (r + lugW / 2) * nz)
-      grp.add(lug)
-
-      // Gusset below lug
-      const gus = new THREE.Mesh(new THREE.BoxGeometry(lugW * 0.85, lugH * 0.55, lugThk), suppSolid)
-      gus.rotation.y = -ang
-      gus.position.set((r + lugW / 2) * nx, lugY - lugH * 0.15, (r + lugW / 2) * nz)
-      grp.add(gus)
-
-      // Lifting pin (horizontal, tangential direction = (−sin ang, 0, cos ang))
-      // Rotation: axis = radial (cos ang, 0, sin ang), angle = π/2 rotates Y→tangential
-      const pin = new THREE.Mesh(new THREE.CylinderGeometry(pinR, pinR, lugThk * 2.5, 12), flangeMat)
-      pin.setRotationFromAxisAngle(new THREE.Vector3(nx, 0, nz), Math.PI / 2)
-      pin.position.set((r + lugW * 0.68) * nx, lugY + lugH * 0.6, (r + lugW * 0.68) * nz)
-      grp.add(pin)
+      // Two web plates, ±3" tangentially (6" apart center-to-center).
+      // Each web's inner-bottom corner placed at (vessel shell r, lugY−webH, ±3" tangential).
+      for (const side of [-1, 1]) {
+        const web = new THREE.Mesh(makeWebGeo(), saddleMat)
+        web.rotation.y = -ang
+        web.position.set(
+          r * ca - side * sa * 3,
+          lugY - webH,              // local y=0 at bearing plate level, local y=webH at lugY
+          r * sa + side * ca * 3
+        )
+        grp.add(web)
+      }
     }
   }
 
