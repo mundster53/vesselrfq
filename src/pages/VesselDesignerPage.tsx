@@ -621,8 +621,9 @@ export default function VesselDesignerPage() {
 
     setSubmitting(true)
     try {
+      let result: { rfq: { id: number; title: string; vesselType?: string } }
       if (vesselType === 'tank') {
-        await api.post('/rfqs', {
+        result = await api.post('/rfqs', {
           vesselType: 'tank',
           title: form.title.trim(),
           shellOd: form.shellOd || undefined,
@@ -641,8 +642,20 @@ export default function VesselDesignerPage() {
             material: n.material === NOZZLE_MATERIAL_SENTINEL ? n.materialCustom : n.material,
           })),
         })
+        navigate('/rfq-submitted', {
+          state: {
+            rfqId:       result.rfq.id,
+            title:       form.title.trim(),
+            vesselType:  'tank',
+            shellOd:     form.shellOd || undefined,
+            shellLength: form.shellLength || undefined,
+            headType:    form.headType || undefined,
+            mawp:        form.mawp || undefined,
+            nozzleCount: form.nozzles.length,
+          },
+        })
       } else {
-        await api.post('/rfqs', {
+        result = await api.post('/rfqs', {
           vesselType: 'heat_exchanger',
           title: hxForm.title.trim(),
           orientation: hxForm.orientation,
@@ -680,8 +693,22 @@ export default function VesselDesignerPage() {
             material: n.material === NOZZLE_MATERIAL_SENTINEL ? n.materialCustom : n.material,
           })),
         })
+        const temaCode = (hxForm.temaFront && hxForm.temaShell && hxForm.temaRear)
+          ? `${hxForm.temaFront}-${hxForm.temaShell}-${hxForm.temaRear}`
+          : undefined
+        navigate('/rfq-submitted', {
+          state: {
+            rfqId:       result.rfq.id,
+            title:       hxForm.title.trim(),
+            vesselType:  'heat_exchanger',
+            shellOd:     hxForm.shellOd || undefined,
+            shellLength: hxForm.shellLength || undefined,
+            mawp:        hxForm.shellMawp || undefined,
+            temaCode,
+            nozzleCount: hxForm.nozzles.length,
+          },
+        })
       }
-      navigate('/dashboard')
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Submission failed. Please try again.')
     } finally {

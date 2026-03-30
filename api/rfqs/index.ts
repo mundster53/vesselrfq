@@ -1,8 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { eq, desc, sql } from 'drizzle-orm'
 import { db } from '../_lib/db'
-import { rfqs, nozzles } from '../../db/schema'
+import { rfqs, nozzles, users } from '../../db/schema'
 import { requireAuth } from '../_lib/auth'
+import { sendEmail, buyerConfirmationHtml, adminNotificationHtml } from '../_lib/email'
+
+const ADMIN_EMAIL = process.env.NOTIFICATION_EMAIL ?? 'rfqs@vesselrfq.com'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -170,7 +173,48 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return created
     })
 
-    return res.status(201).json({ rfq: { id: rfq.id, title: rfq.title, status: rfq.status, createdAt: rfq.createdAt } })
+    // Send emails — failure must not block the submission response
+    try {
+      const [buyer] = await db.select({ email: users.email }).from(users).where(eq(users.id, auth.userId))
+      if (buyer) {
+        const nozzleCount = body.nozzles?.length ?? 0
+        const emailParams = {
+          rfqId:   rfq.id,
+          title:   rfq.title,
+          vesselType: (rfq.vesselType ?? 'tank') as 'tank' | 'heat_exchanger',
+          buyerEmail: buyer.email,
+          shellOd:       rfq.shellOd,
+          shellLength:   rfq.shellLength,
+          shellMaterial: rfq.shellMaterial,
+          headType:      rfq.headType,
+          mawp:          rfq.mawp,
+          designTemp:    rfq.designTemp,
+          corrosionAllowance: rfq.corrosionAllowance,
+          supportType:   rfq.supportType,
+          temaFront:     rfq.temaFront,
+          temaShell:     rfq.temaShell,
+          temaRear:      rfq.temaRear,
+          tubeCount:     rfq.tubeCount,
+          tubeOd:        rfq.tubeOd,
+          tubeBwg:       rfq.tubeBwg,
+          tubeLength:    rfq.tubeLength,
+          shellMawp:     rfq.shellMawp,
+          shellDesignTemp: rfq.shellDesignTemp,
+          tubeMawp:      rfq.tubeMawp,
+          tubeDesignTemp: rfq.tubeDesignTemp,
+          nozzleCount,
+          notes:         rfq.notes,
+        }
+        await Promise.all([
+          sendEmail(buyer.email, `RFQ Received — ${rfq.title}`, buyerConfirmationHtml(emailParams)),
+          sendEmail(ADMIN_EMAIL, `New RFQ #${rfq.id} — ${rfq.title}`, adminNotificationHtml(emailParams)),
+        ])
+      }
+    } catch (emailErr) {
+      console.error('[rfqs] email send failed', emailErr)
+    }
+
+    return res.status(201).json({ rfq: { id: rfq.id, title: rfq.title, status: rfq.status, vesselType: rfq.vesselType, createdAt: rfq.createdAt } })
   }
 
     return res.status(405).json({ error: 'Method not allowed' })

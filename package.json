@@ -17,7 +17,9 @@
   "dependencies": {
     "@types/three": "^0.183.1",
     "drizzle-orm": "^0.40.1",
+    "form-data": "^4.0.5",
     "jose": "^5.10.0",
+    "mailgun.js": "^12.7.1",
     "postgres": "^3.4.5",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
