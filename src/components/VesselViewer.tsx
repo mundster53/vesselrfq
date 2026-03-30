@@ -131,7 +131,6 @@ function buildVessel(
   const vesselMat = new THREE.MeshStandardMaterial({ color: 0xb4c8d8, metalness: 0.62, roughness: 0.32 })
   const nozzleMat = new THREE.MeshStandardMaterial({ color: 0xd4cfc0, metalness: 0.72, roughness: 0.22 })
   const flangeMat = new THREE.MeshStandardMaterial({ color: 0xe8e4da, metalness: 0.78, roughness: 0.16 })
-  const suppMat   = new THREE.MeshStandardMaterial({ color: 0x7e8c96, metalness: 0.44, roughness: 0.62, side: THREE.DoubleSide })
   const suppSolid = new THREE.MeshStandardMaterial({ color: 0x7e8c96, metalness: 0.44, roughness: 0.62 })
   // Skirt-specific materials — more visible against dark background
   const skirtMat    = new THREE.MeshStandardMaterial({ color: 0xd8dde2, metalness: 0.30, roughness: 0.72, side: THREE.DoubleSide })

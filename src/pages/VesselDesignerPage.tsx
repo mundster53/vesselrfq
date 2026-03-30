@@ -13,7 +13,6 @@ import type {
   SupportType,
   NozzleRating,
   FlangeType,
-  FlangeFacing,
   NozzleLocation,
   Orientation,
   VesselType,
