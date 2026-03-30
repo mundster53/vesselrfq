@@ -6,7 +6,12 @@ export type NozzleLocation = 'shell' | 'left_head' | 'right_head'
 
 export type NozzleRating = '150' | '300' | '600' | '900' | '1500' | '2500'
 
-export type FlangeType = 'WN' | 'SO' | 'SW' | 'BL' | 'LJ' | 'THD'
+export type FlangeType =
+  | 'RFWN' | 'RFSO' | 'RFSW' | 'RFTH'
+  | 'FFWN' | 'FFSO'
+  | 'RJWN'
+  | 'LJWN' | 'LJFSE'
+  | 'BFSO' | 'BF'
 
 export type FlangeFacing = 'RF' | 'FF' | 'RTJ'
 
@@ -28,14 +33,16 @@ export type NozzleMaterial =
 
 export interface NozzleRow {
   mark: string
+  service: string
   size: string
   rating: NozzleRating
+  projection: number
   flangeType: FlangeType
   facing: FlangeFacing
-  material: string
-  service: string
-  quantity: number
+  material: string       // predefined value or NOZZLE_MATERIAL_SENTINEL
+  materialCustom: string // custom text when material === NOZZLE_MATERIAL_SENTINEL
   location: NozzleLocation
+  quantity: number
   // Shell nozzles: degrees from 12 o'clock, counterclockwise viewed from right end.
   // null = auto-distribute evenly.
   shellAngle: number | null
@@ -76,4 +83,68 @@ export interface RfqSummary {
   designTemp: number | null
   createdAt: string
   nozzleCount: number
+}
+
+// ── Heat Exchanger types ──────────────────────────────────────────────────────
+
+export type VesselType = 'tank' | 'heat_exchanger'
+
+export type TemaFrontHead = 'A' | 'B' | 'C' | 'N' | 'D'
+export type TemaShell     = 'E' | 'F' | 'G' | 'H' | 'J' | 'K' | 'X'
+export type TemaRearHead  = 'L' | 'M' | 'N' | 'P' | 'S' | 'T' | 'U' | 'W'
+
+export type TubeOd     = '3/4' | '1' | '1-1/4' | '1-1/2' | '2'
+export type TubeBwg    = '10' | '11' | '12' | '13' | '14' | '15' | '16' | '17' | '18'
+export type TubeLength = '6' | '8' | '10' | '12' | '16' | '20'
+export type TubeLayout = '30' | '60' | '90' | '45'
+export type TubeJoint  = 'expanded' | 'seal_welded' | 'strength_welded'
+export type BaffleType =
+  | 'single_segmental'
+  | 'double_segmental'
+  | 'triple_segmental'
+  | 'disc_donut'
+  | 'rod'
+  | 'ntiw'
+
+export interface HxDesignState {
+  title: string
+  orientation: Orientation
+
+  temaFront: TemaFrontHead | ''
+  temaShell: TemaShell | ''
+  temaRear:  TemaRearHead | ''
+
+  shellOd:           string
+  shellLength:       string
+  shellMaterial:     string
+  shellsInSeries:    string
+  shellsInParallel:  string
+
+  tubeCount:    string
+  tubeOd:       TubeOd | ''
+  tubeBwg:      TubeBwg | ''
+  tubeLength:   TubeLength | ''
+  tubeMaterial: string
+  tubeLayout:   TubeLayout | ''
+  tubePitch:    string
+  tubeJoint:    TubeJoint | ''
+  tubePasses:   string
+
+  baffleType:       BaffleType | ''
+  baffleCut:        string
+  baffleSpacing:    string
+  impingementPlate: 'yes' | 'no'
+
+  shellMawp:               string
+  shellDesignTemp:          string
+  shellCorrosionAllowance:  string
+  shellFluid:               string
+
+  tubeMawp:               string
+  tubeDesignTemp:          string
+  tubeCorrosionAllowance:  string
+  tubeFluid:               string
+
+  nozzles: NozzleRow[]
+  notes:   string
 }
