@@ -61,11 +61,7 @@ const FLANGE_TYPES: { value: FlangeType; label: string }[] = [
   { value: 'BFSO',  label: 'BFSO — Blind Flange (Slip On neck)' },
   { value: 'BF',    label: 'BF — Blind Flange' },
 ]
-const FACINGS: { value: FlangeFacing; label: string }[] = [
-  { value: 'RF',  label: 'RF — Raised Face' },
-  { value: 'FF',  label: 'FF — Flat Face' },
-  { value: 'RTJ', label: 'RTJ — Ring Type Joint' },
-]
+
 const NOZZLE_MATERIAL_SENTINEL = '__nozzle_custom__'
 const NOZZLE_MATERIALS: { value: string; label: string }[] = [
   { value: 'SA-105',       label: 'SA-105 (Carbon Steel flanges)' },

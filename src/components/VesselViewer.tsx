@@ -140,7 +140,6 @@ function buildVessel(
   // Saddle-specific materials
   const saddleMat   = new THREE.MeshStandardMaterial({ color: 0xb0bcc8, metalness: 0.48, roughness: 0.55, side: THREE.DoubleSide })
   const saddleSolid = new THREE.MeshStandardMaterial({ color: 0xb0bcc8, metalness: 0.48, roughness: 0.55 })
-  const boltMat   = new THREE.MeshStandardMaterial({ color: 0x444c54, metalness: 0.8, roughness: 0.3 })
 
   // ── Shell ──────────────────────────────────────────────────────────────────
   // Horizontal: rotation.z = −π/2 rotates CylinderGeometry's Y-axis to world +X.
@@ -497,7 +496,7 @@ function buildVessel(
     for (let i = 0; i < 4; i++) {
       const ang = (i / 4) * Math.PI * 2
       const ca = Math.cos(ang), sa = Math.sin(ang)
-      const tx = -sa, tz = ca  // tangential unit vector
+
 
       const cx = legOff * ca, cz = legOff * sa
 
@@ -628,25 +627,6 @@ function buildVessel(
     }
   }
 
-  // ── Horizontal skirt/legs/lugs (should not appear, but defensive) ──────────
-  else if (!isV && form.supportType === 'skirt') {
-    // Horizontal skirt shown as ring around vessel centre
-    const skirtH = r * 1.35
-    supportExtent = 0
-    const skirt = new THREE.Mesh(new THREE.CylinderGeometry(r + 1, r + 1, skirtH, 48, 1, true), suppMat)
-    skirt.rotation.z = -Math.PI / 2
-    skirt.position.x = -(L / 2 + hd + skirtH / 2)
-    grp.add(skirt)
-  } else if (!isV && form.supportType === 'legs') {
-    const legH = r * 1.3, legR = Math.max(r * 0.048, 1.5), legSpread = r * 0.62
-    supportExtent = legH
-    for (const lx of [-L * 0.36, L * 0.36]) for (const lz of [-legSpread, legSpread]) {
-      const leg = new THREE.Mesh(new THREE.CylinderGeometry(legR, legR * 1.2, legH, 8), suppSolid)
-      leg.position.set(lx, -(r + legH / 2), lz); grp.add(leg)
-      const base = new THREE.Mesh(new THREE.BoxGeometry(legR * 4, 1.25, legR * 4), suppSolid)
-      base.position.set(lx, -(r + legH + 0.625), lz); grp.add(base)
-    }
-  }
 
   // ── Camera ─────────────────────────────────────────────────────────────────
   if (!skipCamera) fitCamera(cam, ctl, isV, od, L, hd, supportExtent, extraRadial)
