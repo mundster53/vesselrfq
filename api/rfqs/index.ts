@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { eq, desc, sql } from 'drizzle-orm'
-import { db } from '../_lib/db'
-import { rfqs, nozzles, users } from '../../db/schema'
-import { requireAuth } from '../_lib/auth'
-import { sendEmail, buyerConfirmationHtml, adminNotificationHtml } from '../_lib/email'
+import { db } from '../_lib/db.js'
+import { rfqs, nozzles, users } from '../../db/schema.js'
+import { requireAuth } from '../_lib/auth.js'
+import { sendEmail, buyerConfirmationHtml, adminNotificationHtml } from '../_lib/email.js'
 
 const ADMIN_EMAIL = process.env.NOTIFICATION_EMAIL ?? 'rfqs@vesselrfq.com'
 

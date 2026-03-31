@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { eq } from 'drizzle-orm'
-import { db } from '../_lib/db'
-import { users } from '../../db/schema'
-import { requireAuth } from '../_lib/auth'
+import { db } from '../_lib/db.js'
+import { users } from '../../db/schema.js'
+import { requireAuth } from '../_lib/auth.js'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
