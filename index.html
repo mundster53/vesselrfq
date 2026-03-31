@@ -3,716 +3,367 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VesselRFQ - The Compressed Marketplace for ASME Pressure Vessel RFQs</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>VesselRFQ — Competitive Bids on ASME Pressure Vessels</title>
+  <meta name="description" content="Design your pressure vessel, submit your requirements, and receive bids from qualified ASME Code fabricators. Maximum three bidders per RFQ.">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      color: #1e293b;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #111827;
+      color: #f9fafb;
       line-height: 1.6;
-      background: #ffffff;
+      -webkit-font-smoothing: antialiased;
     }
-    
-    /* Header */
-    header {
-      background: #0f172a;
-      padding: 1rem 2rem;
-      position: fixed;
-      width: 100%;
+
+    /* ── Nav ──────────────────────────────────────────────────────────────── */
+    nav {
+      position: sticky;
       top: 0;
-      z-index: 100;
+      z-index: 50;
+      background: #111827;
+      border-bottom: 1px solid #1f2937;
     }
-    
-    .header-content {
-      max-width: 1200px;
+    .nav-inner {
+      max-width: 1120px;
       margin: 0 auto;
+      padding: 0 24px;
+      height: 60px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
     }
-    
     .logo {
-      font-size: 1.75rem;
-      font-weight: 800;
-      color: white;
-    }
-    
-    .logo span {
-      color: #3b82f6;
-    }
-    
-    .header-cta {
-      background: #3b82f6;
-      color: white;
-      padding: 0.625rem 1.25rem;
-      border-radius: 6px;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
       text-decoration: none;
+    }
+    .logo-vessel { color: #ffffff; }
+    .logo-rfq    { color: #3b82f6; }
+
+    .nav-actions { display: flex; align-items: center; gap: 12px; }
+
+    .btn {
+      display: inline-block;
+      padding: 8px 18px;
+      border-radius: 7px;
+      font-size: 14px;
       font-weight: 600;
-      font-size: 0.9rem;
-      transition: background 0.2s;
+      text-decoration: none;
+      cursor: pointer;
+      transition: opacity 0.15s, background 0.15s;
+      white-space: nowrap;
     }
-    
-    .header-cta:hover {
-      background: #2563eb;
+    .btn:hover { opacity: 0.88; }
+
+    .btn-green  { background: #16a34a; color: #ffffff; border: none; }
+    .btn-outline {
+      background: transparent;
+      color: #3b82f6;
+      border: 1.5px solid #3b82f6;
     }
-    
-    /* Hero */
-    .hero {
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      padding: 8rem 2rem 5rem;
-      color: white;
-      text-align: center;
-    }
-    
-    .hero-content {
-      max-width: 900px;
+    .btn-outline:hover { background: rgba(59,130,246,0.08); opacity: 1; }
+
+    /* ── Sections ─────────────────────────────────────────────────────────── */
+    section { padding: 88px 24px; }
+    .section-alt  { background: #1f2937; }
+    .section-blue { background: #1d4ed8; }
+
+    .container {
+      max-width: 1120px;
       margin: 0 auto;
     }
-    
-    .hero-badge {
+
+    .section-label {
       display: inline-block;
-      background: rgba(59, 130, 246, 0.2);
-      border: 1px solid rgba(59, 130, 246, 0.4);
-      color: #60a5fa;
-      padding: 0.5rem 1rem;
-      border-radius: 50px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 1.5rem;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #3b82f6;
+      margin-bottom: 14px;
     }
-    
-    .hero h1 {
-      font-size: 3rem;
+
+    h1 {
+      font-size: clamp(28px, 4vw, 48px);
       font-weight: 800;
       line-height: 1.15;
-      margin-bottom: 1.5rem;
+      letter-spacing: -0.5px;
+      color: #ffffff;
     }
-    
-    .hero h1 span {
-      color: #3b82f6;
-    }
-    
-    .hero p {
-      font-size: 1.25rem;
-      color: #94a3b8;
-      max-width: 700px;
-      margin: 0 auto 2rem;
-    }
-    
-    .hero-stats {
-      display: flex;
-      justify-content: center;
-      gap: 3rem;
-      margin-top: 3rem;
-      padding-top: 2rem;
-      border-top: 1px solid rgba(255,255,255,0.1);
-    }
-    
-    .stat {
-      text-align: center;
-    }
-    
-    .stat-number {
-      font-size: 2.5rem;
-      font-weight: 800;
-      color: #3b82f6;
-    }
-    
-    .stat-label {
-      font-size: 0.9rem;
-      color: #94a3b8;
-      margin-top: 0.25rem;
-    }
-    
-    /* Problem Section */
-    .problem {
-      padding: 5rem 2rem;
-      background: #f8fafc;
-    }
-    
-    .problem-content {
-      max-width: 1000px;
-      margin: 0 auto;
-    }
-    
-    .section-label {
-      color: #ef4444;
-      font-weight: 600;
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.75rem;
-    }
-    
-    .section-label.blue {
-      color: #3b82f6;
-    }
-    
-    .section-label.green {
-      color: #10b981;
-    }
-    
     h2 {
-      font-size: 2.25rem;
-      font-weight: 800;
-      margin-bottom: 1rem;
-      color: #0f172a;
-    }
-    
-    .section-intro {
-      font-size: 1.1rem;
-      color: #64748b;
-      max-width: 700px;
-      margin-bottom: 2.5rem;
-    }
-    
-    .problem-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.5rem;
-    }
-    
-    .problem-card {
-      background: white;
-      border: 1px solid #e2e8f0;
-      border-left: 4px solid #ef4444;
-      padding: 1.5rem;
-      border-radius: 8px;
-    }
-    
-    .problem-card h3 {
-      font-size: 1.1rem;
+      font-size: clamp(22px, 3vw, 34px);
       font-weight: 700;
-      margin-bottom: 0.5rem;
-      color: #0f172a;
+      line-height: 1.2;
+      letter-spacing: -0.3px;
+      color: #ffffff;
     }
-    
-    .problem-card p {
-      font-size: 0.95rem;
-      color: #64748b;
+    h3 {
+      font-size: 17px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 8px;
     }
-    
-    /* Solution Section */
-    .solution {
-      padding: 5rem 2rem;
-      background: white;
+    p { color: #9ca3af; font-size: 16px; line-height: 1.7; }
+
+    /* ── Hero ─────────────────────────────────────────────────────────────── */
+    .hero {
+      padding: 100px 24px 96px;
+      text-align: center;
     }
-    
-    .solution-content {
-      max-width: 1000px;
-      margin: 0 auto;
+    .hero h1 {
+      max-width: 780px;
+      margin: 0 auto 20px;
     }
-    
-    .solution-grid {
+    .hero p {
+      max-width: 640px;
+      margin: 0 auto 40px;
+      font-size: 17px;
+    }
+    .hero-ctas {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .hero-ctas .btn { padding: 13px 28px; font-size: 15px; border-radius: 8px; }
+
+    /* ── How it works ─────────────────────────────────────────────────────── */
+    .how-header { margin-bottom: 52px; }
+
+    .steps {
       display: grid;
-      grid-template-columns: 1fr 1.5fr;
-      gap: 3rem;
-      align-items: center;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
     }
-    
-    .solution-metric {
-      background: #0f172a;
-      padding: 3rem;
+    .step-card {
+      background: #111827;
+      border: 1px solid #374151;
       border-radius: 12px;
-      text-align: center;
+      padding: 28px 24px;
     }
-    
-    .solution-metric .big-number {
-      font-size: 5rem;
-      font-weight: 800;
-      color: white;
-      line-height: 1;
-    }
-    
-    .solution-metric .unit {
-      font-size: 1.5rem;
-      color: #60a5fa;
-      font-weight: 600;
-      margin-top: 0.5rem;
-    }
-    
-    .solution-metric .comparison {
-      color: #fbbf24;
-      font-size: 1rem;
-      margin-top: 1.5rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid #334155;
-    }
-    
-    .solution-steps {
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-    }
-    
-    .step {
-      display: flex;
-      gap: 1rem;
-      align-items: flex-start;
-    }
-    
-    .step-number {
-      width: 36px;
-      height: 36px;
-      background: #3b82f6;
-      color: white;
+    .step-num {
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
+      background: #1d4ed8;
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 700;
-      font-size: 0.9rem;
-      flex-shrink: 0;
+      margin-bottom: 18px;
     }
-    
-    .step-content h4 {
-      font-size: 1.05rem;
-      font-weight: 700;
-      margin-bottom: 0.25rem;
-    }
-    
-    .step-content p {
-      font-size: 0.9rem;
-      color: #64748b;
-    }
-    
-    /* Fabricator Value Section */
-    .fabricator-value {
-      padding: 5rem 2rem;
-      background: #0f172a;
-      color: white;
-    }
-    
-    .fabricator-content {
-      max-width: 1000px;
-      margin: 0 auto;
-    }
-    
-    .fabricator-value h2 {
-      color: white;
-      text-align: center;
-    }
-    
-    .fabricator-value .section-intro {
-      text-align: center;
-      color: #94a3b8;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    
-    .value-grid {
+
+    /* ── Why VesselRFQ ────────────────────────────────────────────────────── */
+    .benefits-header { margin-bottom: 52px; }
+
+    .benefits-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 1.25rem;
+      gap: 24px;
     }
-    
-    .value-card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      padding: 1.5rem;
-      border-radius: 8px;
+    .benefit-card {
+      background: #1f2937;
+      border: 1px solid #374151;
+      border-radius: 12px;
+      padding: 28px 26px;
     }
-    
-    .value-card h3 {
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
-      color: white;
+
+    /* ── Who uses ─────────────────────────────────────────────────────────── */
+    .who-header { max-width: 680px; margin-bottom: 8px; }
+    .who-header p { margin-top: 14px; }
+
+    .personas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 28px;
     }
-    
-    .value-card p {
-      font-size: 0.9rem;
-      color: #60a5fa;
+    .persona-tag {
+      background: #1f2937;
+      border: 1px solid #374151;
+      border-radius: 100px;
+      padding: 7px 16px;
+      font-size: 14px;
       font-weight: 500;
+      color: #d1d5db;
     }
-    
-    /* Founder Section */
-    .founder {
-      padding: 5rem 2rem;
-      background: #f8fafc;
-    }
-    
-    .founder-content {
-      max-width: 900px;
-      margin: 0 auto;
-    }
-    
-    .founder-grid {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 3rem;
-      align-items: start;
-    }
-    
-    .founder-info {
+
+    /* ── Closing CTA ──────────────────────────────────────────────────────── */
+    .cta-section {
       text-align: center;
+      padding: 88px 24px;
     }
-    
-    .founder-avatar {
-      width: 140px;
-      height: 140px;
-      background: #1e293b;
-      border-radius: 50%;
+    .cta-section h2 { margin-bottom: 12px; color: #ffffff; }
+    .cta-section p  { color: rgba(255,255,255,0.75); margin-bottom: 36px; font-size: 17px; }
+    .cta-section .btn-outline {
+      color: #ffffff;
+      border-color: rgba(255,255,255,0.6);
+    }
+    .cta-section .btn-outline:hover { background: rgba(255,255,255,0.1); }
+    .cta-btns {
       display: flex;
-      align-items: center;
       justify-content: center;
-      margin: 0 auto 1rem;
+      gap: 14px;
+      flex-wrap: wrap;
     }
-    
-    .founder-avatar span {
-      font-size: 3rem;
-      font-weight: 800;
-      color: #3b82f6;
-    }
-    
-    .founder-name {
-      font-size: 1.35rem;
-      font-weight: 700;
-    }
-    
-    .founder-title {
-      color: #3b82f6;
-      font-weight: 600;
-      font-size: 0.9rem;
-    }
-    
-    .founder-years {
-      margin-top: 1rem;
-      padding: 0.75rem 1rem;
-      background: #0f172a;
-      border-radius: 8px;
-      color: white;
-    }
-    
-    .founder-years strong {
-      font-size: 1.75rem;
-      color: #3b82f6;
-    }
-    
-    .founder-bio h3 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-    }
-    
-    .experience-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-    
-    .experience-list li {
-      padding-left: 1.5rem;
-      position: relative;
-      font-size: 0.95rem;
-      color: #475569;
-    }
-    
-    .experience-list li::before {
-      content: "→";
-      position: absolute;
-      left: 0;
-      color: #3b82f6;
-      font-weight: 600;
-    }
-    
-    .founder-quote {
-      margin-top: 1.5rem;
-      padding: 1.25rem;
-      background: white;
-      border-left: 4px solid #3b82f6;
-      border-radius: 0 8px 8px 0;
-      font-style: italic;
-      color: #475569;
-    }
-    
-    /* CTA Section */
-    .cta {
-      padding: 5rem 2rem;
-      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-      text-align: center;
-      color: white;
-    }
-    
-    .cta-content {
-      max-width: 700px;
-      margin: 0 auto;
-    }
-    
-    .cta h2 {
-      color: white;
-      margin-bottom: 1rem;
-    }
-    
-    .cta p {
-      color: #94a3b8;
-      font-size: 1.1rem;
-      margin-bottom: 2rem;
-    }
-    
-    .cta-button {
-      display: inline-block;
-      background: #3b82f6;
-      color: white;
-      padding: 1rem 2.5rem;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 1.1rem;
-      transition: all 0.2s;
-    }
-    
-    .cta-button:hover {
-      background: #2563eb;
-      transform: translateY(-2px);
-    }
-    
-    .cta-note {
-      margin-top: 1.5rem;
-      font-size: 0.9rem;
-      color: #64748b;
-    }
-    
-    /* Footer */
+    .cta-btns .btn { padding: 13px 28px; font-size: 15px; border-radius: 8px; }
+
+    /* ── Footer ───────────────────────────────────────────────────────────── */
     footer {
-      background: #0f172a;
-      padding: 2rem;
+      background: #111827;
+      border-top: 1px solid #1f2937;
+      padding: 28px 24px;
       text-align: center;
-      color: #64748b;
-      font-size: 0.85rem;
-      border-top: 1px solid #1e293b;
     }
-    
-    footer a {
-      color: #94a3b8;
-      text-decoration: none;
-    }
-    
-    /* Responsive */
+    footer p { font-size: 13px; color: #6b7280; }
+    footer a { color: #6b7280; text-decoration: none; }
+    footer a:hover { color: #9ca3af; }
+
+    /* ── Responsive ───────────────────────────────────────────────────────── */
     @media (max-width: 768px) {
-      .hero h1 {
-        font-size: 2rem;
-      }
-      
-      .hero-stats {
-        flex-direction: column;
-        gap: 1.5rem;
-      }
-      
-      .problem-grid,
-      .value-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .solution-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .founder-grid {
-        grid-template-columns: 1fr;
-        text-align: center;
-      }
-      
-      .founder-bio {
-        text-align: left;
-      }
+      section      { padding: 64px 20px; }
+      .hero        { padding: 72px 20px 64px; }
+      .cta-section { padding: 64px 20px; }
+
+      .steps         { grid-template-columns: 1fr; }
+      .benefits-grid { grid-template-columns: 1fr; }
+
+      .nav-inner { padding: 0 16px; }
+      .btn { padding: 8px 14px; font-size: 13px; }
     }
   </style>
 </head>
 <body>
-  <!-- Header -->
-  <header>
-    <div class="header-content">
-      <div class="logo">Vessel<span>RFQ</span></div>
-      <a href="/cdn-cgi/l/email-protection#44063621300e09312a2030042329252d286a272b297b3731262e21273079122137372128160215617674022b312a202d2a236176740921292621366176740d2a302136213730" class="header-cta">Contact Us</a>
+
+  <!-- ── Nav ──────────────────────────────────────────────────────────────── -->
+  <nav>
+    <div class="nav-inner">
+      <a href="/" class="logo">
+        <span class="logo-vessel">Vessel</span><span class="logo-rfq">RFQ</span>
+      </a>
+      <div class="nav-actions">
+        <a href="/app/login" class="btn btn-outline">Sign in</a>
+        <a href="/app/register" class="btn btn-green">Register free</a>
+      </div>
     </div>
-  </header>
-  
-  <!-- Hero -->
+  </nav>
+
+  <!-- ── Hero ─────────────────────────────────────────────────────────────── -->
   <section class="hero">
-    <div class="hero-content">
-      <div class="hero-badge">Now Recruiting Founding Fabricators</div>
-      <h1>The Compressed Marketplace for <span>ASME Pressure Vessel RFQs</span></h1>
-      <p>A curated network of 40 fabricators. 3-4 bidders per job instead of 15. Geographic exclusivity. No race to the bottom.</p>
-      
-      <div class="hero-stats">
-        <div class="stat">
-          <div class="stat-number">40</div>
-          <div class="stat-label">Founding Member Seats</div>
-        </div>
-        <div class="stat">
-          <div class="stat-number">3-4</div>
-          <div class="stat-label">Bidders Per RFQ</div>
-        </div>
-        <div class="stat">
-          <div class="stat-number">~15</div>
-          <div class="stat-label">Minutes to RFQ</div>
-        </div>
+    <div class="container">
+      <h1>Get competitive bids on pressure vessels&nbsp;— without the engineering bottleneck</h1>
+      <p>Design your vessel, submit your requirements, and receive bids from qualified ASME Code fabricators. No consultant specs required. No bid lists with a dozen shops. Just three qualified bids, faster than the traditional process.</p>
+      <div class="hero-ctas">
+        <a href="/app/register" class="btn btn-green">Register free</a>
+        <a href="/app/login" class="btn btn-outline">Sign in</a>
       </div>
     </div>
   </section>
-  
-  <!-- Problem -->
-  <section class="problem">
-    <div class="problem-content">
-      <div class="section-label">The Problem</div>
-      <h2>The Front-End Process Is Broken</h2>
-      <p class="section-intro">Buying an ASME pressure vessel takes longer and costs more than it should—creating bottlenecks before fabrication even starts.</p>
-      
-      <div class="problem-grid">
-        <div class="problem-card">
-          <h3>6-8 Weeks Engineering Lead Time</h3>
-          <p>Buyers hire consulting engineers to design vessels. That's 6-8 weeks before an RFQ can even be released.</p>
+
+  <!-- ── How it works ──────────────────────────────────────────────────────── -->
+  <section class="section-alt">
+    <div class="container">
+      <div class="how-header">
+        <span class="section-label">How it works</span>
+        <h2>Three steps from requirement to bid</h2>
+      </div>
+      <div class="steps">
+
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <h3>Design your vessel</h3>
+          <p>Use the online configurator to define geometry, nozzles, orientation, and service conditions. Captures what fabricators actually need to bid.</p>
         </div>
-        <div class="problem-card">
-          <h3>Engineering That Gets Discarded</h3>
-          <p>Under ASME Appendix 47, the stamp holder owns design responsibility. Fabricators redo the calculations anyway.</p>
+
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <h3>Submit your RFQ</h3>
+          <p>Your requirements go to a maximum of three pre-qualified ASME Code fabricators in the appropriate region. No shotgun quoting.</p>
         </div>
-        <div class="problem-card">
-          <h3>Incomplete RFQ Packages</h3>
-          <p>Specs arrive with missing data. Fabricators spend hours chasing clarifications before they can even start quoting.</p>
+
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <h3>Receive bids</h3>
+          <p>Fabricators respond with competitive bids based on your actual specs. Evaluate and award.</p>
         </div>
-        <div class="problem-card">
-          <h3>Race to the Bottom</h3>
-          <p>RFQs go to 10, 15, even 20 shops. Win rates plummet. Estimating hours get burned on quotes that never close.</p>
-        </div>
+
       </div>
     </div>
   </section>
-  
-  <!-- Solution -->
-  <section class="solution">
-    <div class="solution-content">
-      <div class="section-label blue">The Solution</div>
-      <h2>VesselRFQ Changes Everything</h2>
-      <p class="section-intro">A guided workflow that lets buyers define vessel parameters in minutes—not months—with complete, structured data that fabricators can use immediately.</p>
-      
-      <div class="solution-grid">
-        <div class="solution-metric">
-          <div class="big-number">~15</div>
-          <div class="unit">MINUTES</div>
-          <div class="comparison">vs. 6-8 weeks traditional</div>
+
+  <!-- ── Why VesselRFQ ─────────────────────────────────────────────────────── -->
+  <section>
+    <div class="container">
+      <div class="benefits-header">
+        <span class="section-label">Why VesselRFQ</span>
+        <h2>Built for how the industry actually works</h2>
+      </div>
+      <div class="benefits-grid">
+
+        <div class="benefit-card">
+          <h3>Cut engineering hours on vessel specs</h3>
+          <p>The configurator captures design conditions, geometry, and nozzle requirements in a structured format fabricators can use to bid. Less back-and-forth. Less time translating documents.</p>
         </div>
-        
-        <div class="solution-steps">
-          <div class="step">
-            <div class="step-number">1</div>
-            <div class="step-content">
-              <h4>Guided Design Workflow</h4>
-              <p>Buyer's engineer enters vessel parameters through an intelligent wizard—diameter, length, pressure, temperature, materials, heads, nozzles.</p>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step-number">2</div>
-            <div class="step-content">
-              <h4>Complete RFQ Package Generated</h4>
-              <p>Platform creates a structured specification with all parameters fabricators need to run their Code calculations.</p>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step-number">3</div>
-            <div class="step-content">
-              <h4>Direct to Qualified Fabricators</h4>
-              <p>One-click release to geographically-appropriate ASME shops. No emails, no chasing, no missing attachments.</p>
-            </div>
-          </div>
+
+        <div class="benefit-card">
+          <h3>Faster from requirement to bid</h3>
+          <p>The traditional process — internal specs, review, bid list assembly, follow-up — takes weeks. VesselRFQ compresses that cycle.</p>
         </div>
+
+        <div class="benefit-card">
+          <h3>Maximum three bidders per RFQ</h3>
+          <p>Your RFQ goes to a maximum of three qualified fabricators. Shops that know they're one of three take the work seriously. You get real bids, not placeholders.</p>
+        </div>
+
+        <div class="benefit-card">
+          <h3>ASME Code fabricators only</h3>
+          <p>Every fabricator on the platform holds the appropriate ASME stamps. You're not sorting through shops that can't build to code.</p>
+        </div>
+
       </div>
     </div>
   </section>
-  
-  <!-- Fabricator Value -->
-  <section class="fabricator-value">
-    <div class="fabricator-content">
-      <div class="section-label green">For Fabricators</div>
-      <h2>What Founding Members Get</h2>
-      <p class="section-intro">This isn't just another platform. It's a strategic position in a compressed marketplace.</p>
-      
-      <div class="value-grid">
-        <div class="value-card">
-          <h3>Compressed Marketplace</h3>
-          <p>40 seats nationwide. Compete against 3-4 shops instead of 15.</p>
-        </div>
-        <div class="value-card">
-          <h3>RFQ Opportunities Delivered</h3>
-          <p>Buyers find you. Work you'd never see otherwise.</p>
-        </div>
-        <div class="value-card">
-          <h3>Complete, Structured Inputs</h3>
-          <p>Every RFQ has all parameters. Zero time chasing missing data.</p>
-        </div>
-        <div class="value-card">
-          <h3>COMPRESS Integration</h3>
-          <p>Export to COMPRESS format. Zero manual data entry.</p>
-        </div>
-        <div class="value-card">
-          <h3>Automated BOM to Suppliers</h3>
-          <p>Material lists sent automatically. Days become hours.</p>
-        </div>
-        <div class="value-card">
-          <h3>FEL Process Acceleration</h3>
-          <p>Quote the same vessel 3-4x without 3-4x the work.</p>
-        </div>
-        <div class="value-card">
-          <h3>Geographic Exclusivity</h3>
-          <p>Your territory, protected. If you leave, the seat goes to a competitor.</p>
-        </div>
-        <div class="value-card">
-          <h3>Founding Member Influence</h3>
-          <p>Direct input on features. Built around how you actually work.</p>
-        </div>
+
+  <!-- ── Who uses VesselRFQ ─────────────────────────────────────────────────── -->
+  <section class="section-alt">
+    <div class="container">
+      <div class="who-header">
+        <span class="section-label">Who uses VesselRFQ</span>
+        <h2>Built for engineering and procurement professionals</h2>
+        <p>Whether you're managing capital projects, supporting client procurement, or handling in-house vessel replacement, VesselRFQ fits into your existing workflow.</p>
+      </div>
+      <div class="personas">
+        <span class="persona-tag">Plant engineers</span>
+        <span class="persona-tag">Refinery engineers</span>
+        <span class="persona-tag">EPC project engineers</span>
+        <span class="persona-tag">Project managers</span>
+        <span class="persona-tag">Senior project managers</span>
+        <span class="persona-tag">Consulting engineering firms</span>
+        <span class="persona-tag">Procurement managers</span>
       </div>
     </div>
   </section>
-  
-  <!-- Founder -->
-  <section class="founder">
-    <div class="founder-content">
-      <div class="section-label blue">Who's Building This</div>
-      <h2>Built by Someone Who's Been There</h2>
-      
-      <div class="founder-grid">
-        <div class="founder-info">
-          <div class="founder-avatar">
-            <span>BM</span>
-          </div>
-          <div class="founder-name">Bret J. Mundt</div>
-          <div class="founder-title">Founder & CEO</div>
-          <div class="founder-years">
-            <strong>36</strong> years<br>
-            <span style="font-size: 0.8rem; color: #94a3b8;">in industrial construction</span>
-          </div>
-        </div>
-        
-        <div class="founder-bio">
-          <h3>I've sat in every chair at this table.</h3>
-          <ul class="experience-list">
-            <li><strong>Industrial Project Manager</strong> at Archer Daniels Midland</li>
-            <li><strong>Project Manager & Estimator</strong> at an ASME fabricator—quoted ASME tanks, API storage tanks, heat exchangers. Estimated $5M/month.</li>
-            <li><strong>President & Owner</strong> of Mundt Construction Services for 19 years</li>
-            <li><strong>Corporate Project Engineer</strong> at a $450MM chemical company—managed capital projects 30-40% under budget</li>
-            <li><strong>B.S. Mechanical Engineering</strong>, University of Memphis (cum laude)</li>
-          </ul>
-          <div class="founder-quote">
-            "I've sat where you sit—as estimator, project manager, and owner. I built VesselRFQ to fix the problems I lived every day."
-          </div>
-        </div>
+
+  <!-- ── Closing CTA ───────────────────────────────────────────────────────── -->
+  <section class="section-blue cta-section">
+    <div class="container">
+      <h2>Ready to submit your first RFQ?</h2>
+      <p>Registration is free. Start designing your vessel today.</p>
+      <div class="cta-btns">
+        <a href="/app/register" class="btn btn-green">Register free</a>
+        <a href="/app/login" class="btn btn-outline">Sign in</a>
       </div>
     </div>
   </section>
-  
-  <!-- CTA -->
-  <section class="cta">
-    <div class="cta-content">
-      <h2>40 Seats. Once They're Filled, They're Filled.</h2>
-      <p>We're recruiting founding fabricators now. Geographic exclusivity means first mover wins. Interested in learning more?</p>
-      <a href="/cdn-cgi/l/email-protection#81c3f3e4f5cbccf4efe5f5c1e6ece0e8edafe2eeecbef2f4e3ebe4e2f5bcd7e4f2f2e4edd3c7d0a4b3b1c7eef4efe5e8efe6a4b3b1cce4ece3e4f3a4b3b1c8eff5e4f3e4f2f5a7e3eee5f8bcc8a6eca4b3b1e8eff5e4f3e4f2f5e4e5a4b3b1e8efa4b3b1ede4e0f3efe8efe6a4b3b1eceef3e4a4b3b1e0e3eef4f5a4b3b1d7e4f2f2e4edd3c7d0a4b3b1e7eef4efe5e8efe6a4b3b1ece4ece3e4f3a4b3b1eef1f1eef3f5f4efe8f5e8e4f2afa4b1c0a4b1c0c2eeecf1e0eff8a4b2c0a4b3b1a4b1c0cdeee2e0f5e8eeefa4b2c0a4b3b1a4b1c0cfe0ece4a4b2c0a4b3b1a4b1c0
+
+  <!-- ── Footer ───────────────────────────────────────────────────────────── -->
+  <footer>
+    <p>&#169; 2026 VesselRFQ &nbsp;&middot;&nbsp; <a href="/">vesselrfq.com</a></p>
+  </footer>
+
+</body>
+</html>
