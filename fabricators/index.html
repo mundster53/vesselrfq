@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VesselRFQ for Fabricators — Put a 3D Vessel Configurator on Your Website</title>
+  <meta name="description" content="Give your customers a better way to send you vessel jobs. A 3D vessel configurator on your website, spec-complete RFQs in your dashboard, and emails to reactivate every past customer.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #0f172a;
+      color: #cbd5e1;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Base typography ──────────────────────────────────────────────────── */
+    h1 { font-size: clamp(26px, 3.5vw, 44px); font-weight: 500; line-height: 1.18; letter-spacing: -0.4px; color: #f8fafc; }
+    h2 { font-size: clamp(20px, 2.8vw, 30px); font-weight: 500; line-height: 1.22; letter-spacing: -0.3px; color: #f8fafc; }
+    h3 { font-size: 15px; font-weight: 500; color: #f8fafc; }
+    p  { font-size: 15px; color: #cbd5e1; }
+
+    a { text-decoration: none; }
+
+    .kicker {
+      display: block;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    /* ── Buttons ──────────────────────────────────────────────────────────── */
+    .btn {
+      display: inline-block;
+      padding: 10px 22px;
+      border-radius: 7px;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.15s;
+      border: none;
+    }
+    .btn:hover { opacity: 0.87; }
+    .btn-green { background: #16a34a; color: #f0fdf4; }
+    .btn-green-lg { padding: 13px 28px; font-size: 15px; border-radius: 8px; }
+
+    /* ── Nav ──────────────────────────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: #0f172a;
+      border-bottom: 0.5px solid #1e293b;
+    }
+    .nav-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 32px;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo { font-size: 17px; font-weight: 500; text-decoration: none; }
+    .logo-vessel { color: #f8fafc; }
+    .logo-rfq    { color: #60a5fa; }
+    .nav-right { display: flex; align-items: center; gap: 20px; }
+    .nav-buyers { font-size: 13px; color: #94a3b8; }
+    .nav-buyers:hover { color: #cbd5e1; }
+
+    /* ── Hero ─────────────────────────────────────────────────────────────── */
+    .hero { background: #0f172a; padding: 48px 32px; }
+    .hero-inner {
+      max-width: 1020px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 48px;
+      align-items: center;
+    }
+    .hero .kicker { color: #60a5fa; }
+    .hero h1 { margin-bottom: 20px; }
+    .hero-sub { font-size: 15px; line-height: 1.7; margin-bottom: 28px; }
+    .hl-blue  { color: #60a5fa; font-weight: 500; }
+    .hl-white { color: #f8fafc; font-weight: 500; }
+    .hl-green { color: #4ade80; font-weight: 500; }
+
+    .hero-image-card {
+      background: #1e293b;
+      border: 0.5px solid #334155;
+      border-radius: 10px;
+      padding: 20px;
+    }
+    .hero-placeholder {
+      background: #0f172a;
+      border: 0.5px solid #334155;
+      border-radius: 8px;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #475569;
+      font-size: 13px;
+    }
+    .hero-caption {
+      margin-top: 12px;
+      font-size: 11px;
+      color: #475569;
+      text-align: center;
+    }
+
+    /* ── Announcement ─────────────────────────────────────────────────────── */
+    .announcement-wrap { background: #0f172a; padding: 0 32px 40px; }
+    .announcement {
+      background: #1e3a8a;
+      border-radius: 12px;
+      padding: 40px 32px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    .announcement .kicker { color: #93c5fd; }
+    .announcement h2 { color: #eff6ff; margin-bottom: 16px; }
+    .announcement p { color: #bfdbfe; }
+    .ann-hl { color: #93c5fd; font-weight: 500; }
+    .ann-hl-white { color: #eff6ff; font-weight: 500; }
+
+    .quote-block {
+      background: #1e40af;
+      border-left: 3px solid #93c5fd;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin-top: 20px;
+    }
+    .quote-block p {
+      font-style: italic;
+      color: #dbeafe;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    /* ── Light panel wrapper ──────────────────────────────────────────────── */
+    .light-wrap { background: #0f172a; padding: 40px 32px; }
+    .light-panel {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 36px 32px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    .light-panel .kicker { color: #1d4ed8; }
+    .light-panel h2 { color: #0f172a; margin-bottom: 24px; }
+    .light-panel p { color: #374151; }
+    .lp-hl-blue  { color: #1d4ed8; font-weight: 500; }
+    .lp-hl-green { color: #15803d; font-weight: 500; }
+
+    /* ── Benefits grid ────────────────────────────────────────────────────── */
+    .benefits-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .benefit-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 18px;
+    }
+    .benefit-card-header {
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .bh-blue  { color: #1d4ed8; }
+    .bh-green { color: #15803d; }
+
+    .bullet-list { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+    .bullet-list li { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: #374151; line-height: 1.55; }
+    .bullet-list li::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+    .bullets-blue li::before  { background: #3b82f6; }
+    .bullets-green li::before { background: #16a34a; }
+    .bullet-bold { font-weight: 500; color: #0f172a; }
+
+    /* ── Configurator ─────────────────────────────────────────────────────── */
+    .config-section { background: #0f172a; padding: 48px 32px; }
+    .config-inner { max-width: 860px; margin: 0 auto; }
+    .config-section .kicker { color: #60a5fa; }
+    .config-section h2 { margin-bottom: 16px; }
+    .config-sub { margin-bottom: 36px; }
+    .config-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    /* Browser mockup */
+    .browser-card {
+      background: #1e293b;
+      border: 0.5px solid #334155;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .browser-bar {
+      background: #0f172a;
+      border-bottom: 0.5px solid #334155;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .browser-dots { display: flex; gap: 5px; }
+    .browser-dot { width: 8px; height: 8px; border-radius: 50%; background: #334155; }
+    .browser-url {
+      flex: 1;
+      background: #1e293b;
+      border: 0.5px solid #334155;
+      border-radius: 4px;
+      padding: 3px 10px;
+      font-size: 11px;
+      color: #64748b;
+    }
+    .browser-body { padding: 14px; }
+    .vessel-preview {
+      background: #0f172a;
+      border: 0.5px solid #334155;
+      border-radius: 6px;
+      height: 130px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: #475569;
+      margin-bottom: 12px;
+    }
+    .spec-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .spec-field {
+      background: #0f172a;
+      border: 0.5px solid #334155;
+      border-radius: 5px;
+      padding: 6px 8px;
+      font-size: 11px;
+    }
+    .spec-label { color: #475569; display: block; margin-bottom: 1px; }
+    .spec-value { color: #94a3b8; font-weight: 500; }
+    .submit-btn-mock {
+      width: 100%;
+      background: #16a34a;
+      color: #f0fdf4;
+      border: none;
+      border-radius: 5px;
+      padding: 8px;
+      font-size: 12px;
+      font-family: inherit;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    /* Feature list */
+    .feature-list { display: flex; flex-direction: column; gap: 20px; }
+    .feature-item { display: flex; gap: 14px; align-items: flex-start; }
+    .feature-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #1e293b;
+      border: 0.5px solid #334155;
+      color: #60a5fa;
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .feature-text h3 { font-size: 14px; color: #f1f5f9; margin-bottom: 3px; }
+    .feature-text p  { font-size: 13px; color: #64748b; line-height: 1.55; }
+
+    /* ── Email add-on ─────────────────────────────────────────────────────── */
+    .email-wrap { background: #0f172a; padding: 0 32px 40px; }
+    .email-panel {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 36px 32px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+    .email-panel h2 { color: #0f172a; margin-bottom: 14px; }
+    .email-panel p  { color: #374151; font-size: 14px; line-height: 1.7; }
+    .email-panel p + p { margin-top: 12px; }
+
+    .pill-badge {
+      display: inline-block;
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      margin-bottom: 14px;
+    }
+
+    .email-dark-box {
+      background: #111827;
+      border-radius: 10px;
+      padding: 20px;
+    }
+    .email-box-header {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #4ade80;
+      margin-bottom: 16px;
+    }
+    .email-items { display: flex; flex-direction: column; gap: 14px; }
+    .email-item { display: flex; gap: 10px; align-items: flex-start; }
+    .email-num {
+      font-size: 12px;
+      font-weight: 500;
+      color: #4ade80;
+      flex-shrink: 0;
+      margin-top: 1px;
+      width: 16px;
+    }
+    .email-item-text { font-size: 13px; color: #d1d5db; line-height: 1.55; }
+    .email-item-label { font-weight: 500; color: #f9fafb; }
+
+    /* ── Credibility ──────────────────────────────────────────────────────── */
+    .credibility { background: #1e293b; padding: 40px 32px; }
+    .cred-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 48px;
+      align-items: start;
+    }
+    .credibility .kicker { color: #60a5fa; }
+    .credibility h2 { color: #f8fafc; }
+    .credibility p { color: #94a3b8; font-size: 14px; line-height: 1.75; }
+    .credibility p + p { margin-top: 14px; }
+    .cred-hl { color: #e2e8f0; font-weight: 500; }
+
+    .stat-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 24px; }
+    .stat-card {
+      background: #0f172a;
+      border: 0.5px solid #334155;
+      border-radius: 8px;
+      padding: 14px;
+    }
+    .stat-num { font-size: 22px; font-weight: 500; color: #60a5fa; margin-bottom: 4px; }
+    .stat-label { font-size: 11px; color: #64748b; line-height: 1.4; }
+
+    /* ── Contact form ─────────────────────────────────────────────────────── */
+    .contact-section { background: #0f172a; padding: 48px 32px; }
+    .contact-inner { max-width: 560px; margin: 0 auto; text-align: center; }
+    .contact-section .kicker { color: #60a5fa; }
+    .contact-section h2 { color: #f8fafc; margin-bottom: 8px; }
+    .contact-sub { font-size: 14px; color: #64748b; margin-bottom: 28px; }
+
+    .form-card {
+      background: #1e293b;
+      border: 0.5px solid #334155;
+      border-radius: 12px;
+      padding: 28px;
+      text-align: left;
+    }
+    .field-group { margin-bottom: 16px; }
+    .field-group label {
+      display: block;
+      font-size: 12px;
+      color: #94a3b8;
+      margin-bottom: 6px;
+    }
+    .field-group input,
+    .field-group textarea {
+      width: 100%;
+      background: #0f172a;
+      border: 0.5px solid #334155;
+      border-radius: 6px;
+      color: #f1f5f9;
+      font-size: 14px;
+      font-family: inherit;
+      padding: 9px 12px;
+      outline: none;
+      transition: border-color 0.15s;
+      resize: vertical;
+    }
+    .field-group input:focus,
+    .field-group textarea:focus { border-color: #60a5fa; }
+    .field-group input::placeholder,
+    .field-group textarea::placeholder { color: #334155; }
+    .field-group textarea { height: 64px; }
+
+    .submit-btn {
+      width: 100%;
+      padding: 12px;
+      font-size: 15px;
+      border-radius: 7px;
+      margin-top: 4px;
+    }
+    .form-note {
+      margin-top: 12px;
+      font-size: 11px;
+      color: #475569;
+      text-align: center;
+    }
+
+    /* ── Footer ───────────────────────────────────────────────────────────── */
+    footer {
+      background: #020617;
+      border-top: 0.5px solid #0f172a;
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    footer span, footer a {
+      font-size: 12px;
+      color: #334155;
+      text-decoration: none;
+    }
+    footer a:hover { color: #475569; }
+
+    /* ── Responsive ───────────────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .nav-buyers { display: none; }
+      .nav-inner  { padding: 0 16px; }
+
+      .hero        { padding: 40px 20px; }
+      .hero-inner  { grid-template-columns: 1fr; gap: 28px; }
+
+      .announcement-wrap { padding: 0 20px 32px; }
+      .announcement { padding: 28px 20px; }
+
+      .light-wrap  { padding: 32px 20px; }
+      .light-panel { padding: 24px 18px; }
+
+      .benefits-grid { grid-template-columns: 1fr; }
+
+      .config-section { padding: 40px 20px; }
+      .config-grid    { grid-template-columns: 1fr; }
+
+      .email-wrap  { padding: 0 20px 32px; }
+      .email-panel { padding: 24px 18px; }
+      .email-grid  { grid-template-columns: 1fr; gap: 24px; }
+
+      .credibility { padding: 32px 20px; }
+      .cred-inner  { grid-template-columns: 1fr; gap: 28px; }
+      .stat-cards  { grid-template-columns: 1fr; }
+
+      .contact-section { padding: 40px 20px; }
+      .form-card { padding: 20px 16px; }
+
+      footer { padding: 14px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Nav ──────────────────────────────────────────────────────────────── -->
+  <nav>
+    <div class="nav-inner">
+      <a href="/" class="logo">
+        <span class="logo-vessel">Vessel</span><span class="logo-rfq">RFQ</span>
+      </a>
+      <div class="nav-right">
+        <a href="https://vesselrfq.com" class="nav-buyers">For buyers</a>
+        <a href="#contact-form" class="btn btn-green">Get details</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Hero ─────────────────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div>
+        <span class="kicker">For ASME Code fabricators</span>
+        <h1>Give your customers a <span class="hl-blue">better way to send you vessel jobs</span> — and a reason to call every past customer you haven't heard from in years</h1>
+        <p class="hero-sub">
+          We put a <span class="hl-white">vessel configurator on your website</span>. Your customers design their vessel online, submit a spec-complete RFQ, and get a bid back faster. You get what you need to estimate. They <span class="hl-white">save time and money</span>. And you have <span class="hl-white">something worth announcing</span>.
+        </p>
+        <a href="#contact-form" class="btn btn-green btn-green-lg">Get the details</a>
+      </div>
+      <div>
+        <div class="hero-image-card">
+          <div class="hero-placeholder">Pressure vessel photo</div>
+          <p class="hero-caption">ASME Code pressure vessel — typical refinery service</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Announcement ──────────────────────────────────────────────────────── -->
+  <div class="announcement-wrap">
+    <div class="announcement">
+      <span class="kicker">The announcement opportunity</span>
+      <h2>When did you last have something <span class="ann-hl">genuinely useful to tell a past customer</span>?</h2>
+      <p style="margin-top:16px">
+        Your past customers still need vessels. They just aren't calling you right now. <span class="ann-hl-white">Give them a reason to.</span> When you add the configurator to your site, you have a real story to tell every dormant account — a tool that makes their job easier, saves them engineering hours, and gets them a bid faster.
+      </p>
+      <div class="quote-block">
+        <p>"We've added a vessel configurator to our website. You can now design and submit a vessel RFQ online and get a bid back faster than before." — <span style="color:#eff6ff;font-weight:500;font-style:normal">That's a phone call worth making.</span> Every shop in your region still running a static contact form can't have that conversation.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Benefits split ────────────────────────────────────────────────────── -->
+  <div class="light-wrap">
+    <div class="light-panel">
+      <span class="kicker">What changes for everyone</span>
+      <h2>Better for <span class="lp-hl-blue">your customer</span>. Better for <span class="lp-hl-green">your shop</span>.</h2>
+      <div class="benefits-grid">
+
+        <div class="benefit-card">
+          <div class="benefit-card-header bh-blue">What your customer gets</div>
+          <ul class="bullet-list bullets-blue">
+            <li><span><span class="bullet-bold">Designs vessel online</span> — geometry, design conditions, nozzle schedule in one session</span></li>
+            <li><span><span class="bullet-bold">Submits a complete RFQ</span> — no phone calls, no back-and-forth</span></li>
+            <li><span><span class="bullet-bold">Gets a bid back faster</span> — because you already have what you need to estimate</span></li>
+            <li><span><span class="bullet-bold">Saves engineering hours</span> — spec requirements captured without a consultant</span></li>
+          </ul>
+        </div>
+
+        <div class="benefit-card">
+          <div class="benefit-card-header bh-green">What your shop gets</div>
+          <ul class="bullet-list bullets-green">
+            <li><span><span class="bullet-bold">Spec-complete RFQs</span> — design conditions, geometry, nozzles — everything to estimate from</span></li>
+            <li><span><span class="bullet-bold">RFQ dashboard</span> — all submissions organized, no email digging</span></li>
+            <li><span><span class="bullet-bold">Serious buyers</span> — people who configured a vessel are ready to get a bid</span></li>
+            <li><span><span class="bullet-bold">A competitive differentiator</span> — something no other shop in your region can offer yet</span></li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Configurator ───────────────────────────────────────────────────────── -->
+  <section class="config-section">
+    <div class="config-inner">
+      <span class="kicker">What you're putting on your website</span>
+      <h2>A <span class="hl-blue">3D vessel configurator</span> — not a contact form</h2>
+      <p class="config-sub">Your customer selects vessel type, enters design conditions, configures nozzles and orientation, and submits. <span class="hl-white">You receive a structured RFQ</span> with everything an estimator needs — in your dashboard, ready to review.</p>
+
+      <div class="config-grid">
+
+        <!-- Browser mockup -->
+        <div class="browser-card">
+          <div class="browser-bar">
+            <div class="browser-dots">
+              <div class="browser-dot"></div>
+              <div class="browser-dot"></div>
+              <div class="browser-dot"></div>
+            </div>
+            <div class="browser-url">smithfabrication.com/quote</div>
+          </div>
+          <div class="browser-body">
+            <div class="vessel-preview">3D vessel preview</div>
+            <div class="spec-grid">
+              <div class="spec-field"><span class="spec-label">Shell ID</span><span class="spec-value">48&quot;</span></div>
+              <div class="spec-field"><span class="spec-label">T/T Length</span><span class="spec-value">12&apos;-0&quot;</span></div>
+              <div class="spec-field"><span class="spec-label">Design pressure</span><span class="spec-value">285 PSI</span></div>
+              <div class="spec-field"><span class="spec-label">Design temp</span><span class="spec-value">650°F</span></div>
+              <div class="spec-field"><span class="spec-label">Material</span><span class="spec-value">SA-516-70</span></div>
+              <div class="spec-field"><span class="spec-label">Orientation</span><span class="spec-value">Vertical</span></div>
+            </div>
+            <div class="submit-btn-mock">Submit RFQ</div>
+          </div>
+        </div>
+
+        <!-- Feature list -->
+        <div class="feature-list">
+          <div class="feature-item">
+            <div class="feature-num">1</div>
+            <div class="feature-text">
+              <h3>3D vessel preview</h3>
+              <p>Buyer sees their vessel update in real time as they configure it.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-num">2</div>
+            <div class="feature-text">
+              <h3>Spec fields estimators recognize</h3>
+              <p>Shell ID, T/T length, design pressure, temperature, material spec — not generic form fields.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-num">3</div>
+            <div class="feature-text">
+              <h3>Nozzle schedule builder</h3>
+              <p>Buyer adds nozzles with size, rating, and service. You receive a complete schedule.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-num">4</div>
+            <div class="feature-text">
+              <h3>Branded to your shop</h3>
+              <p>Lives at your URL. Your logo. Your customer never leaves your website.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Email add-on ───────────────────────────────────────────────────────── -->
+  <div class="email-wrap">
+    <div class="email-panel">
+      <div class="email-grid">
+        <div>
+          <span class="pill-badge">Included</span>
+          <h2>Ready-to-send emails to <span class="lp-hl-green">reactivate your past customers</span></h2>
+          <p style="margin-top:14px">
+            We provide a series of emails — written by someone with <span style="color:#111827;font-weight:500">30+ years in the industry</span> — that you can send to your past customers to introduce the configurator, show them how it saves them time, and get them using it.
+          </p>
+          <p>
+            <span style="color:#111827;font-weight:500">Nothing to write. Nothing to figure out.</span> Send them as-is or personalize them. Either way, your past customers hear from you with something genuinely useful to say.
+          </p>
+        </div>
+        <div>
+          <div class="email-dark-box">
+            <div class="email-box-header">What's included</div>
+            <div class="email-items">
+              <div class="email-item">
+                <span class="email-num">1.</span>
+                <p class="email-item-text"><span class="email-item-label">Announcement email</span> — introduces the configurator to past customers and tells them what it does for them</p>
+              </div>
+              <div class="email-item">
+                <span class="email-num">2.</span>
+                <p class="email-item-text"><span class="email-item-label">Follow-up sequence</span> — keeps your shop top of mind for their next vessel job</p>
+              </div>
+              <div class="email-item">
+                <span class="email-num">3.</span>
+                <p class="email-item-text"><span class="email-item-label">Written for fabricators, by a fabricator</span> — not generic marketing copy</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Credibility ────────────────────────────────────────────────────────── -->
+  <section class="credibility">
+    <div class="cred-inner">
+      <div>
+        <span class="kicker">Why this is different</span>
+        <h2>Built by someone who has <span class="hl-blue">estimated from bad specs</span></h2>
+      </div>
+      <div>
+        <p>
+          This platform wasn't built by a software company. It was designed by someone with <span class="cred-hl">30+ years in code fabrication and industrial construction</span> — someone who has sat across the table from buyers sending vague inquiries and wished there was a better way to get what he needed to bid.
+        </p>
+        <p>
+          The configurator captures what fabricators actually need <span class="cred-hl">because it was designed from that chair</span>, not from a software office. Every field, every spec, every nozzle parameter exists because an estimator needed it.
+        </p>
+        <div class="stat-cards">
+          <div class="stat-card">
+            <div class="stat-num">30+</div>
+            <div class="stat-label">Years in code fabrication and industrial construction</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">~5 yrs</div>
+            <div class="stat-label">Estimating pressure vessels at an ASME Code shop</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Contact form ───────────────────────────────────────────────────────── -->
+  <section class="contact-section" id="contact-form">
+    <div class="contact-inner">
+      <span class="kicker">Ready to learn more?</span>
+      <h2>Get the details</h2>
+      <p class="contact-sub">No commitment. We'll follow up personally with pricing and a demo.</p>
+      <div class="form-card">
+        <form>
+          <div class="field-group">
+            <label for="name">Your name</label>
+            <input type="text" id="name" name="name" placeholder="John Smith" autocomplete="name">
+          </div>
+          <div class="field-group">
+            <label for="shop">Shop name</label>
+            <input type="text" id="shop" name="shop" placeholder="Smith Fabrication, Inc." autocomplete="organization">
+          </div>
+          <div class="field-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="john@smithfab.com" autocomplete="email">
+          </div>
+          <div class="field-group">
+            <label for="current">How do you currently handle vessel inquiries from your website?</label>
+            <textarea id="current" name="current" placeholder="Contact form, phone number, email address..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-green submit-btn">Send my details</button>
+        </form>
+        <p class="form-note">We don't sell your information. We'll follow up by email within one business day.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ────────────────────────────────────────────────────────────── -->
+  <footer>
+    <span>&#169; 2026 VesselRFQ</span>
+    <a href="https://vesselrfq.com">vesselrfq.com</a>
+  </footer>
+
+</body>
+</html>
