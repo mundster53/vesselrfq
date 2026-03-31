@@ -34,12 +34,12 @@ export const rfqs = pgTable('rfqs', {
   saddleWidth: numeric('saddle_width'),
 
   // HX — TEMA designation
-  temaFront: text('tema_front'),
+  temaFront: text('tema_front_head'),
   temaShell: text('tema_shell'),
-  temaRear:  text('tema_rear'),
+  temaRear:  text('tema_rear_head'),
 
   // HX — shell configuration
-  orientation:       text('orientation'),
+  orientation:       text('hx_orientation'),
   shellsInSeries:    integer('shells_in_series'),
   shellsInParallel:  integer('shells_in_parallel'),
 
@@ -60,16 +60,16 @@ export const rfqs = pgTable('rfqs', {
   impingementPlate: text('impingement_plate'),
 
   // HX — shell side design conditions
-  shellMawp:              numeric('shell_mawp'),
-  shellDesignTemp:        integer('shell_design_temp'),
-  shellCorrosionAllowance: numeric('shell_corrosion_allowance'),
-  shellFluid:             text('shell_fluid'),
+  shellMawp:              numeric('shell_side_pressure'),
+  shellDesignTemp:        integer('shell_side_temp'),
+  shellCorrosionAllowance: numeric('shell_side_ca'),
+  shellFluid:             text('shell_side_fluid'),
 
   // HX — tube side design conditions
-  tubeMawp:              numeric('tube_mawp'),
-  tubeDesignTemp:        integer('tube_design_temp'),
-  tubeCorrosionAllowance: numeric('tube_corrosion_allowance'),
-  tubeFluid:             text('tube_fluid'),
+  tubeMawp:              numeric('tube_side_pressure'),
+  tubeDesignTemp:        integer('tube_side_temp'),
+  tubeCorrosionAllowance: numeric('tube_side_ca'),
+  tubeFluid:             text('tube_side_fluid'),
 
   notes: text('notes'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
