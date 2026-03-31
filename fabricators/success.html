@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to VesselRFQ — You're In</title>
+  <meta name="description" content="Your VesselRFQ founding fabricator subscription is confirmed.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #0f172a;
+      color: #cbd5e1;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Nav ────────────────────────────────────────────────────────────────── */
+    nav {
+      background: #0f172a;
+      border-bottom: 0.5px solid #1e293b;
+    }
+    .nav-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 32px;
+      height: 58px;
+      display: flex;
+      align-items: center;
+    }
+    .logo { font-size: 17px; font-weight: 500; text-decoration: none; }
+    .logo-vessel { color: #f8fafc; }
+    .logo-rfq    { color: #60a5fa; }
+
+    /* ── Main content ───────────────────────────────────────────────────────── */
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 64px 32px;
+    }
+    .success-card {
+      max-width: 560px;
+      width: 100%;
+      text-align: center;
+    }
+    .check-circle {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: #14532d;
+      border: 0.5px solid #16a34a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 28px;
+    }
+    .check-circle svg {
+      width: 30px;
+      height: 30px;
+    }
+    h1 {
+      font-size: clamp(22px, 3vw, 30px);
+      font-weight: 500;
+      color: #f8fafc;
+      line-height: 1.22;
+      letter-spacing: -0.3px;
+      margin-bottom: 16px;
+    }
+    .sub {
+      font-size: 15px;
+      color: #94a3b8;
+      line-height: 1.7;
+      margin-bottom: 36px;
+    }
+
+    .next-steps {
+      background: #1e293b;
+      border: 0.5px solid #334155;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: left;
+      margin-bottom: 28px;
+    }
+    .next-steps-header {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #60a5fa;
+      margin-bottom: 18px;
+    }
+    .step-list { display: flex; flex-direction: column; gap: 14px; }
+    .step-item { display: flex; gap: 12px; align-items: flex-start; }
+    .step-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #0f172a;
+      border: 0.5px solid #334155;
+      color: #60a5fa;
+      font-size: 11px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .step-text { font-size: 13px; color: #94a3b8; line-height: 1.55; }
+    .step-text strong { color: #e2e8f0; font-weight: 500; }
+
+    .back-link {
+      font-size: 13px;
+      color: #475569;
+      text-decoration: none;
+    }
+    .back-link:hover { color: #64748b; }
+
+    /* ── Footer ─────────────────────────────────────────────────────────────── */
+    footer {
+      background: #020617;
+      border-top: 0.5px solid #0f172a;
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    footer span, footer a {
+      font-size: 12px;
+      color: #334155;
+      text-decoration: none;
+    }
+    footer a:hover { color: #475569; }
+
+    @media (max-width: 768px) {
+      .nav-inner { padding: 0 16px; }
+      main { padding: 48px 20px; }
+      footer { padding: 14px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="/fabricators" class="logo">
+        <span class="logo-vessel">Vessel</span><span class="logo-rfq">RFQ</span>
+      </a>
+    </div>
+  </nav>
+
+  <main>
+    <div class="success-card">
+
+      <div class="check-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+
+      <h1>You're in — welcome to VesselRFQ</h1>
+      <p class="sub">Your founding fabricator subscription is confirmed. We'll be in touch within one business day to get you set up.</p>
+
+      <div class="next-steps">
+        <div class="next-steps-header">What happens next</div>
+        <div class="step-list">
+          <div class="step-item">
+            <div class="step-num">1</div>
+            <div class="step-text"><strong>We'll reach out within one business day</strong> — to confirm your shop details and get the configurator set up on your website.</div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">2</div>
+            <div class="step-text"><strong>You'll receive your customer reactivation emails</strong> — ready to send to past customers to introduce the configurator.</div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">3</div>
+            <div class="step-text"><strong>Your RFQ dashboard goes live</strong> — every submission from your website lands in your dashboard, organized and ready to estimate.</div>
+          </div>
+        </div>
+      </div>
+
+      <a href="/fabricators" class="back-link">&#8592; Back to fabricators page</a>
+
+    </div>
+  </main>
+
+  <footer>
+    <span>&#169; 2026 VesselRFQ</span>
+    <a href="https://vesselrfq.com">vesselrfq.com</a>
+  </footer>
+
+</body>
+</html>

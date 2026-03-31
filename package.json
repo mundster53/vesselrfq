@@ -24,6 +24,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.4.0",
+    "stripe": "^17.7.0",
     "three": "^0.183.2"
   },
   "devDependencies": {
