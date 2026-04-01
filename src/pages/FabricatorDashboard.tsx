@@ -633,7 +633,7 @@ export default function FabricatorDashboard() {
           </div>
 
           {/* Filter pills */}
-          <div style={{ display: 'flex', gap: 6, paddingBottom: 12, borderBottom: '0.5px solid #1e293b' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, paddingBottom: 12, borderBottom: '0.5px solid #1e293b' }}>
             {FILTER_OPTIONS.map(f => (
               <button
                 key={f.value}

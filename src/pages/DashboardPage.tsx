@@ -74,6 +74,7 @@ export default function DashboardPage() {
           </div>
         ) : (
           <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+            <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50">
@@ -111,6 +112,7 @@ export default function DashboardPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         )}
       </main>

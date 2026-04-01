@@ -21,7 +21,7 @@ export default function Navbar() {
             <Link to="/designer" className="text-slate-300 hover:text-white transition-colors">
               New RFQ
             </Link>
-            <span className="text-slate-500">{user.email}</span>
+            <span className="text-slate-500 truncate max-w-xs">{user.email}</span>
             <button
               onClick={handleLogout}
               className="text-slate-400 hover:text-white transition-colors"
