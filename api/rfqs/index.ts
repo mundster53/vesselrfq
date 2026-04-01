@@ -3,7 +3,7 @@ import { eq, desc, sql } from 'drizzle-orm'
 import { db } from '../_lib/db.js'
 import { rfqs, nozzles, users } from '../../db/schema.js'
 import { requireAuth } from '../_lib/auth.js'
-import { sendEmail, buyerConfirmationHtml, adminNotificationHtml } from '../_lib/email.js'
+import { sendEmail, buyerConfirmationHtml, buyerConfirmationText, adminNotificationHtml, adminNotificationText } from '../_lib/email.js'
 
 const ADMIN_EMAIL = process.env.NOTIFICATION_EMAIL ?? 'rfqs@vesselrfq.com'
 
@@ -206,8 +206,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           notes:         rfq.notes,
         }
         await Promise.all([
-          sendEmail(buyer.email, `RFQ Received — ${rfq.title}`, buyerConfirmationHtml(emailParams)),
-          sendEmail(ADMIN_EMAIL, `New RFQ #${rfq.id} — ${rfq.title}`, adminNotificationHtml(emailParams)),
+          sendEmail(buyer.email, `RFQ Received — ${rfq.title}`, buyerConfirmationHtml(emailParams), buyerConfirmationText(emailParams)),
+          sendEmail(ADMIN_EMAIL, `New RFQ #${rfq.id} — ${rfq.title}`, adminNotificationHtml(emailParams), adminNotificationText(emailParams)),
         ])
       }
     } catch (emailErr) {

@@ -9,10 +9,18 @@ const client = mg.client({
 })
 
 const FROM = 'VesselRFQ <rfqs@vesselrfq.com>'
-const DOMAIN = process.env.MAILGUN_DOMAIN ?? 'vesselrfq.com'
+const REPLY_TO = 'rfqs@vesselrfq.com'
+const DOMAIN = process.env.MAILGUN_DOMAIN ?? 'mg.vesselrfq.com'
 
 export async function sendEmail(to: string, subject: string, html: string, text?: string) {
-  await client.messages.create(DOMAIN, { from: FROM, to, subject, html, ...(text ? { text } : {}) })
+  await client.messages.create(DOMAIN, {
+    from: FROM,
+    to,
+    subject,
+    html,
+    'h:Reply-To': REPLY_TO,
+    ...(text ? { text } : {}),
+  })
 }
 
 // ─── Fabricator onboarding email ─────────────────────────────────────────────
@@ -265,6 +273,103 @@ export function buyerConfirmationHtml(p: RfqEmailParams): string {
   </div>
 </body>
 </html>`
+}
+
+export function buyerConfirmationText(p: RfqEmailParams): string {
+  const isTank = p.vesselType === 'tank'
+  const temaCode = (!isTank && p.temaFront && p.temaShell && p.temaRear)
+    ? `${p.temaFront}-${p.temaShell}-${p.temaRear}`
+    : null
+
+  const specs: string[] = isTank
+    ? [
+        p.shellOd            ? `Shell OD: ${p.shellOd}"` : '',
+        p.shellLength        ? `Shell Length: ${p.shellLength}"` : '',
+        p.shellMaterial      ? `Shell Material: ${p.shellMaterial}` : '',
+        p.headType           ? `Head Type: ${p.headType}` : '',
+        p.mawp               ? `MAWP: ${p.mawp} psig` : '',
+        p.designTemp != null ? `Design Temp: ${p.designTemp}°F` : '',
+        p.corrosionAllowance ? `Corrosion Allowance: ${p.corrosionAllowance}"` : '',
+        p.supportType        ? `Supports: ${p.supportType}` : '',
+        p.nozzleCount        ? `Nozzles: ${p.nozzleCount}` : '',
+      ].filter(Boolean)
+    : [
+        temaCode             ? `TEMA Designation: ${temaCode}` : '',
+        p.shellOd            ? `Shell OD: ${p.shellOd}"` : '',
+        p.shellLength        ? `Shell Length: ${p.shellLength}"` : '',
+        p.shellMaterial      ? `Shell Material: ${p.shellMaterial}` : '',
+        p.tubeCount          ? `Tube Count: ${p.tubeCount}` : '',
+        p.tubeOd             ? `Tube OD: ${p.tubeOd}"` : '',
+        p.tubeBwg            ? `Tube BWG: ${p.tubeBwg}` : '',
+        p.tubeLength         ? `Tube Length: ${p.tubeLength}'` : '',
+        p.shellMawp          ? `Shell MAWP: ${p.shellMawp} psig` : '',
+        p.shellDesignTemp != null ? `Shell Design Temp: ${p.shellDesignTemp}°F` : '',
+        p.tubeMawp           ? `Tube MAWP: ${p.tubeMawp} psig` : '',
+        p.tubeDesignTemp != null  ? `Tube Design Temp: ${p.tubeDesignTemp}°F` : '',
+        p.nozzleCount        ? `Nozzles: ${p.nozzleCount}` : '',
+      ].filter(Boolean)
+
+  return `RFQ Received — ${p.title}
+RFQ #${p.rfqId} · ${isTank ? 'Pressure Vessel' : 'Heat Exchanger'}
+
+Your RFQ has been submitted to the VesselRFQ marketplace. Qualified ASME fabricators in your region will receive your specifications and submit quotes. You can expect to hear back within 5–7 business days.
+
+SPECIFICATIONS SUMMARY
+${specs.join('\n')}${p.notes ? `\n\nRemarks: ${p.notes}` : ''}
+
+WHAT HAPPENS NEXT?
+Your RFQ will be routed to a maximum of 3 qualified fabricators with protected territories in your region. Each fabricator receives your full specifications and will contact you directly to discuss scope and pricing.
+
+Questions? Reply to this email or contact us at rfqs@vesselrfq.com.
+
+VesselRFQ · ASME Pressure Vessel Marketplace
+vesselrfq.com`
+}
+
+export function adminNotificationText(p: RfqEmailParams): string {
+  const isTank = p.vesselType === 'tank'
+  const temaCode = (!isTank && p.temaFront && p.temaShell && p.temaRear)
+    ? `${p.temaFront}-${p.temaShell}-${p.temaRear}`
+    : null
+
+  const specs: string[] = isTank
+    ? [
+        `Vessel Type: Pressure Vessel / Tank`,
+        p.shellOd            ? `Shell OD: ${p.shellOd}"` : '',
+        p.shellLength        ? `Shell Length: ${p.shellLength}"` : '',
+        p.shellMaterial      ? `Shell Material: ${p.shellMaterial}` : '',
+        p.headType           ? `Head Type: ${p.headType}` : '',
+        p.mawp               ? `MAWP: ${p.mawp} psig` : '',
+        p.designTemp != null ? `Design Temp: ${p.designTemp}°F` : '',
+        p.corrosionAllowance ? `Corrosion Allowance: ${p.corrosionAllowance}"` : '',
+        p.supportType        ? `Supports: ${p.supportType}` : '',
+        `Nozzle Count: ${p.nozzleCount}`,
+        p.notes              ? `Notes: ${p.notes}` : '',
+      ].filter(Boolean)
+    : [
+        `Vessel Type: Heat Exchanger`,
+        temaCode             ? `TEMA Designation: ${temaCode}` : '',
+        p.shellOd            ? `Shell OD: ${p.shellOd}"` : '',
+        p.shellLength        ? `Shell Length: ${p.shellLength}"` : '',
+        p.shellMaterial      ? `Shell Material: ${p.shellMaterial}` : '',
+        p.tubeCount          ? `Tube Count: ${p.tubeCount}` : '',
+        p.tubeOd             ? `Tube OD: ${p.tubeOd}"` : '',
+        p.tubeBwg            ? `Tube BWG: ${p.tubeBwg}` : '',
+        p.tubeLength         ? `Tube Length: ${p.tubeLength}'` : '',
+        p.shellMawp          ? `Shell MAWP: ${p.shellMawp} psig` : '',
+        p.shellDesignTemp != null ? `Shell Design Temp: ${p.shellDesignTemp}°F` : '',
+        p.tubeMawp           ? `Tube MAWP: ${p.tubeMawp} psig` : '',
+        p.tubeDesignTemp != null  ? `Tube Design Temp: ${p.tubeDesignTemp}°F` : '',
+        `Nozzle Count: ${p.nozzleCount}`,
+        p.notes              ? `Notes: ${p.notes}` : '',
+      ].filter(Boolean)
+
+  return `New RFQ Submitted — VesselRFQ
+
+${p.title}
+RFQ #${p.rfqId} · Buyer: ${p.buyerEmail}
+
+${specs.join('\n')}`
 }
 
 export function adminNotificationHtml(p: RfqEmailParams): string {
