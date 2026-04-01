@@ -436,6 +436,35 @@
       text-align: center;
     }
 
+    /* ── FAQ ─────────────────────────────────────────────────────────────── */
+    .faq-item { border-bottom: 0.5px solid #1e293b; }
+    .faq-q {
+      width: 100%;
+      background: none;
+      border: none;
+      text-align: left;
+      padding: 18px 0;
+      font-size: 15px;
+      font-weight: 500;
+      color: #f1f5f9;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .faq-q::after { content: '+'; font-size: 20px; font-weight: 400; color: #475569; flex-shrink: 0; }
+    .faq-q.open::after { content: '−'; }
+    .faq-a {
+      display: none;
+      font-size: 14px;
+      color: #94a3b8;
+      line-height: 1.7;
+      padding-bottom: 18px;
+    }
+    .faq-a.open { display: block; }
+
     /* ── Footer ───────────────────────────────────────────────────────────── */
     footer {
       background: #020617;
@@ -719,6 +748,62 @@
     </div>
   </section>
 
+  <!-- ── FAQ ──────────────────────────────────────────────────────────────── -->
+  <div style="background:#0f172a;padding:48px 32px">
+    <div style="max-width:860px;margin:0 auto">
+      <span class="kicker" style="color:#60a5fa">FAQ</span>
+      <h2 style="margin-bottom:32px">Questions shop owners ask</h2>
+      <div id="fab-faq" style="border-top:0.5px solid #1e293b">
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">How does the vessel configurator get on my website?</button>
+          <div class="faq-a">We handle the installation. You don't need a developer or any technical knowledge. We send you a short snippet of code your web person pastes into one page, or we do it for you.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">What happens when a buyer submits an RFQ?</button>
+          <div class="faq-a">You get an email notification immediately and the RFQ appears in your dashboard with the full spec — shell dimensions, design conditions, material, and a complete nozzle schedule. Everything you need to estimate.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Do my customers have to create an account to submit an RFQ?</button>
+          <div class="faq-a">Buyers create a free account to submit and track their RFQs. Registration takes less than a minute and requires only an email and password.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Can other fabricators see my RFQs?</button>
+          <div class="faq-a">No. RFQs submitted through your configurator come only to you. Your dashboard is private.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">What does $197/month include?</button>
+          <div class="faq-a">The vessel configurator on your website, the RFQ dashboard, and a series of ready-to-send announcement emails written for your customers.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Is there a contract?</button>
+          <div class="faq-a">No long-term contract. Month to month.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">What if my customers aren't tech savvy?</button>
+          <div class="faq-a">The configurator was designed for engineers and project managers who already work with vessel specs. If they can fill out a datasheet they can use this.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Who built this and do they understand fabrication?</button>
+          <div class="faq-a">Built by someone with 30+ years in code fabrication and industrial construction, including nearly five years estimating vessels at an ASME Code shop.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Who has access to the RFQ data submitted through my configurator?</button>
+          <div class="faq-a">You do. RFQs submitted through your configurator are visible only to you in your dashboard. VesselRFQ does not share, sell, or use your customer data for any purpose.</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <!-- ── Bottom CTA ───────────────────────────────────────────────────────── -->
   <div style="background:#0f172a;padding:0 32px 48px">
     <div style="max-width:560px;margin:0 auto;text-align:center">
@@ -764,5 +849,13 @@
     <a href="https://vesselrfq.com">vesselrfq.com</a>
   </footer>
 
+  <script>
+    function toggleFaq(btn) {
+      var answer = btn.nextElementSibling;
+      var isOpen = btn.classList.contains('open');
+      btn.classList.toggle('open', !isOpen);
+      answer.classList.toggle('open', !isOpen);
+    }
+  </script>
 </body>
 </html>

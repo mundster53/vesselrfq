@@ -212,6 +212,35 @@
     }
     .cta-btns .btn { padding: 13px 28px; font-size: 15px; border-radius: 8px; }
 
+    /* ── Buyer FAQ ────────────────────────────────────────────────────────── */
+    .bfaq-item { border-bottom: 0.5px solid #374151; }
+    .bfaq-q {
+      width: 100%;
+      background: none;
+      border: none;
+      text-align: left;
+      padding: 18px 0;
+      font-size: 15px;
+      font-weight: 500;
+      color: #f1f5f9;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .bfaq-q::after { content: '+'; font-size: 20px; font-weight: 400; color: #6b7280; flex-shrink: 0; }
+    .bfaq-q.open::after { content: '−'; }
+    .bfaq-a {
+      display: none;
+      font-size: 14px;
+      color: #94a3b8;
+      line-height: 1.7;
+      padding-bottom: 18px;
+    }
+    .bfaq-a.open { display: block; }
+
     /* ── Footer ───────────────────────────────────────────────────────────── */
     footer {
       background: #111827;
@@ -361,10 +390,69 @@
     </div>
   </section>
 
+  <!-- ── Buyer FAQ ────────────────────────────────────────────────────────── -->
+  <section style="background:#1f2937;padding:48px 32px">
+    <div style="max-width:860px;margin:0 auto">
+      <span style="display:block;font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:#60a5fa;margin-bottom:12px">FAQ</span>
+      <h2 style="font-size:clamp(20px,2.8vw,30px);font-weight:500;color:#f8fafc;line-height:1.22;letter-spacing:-0.3px;margin-bottom:32px">Questions buyers ask</h2>
+      <div style="border-top:0.5px solid #374151">
+
+        <div class="bfaq-item">
+          <button class="bfaq-q" onclick="toggleBfaq(this)">Do I need an account to submit an RFQ?</button>
+          <div class="bfaq-a">Yes, a free account is required to submit and track your RFQs. Registration takes less than a minute and requires only an email and password.</div>
+        </div>
+
+        <div class="bfaq-item">
+          <button class="bfaq-q" onclick="toggleBfaq(this)">How many fabricators will receive my RFQ?</button>
+          <div class="bfaq-a">Your RFQ goes to the fabricator whose configurator you used on their website.</div>
+        </div>
+
+        <div class="bfaq-item">
+          <button class="bfaq-q" onclick="toggleBfaq(this)">Are the fabricators ASME certified?</button>
+          <div class="bfaq-a">Yes. Every fabricator on the platform holds the appropriate ASME stamps for pressure vessel fabrication.</div>
+        </div>
+
+        <div class="bfaq-item">
+          <button class="bfaq-q" onclick="toggleBfaq(this)">How long does it take to get a bid?</button>
+          <div class="bfaq-a">That depends on the fabricator. VesselRFQ compresses the time it takes to get your specs in front of a qualified shop — how quickly they respond is up to them.</div>
+        </div>
+
+        <div class="bfaq-item">
+          <button class="bfaq-q" onclick="toggleBfaq(this)">Can I save my vessel design and come back to it?</button>
+          <div class="bfaq-a">Yes. Your RFQs are saved to your dashboard and you can review them any time.</div>
+        </div>
+
+        <div class="bfaq-item">
+          <button class="bfaq-q" onclick="toggleBfaq(this)">What vessel types can I configure?</button>
+          <div class="bfaq-a">Currently horizontal and vertical pressure vessels and heat exchangers. Additional vessel types are in development.</div>
+        </div>
+
+        <div class="bfaq-item">
+          <button class="bfaq-q" onclick="toggleBfaq(this)">Is my information shared with anyone other than the fabricator?</button>
+          <div class="bfaq-a">No. Your RFQ goes only to the fabricator you submitted to. We don't sell your data.</div>
+        </div>
+
+        <div class="bfaq-item">
+          <button class="bfaq-q" onclick="toggleBfaq(this)">What if I need to modify my RFQ after submitting?</button>
+          <div class="bfaq-a">Contact the fabricator directly using the contact information provided in your confirmation email.</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
   <!-- ── Footer ───────────────────────────────────────────────────────────── -->
   <footer>
     <p>&#169; 2026 VesselRFQ &nbsp;&middot;&nbsp; <a href="/">vesselrfq.com</a></p>
   </footer>
 
+  <script>
+    function toggleBfaq(btn) {
+      var answer = btn.nextElementSibling;
+      var isOpen = btn.classList.contains('open');
+      btn.classList.toggle('open', !isOpen);
+      answer.classList.toggle('open', !isOpen);
+    }
+  </script>
 </body>
 </html>
