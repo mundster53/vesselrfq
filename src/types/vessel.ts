@@ -20,9 +20,12 @@ export type ShellMaterial =
   | 'SA-516-70'
   | 'SA-516-60'
   | 'SA-240-304'
+  | 'SA-240-304L'
   | 'SA-240-316'
   | 'SA-240-316L'
   | 'SA-285-C'
+  | 'SA-387-11'
+  | 'SA-387-22'
 
 export type NozzleMaterial =
   | 'SA-106-B'
@@ -131,11 +134,12 @@ export interface HxDesignState {
   temaShell: TemaShell | ''
   temaRear:  TemaRearHead | ''
 
-  shellOd:           string
-  shellLength:       string
-  shellMaterial:     string
-  shellsInSeries:    string
-  shellsInParallel:  string
+  shellOd:             string
+  shellLength:         string
+  shellMaterial:       string
+  tubesheetMaterial:   string
+  shellsInSeries:      string
+  shellsInParallel:    string
 
   tubeCount:    string
   tubeOd:       TubeOd | ''

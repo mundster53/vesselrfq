@@ -31,7 +31,8 @@ import type {
 // ─── Shared constants ─────────────────────────────────────────────────────────
 
 const SHELL_MATERIALS: ShellMaterial[] = [
-  'SA-516-70', 'SA-516-60', 'SA-240-304', 'SA-240-316', 'SA-240-316L', 'SA-285-C',
+  'SA-516-70', 'SA-516-60', 'SA-240-304', 'SA-240-304L', 'SA-240-316', 'SA-240-316L',
+  'SA-285-C', 'SA-387-11', 'SA-387-22',
 ]
 const CUSTOM_MATERIAL_SENTINEL = '__custom__'
 
@@ -293,6 +294,7 @@ const initialHxState: HxDesignState = {
   shellOd: '',
   shellLength: '',
   shellMaterial: '',
+  tubesheetMaterial: 'SA-516-70',
   shellsInSeries: '1',
   shellsInParallel: '1',
   tubeCount: '',
@@ -586,11 +588,13 @@ export default function VesselDesignerPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError]           = useState('')
   const [useCustomMaterial, setUseCustomMaterial] = useState(false)
-  const [hxUseCustomShellMat, setHxUseCustomShellMat] = useState(false)
-  const [hxUseCustomTubeMat,  setHxUseCustomTubeMat]  = useState(false)
-  const customMaterialRef   = useRef<HTMLInputElement>(null)
-  const hxCustomShellMatRef = useRef<HTMLInputElement>(null)
-  const hxCustomTubeMatRef  = useRef<HTMLInputElement>(null)
+  const [hxUseCustomShellMat,      setHxUseCustomShellMat]      = useState(false)
+  const [hxUseCustomTubesheetMat,  setHxUseCustomTubesheetMat]  = useState(false)
+  const [hxUseCustomTubeMat,       setHxUseCustomTubeMat]       = useState(false)
+  const customMaterialRef         = useRef<HTMLInputElement>(null)
+  const hxCustomShellMatRef       = useRef<HTMLInputElement>(null)
+  const hxCustomTubesheetMatRef   = useRef<HTMLInputElement>(null)
+  const hxCustomTubeMatRef        = useRef<HTMLInputElement>(null)
 
   // ── HX Wizard state ────────────────────────────────────────────────────────
   const [hxStep, setHxStep]               = useState(1)
@@ -789,6 +793,7 @@ export default function VesselDesignerPage() {
           shellOd: hxForm.shellOd || undefined,
           shellLength: hxForm.shellLength || undefined,
           shellMaterial: hxForm.shellMaterial || undefined,
+          tubesheetMaterial: hxForm.tubesheetMaterial || undefined,
           temaFront: hxForm.temaFront || undefined,
           temaShell: hxForm.temaShell || undefined,
           temaRear: hxForm.temaRear || undefined,
@@ -1410,6 +1415,27 @@ export default function VesselDesignerPage() {
                             {hxUseCustomShellMat && (
                               <input ref={hxCustomShellMatRef} type="text" value={hxForm.shellMaterial}
                                 onChange={hxFieldInput('shellMaterial')}
+                                placeholder="e.g. Duplex 2205, Hastelloy…" className={inputCls + ' mt-2'} />
+                            )}
+                          </div>
+                          <div>
+                            <FieldLabel help="Material for both tubesheets. Typically matches the shell material for carbon steel units. Upgrade to stainless or alloy when tube-side fluid is corrosive.">Tubesheet Material</FieldLabel>
+                            <select
+                              value={hxUseCustomTubesheetMat ? CUSTOM_MATERIAL_SENTINEL : hxForm.tubesheetMaterial}
+                              onChange={e => {
+                                if (e.target.value === CUSTOM_MATERIAL_SENTINEL) {
+                                  setHxUseCustomTubesheetMat(true); setHxField('tubesheetMaterial', '')
+                                  setTimeout(() => hxCustomTubesheetMatRef.current?.focus(), 50)
+                                } else {
+                                  setHxUseCustomTubesheetMat(false); setHxField('tubesheetMaterial', e.target.value)
+                                }
+                              }} className={selectCls}>
+                              {SHELL_MATERIALS.map(m => <option key={m} value={m}>{m}</option>)}
+                              <option value={CUSTOM_MATERIAL_SENTINEL}>Other (specify)</option>
+                            </select>
+                            {hxUseCustomTubesheetMat && (
+                              <input ref={hxCustomTubesheetMatRef} type="text" value={hxForm.tubesheetMaterial}
+                                onChange={hxFieldInput('tubesheetMaterial')}
                                 placeholder="e.g. Duplex 2205, Hastelloy…" className={inputCls + ' mt-2'} />
                             )}
                           </div>
