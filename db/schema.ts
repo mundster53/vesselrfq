@@ -1,10 +1,12 @@
-import { pgTable, serial, text, timestamp, integer, numeric } from 'drizzle-orm/pg-core'
+import { pgTable, serial, text, timestamp, integer, numeric, boolean } from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
   email: text('email').notNull().unique(),
   passwordHash: text('password_hash').notNull(),
   role: text('role', { enum: ['buyer', 'fabricator'] }).notNull().default('buyer'),
+  active: boolean('active').notNull().default(true),
+  stripeCustomerId: text('stripe_customer_id'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })
 

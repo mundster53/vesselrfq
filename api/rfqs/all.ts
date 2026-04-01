@@ -15,6 +15,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(403).json({ error: 'Fabricator access required' })
     }
 
+    const [fabricator] = await db
+      .select({ active: users.active })
+      .from(users)
+      .where(eq(users.id, auth.userId))
+      .limit(1)
+
+    if (!fabricator?.active) {
+      return res.status(403).json({ error: 'Account inactive. Please check your subscription.' })
+    }
+
     const rows = await db
       .select({
         id: rfqs.id,
