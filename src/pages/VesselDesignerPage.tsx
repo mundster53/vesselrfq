@@ -284,6 +284,9 @@ const initialTankState: VesselDesignState = {
 const initialHxState: HxDesignState = {
   title: '',
   orientation: 'horizontal',
+  supportType: 'saddles',
+  saddleHeight: '',
+  saddleWidth: '',
   temaFront: 'A',
   temaShell: 'E',
   temaRear: 'S',
@@ -294,11 +297,11 @@ const initialHxState: HxDesignState = {
   shellsInParallel: '1',
   tubeCount: '',
   tubeOd: '3/4',
-  tubeBwg: '14',
+  tubeBwg: '16',
   tubeLength: '20',
   tubeMaterial: '',
   tubeLayout: '30',
-  tubePitch: '',
+  tubePitch: '0.9375',
   tubeJoint: 'expanded',
   tubePasses: '1',
   baffleType: 'single_segmental',
@@ -336,27 +339,29 @@ function SectionHeader({ children }: { children: string }) {
   return <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-4">{children}</h2>
 }
 
-function HelpTip({ text }: { text: string }) {
+function HelpTip({ text, side = 'center' }: { text: string; side?: 'center' | 'left' }) {
+  const tipPos  = side === 'left' ? 'right-0' : 'left-1/2 -translate-x-1/2'
+  const arrowPos = side === 'left' ? 'right-2 left-auto translate-x-0' : 'left-1/2 -translate-x-1/2'
   return (
     <span className="relative inline-block ml-1.5 group">
       <button type="button" tabIndex={0}
         className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-500 text-[10px] font-bold cursor-help leading-none select-none focus:outline-none focus:ring-1 focus:ring-blue-400 align-middle">
         ?
       </button>
-      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-slate-800 text-white text-xs rounded-lg px-3 py-2 leading-relaxed opacity-0 pointer-events-none group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-150 z-50 shadow-xl whitespace-normal">
+      <span className={`absolute bottom-full ${tipPos} mb-2 w-64 bg-slate-800 text-white text-xs rounded-lg px-3 py-2 leading-relaxed opacity-0 pointer-events-none group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-150 z-50 shadow-xl whitespace-normal`}>
         {text}
-        <span className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-x-[5px] border-x-transparent border-t-[5px] border-t-slate-800" />
+        <span className={`absolute top-full ${arrowPos} w-0 h-0 border-x-[5px] border-x-transparent border-t-[5px] border-t-slate-800`} />
       </span>
     </span>
   )
 }
 
-function FieldLabel({ children, unit, help }: { children: string; unit?: string; help?: string }) {
+function FieldLabel({ children, unit, help, helpSide }: { children: string; unit?: string; help?: string; helpSide?: 'center' | 'left' }) {
   return (
     <label className="block text-sm font-medium text-slate-700 mb-1">
       {children}
       {unit && <span className="font-normal text-slate-400 ml-1">({unit})</span>}
-      {help && <HelpTip text={help} />}
+      {help && <HelpTip text={help} side={helpSide} />}
     </label>
   )
 }
@@ -801,6 +806,9 @@ export default function VesselDesignerPage() {
           baffleCut: hxForm.baffleCut || undefined,
           baffleSpacing: hxForm.baffleSpacing || undefined,
           impingementPlate: hxForm.impingementPlate,
+          supportType: hxForm.supportType || undefined,
+          saddleHeight: hxForm.saddleHeight || undefined,
+          saddleWidth: hxForm.saddleWidth || undefined,
           shellMawp: hxForm.shellMawp || undefined,
           shellDesignTemp: hxForm.shellDesignTemp || undefined,
           shellCorrosionAllowance: hxForm.shellCorrosionAllowance || undefined,
@@ -1348,6 +1356,27 @@ export default function VesselDesignerPage() {
                   >
                     <div className="space-y-6 pt-1">
 
+                      {/* Orientation */}
+                      <div>
+                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">Orientation</p>
+                        <div className="flex gap-6">
+                          {(['horizontal', 'vertical'] as Orientation[]).map(o => (
+                            <label key={o} className="flex items-center gap-2 cursor-pointer">
+                              <input type="radio" name="hxOrientation" value={o}
+                                checked={hxForm.orientation === o}
+                                onChange={() => {
+                                  setHxField('orientation', o)
+                                  setHxField('supportType', o === 'horizontal' ? 'saddles' : 'skirt')
+                                  if (o !== 'horizontal') { setHxField('saddleHeight', ''); setHxField('saddleWidth', '') }
+                                }}
+                                className="accent-blue-600" />
+                              <span className="text-sm text-slate-700 capitalize">{o}</span>
+                            </label>
+                          ))}
+                        </div>
+                        <p className="text-xs text-slate-400 mt-1.5">Horizontal is most common. Vertical units are used when plot space is limited, for kettle reboilers, or when liquid draining is important.</p>
+                      </div>
+
                       {/* Shell */}
                       <div>
                         <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">Shell</p>
@@ -1361,20 +1390,6 @@ export default function VesselDesignerPage() {
                             <FieldLabel unit="in T/T" help={`Tangent-to-tangent length — measured from where the head curves begin on each end. Does not include head depth. Typical range: 96" to 240". Longer shells have more heat transfer area but higher shipping and installation cost.`}>Shell Length</FieldLabel>
                             <input type="number" min="0" step="0.125" value={hxForm.shellLength}
                               onChange={hxFieldInput('shellLength')} className={inputCls} placeholder="240" />
-                          </div>
-                          <div>
-                            <FieldLabel help="Horizontal is most common. Vertical units are used when plot space is limited, for kettle reboilers, or when liquid draining is important. Condensers are often horizontal.">Orientation</FieldLabel>
-                            <div className="flex gap-4 mt-2">
-                              {(['horizontal', 'vertical'] as Orientation[]).map(o => (
-                                <label key={o} className="flex items-center gap-2 cursor-pointer">
-                                  <input type="radio" name="hxOrientation" value={o}
-                                    checked={hxForm.orientation === o}
-                                    onChange={() => setHxField('orientation', o)}
-                                    className="accent-blue-600" />
-                                  <span className="text-sm text-slate-700 capitalize">{o}</span>
-                                </label>
-                              ))}
-                            </div>
                           </div>
                           <div>
                             <FieldLabel>Shell Material</FieldLabel>
@@ -1404,10 +1419,47 @@ export default function VesselDesignerPage() {
                               onChange={hxFieldInput('shellsInSeries')} className={inputCls} />
                           </div>
                           <div>
-                            <FieldLabel help="Parallel shells split the flow between multiple identical units. Used when flow rate exceeds practical shell size, or for spare capacity. All shells must be identical.">Shells in Parallel</FieldLabel>
+                            <FieldLabel help="Parallel shells split the flow between multiple identical units. Used when flow rate exceeds practical shell size, or for spare capacity. All shells must be identical." helpSide="left">Shells in Parallel</FieldLabel>
                             <input type="number" min="1" step="1" value={hxForm.shellsInParallel}
                               onChange={hxFieldInput('shellsInParallel')} className={inputCls} />
                           </div>
+                        </div>
+                      </div>
+
+                      {/* Supports */}
+                      <div>
+                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">Supports</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <FieldLabel>Support Type</FieldLabel>
+                            <div className="flex flex-wrap gap-3">
+                              {(hxForm.orientation === 'horizontal' ? HORIZONTAL_SUPPORTS : VERTICAL_SUPPORTS).map(({ value, label }) => (
+                                <label key={value} className="flex items-center gap-2 cursor-pointer">
+                                  <input type="radio" name="hxSupportType" value={value}
+                                    checked={hxForm.supportType === value}
+                                    onChange={() => {
+                                      setHxField('supportType', value as SupportType)
+                                      if (value !== 'saddles') { setHxField('saddleHeight', ''); setHxField('saddleWidth', '') }
+                                    }} className="accent-blue-600" />
+                                  <span className="text-sm text-slate-700">{label}</span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+                          {hxForm.supportType === 'saddles' && (
+                            <div className="sm:col-span-2 grid grid-cols-2 gap-4 max-w-sm">
+                              <div>
+                                <FieldLabel unit="in">Saddle Height</FieldLabel>
+                                <input type="number" min="0" step="0.125" value={hxForm.saddleHeight}
+                                  onChange={hxFieldInput('saddleHeight')} className={inputCls} placeholder="18" />
+                              </div>
+                              <div>
+                                <FieldLabel unit="in">Saddle Width</FieldLabel>
+                                <input type="number" min="0" step="0.125" value={hxForm.saddleWidth}
+                                  onChange={hxFieldInput('saddleWidth')} className={inputCls} placeholder="12" />
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
 

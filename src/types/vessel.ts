@@ -123,6 +123,9 @@ export type BaffleType =
 export interface HxDesignState {
   title: string
   orientation: Orientation
+  supportType: SupportType | ''
+  saddleHeight: string
+  saddleWidth: string
 
   temaFront: TemaFrontHead | ''
   temaShell: TemaShell | ''
