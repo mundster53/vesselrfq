@@ -12,6 +12,7 @@ export default function FabricatorRegisterPage() {
   const [confirm, setConfirm] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [agreed, setAgreed] = useState(false)
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -79,10 +80,30 @@ export default function FabricatorRegisterPage() {
             />
           </div>
 
+          <label className="flex items-start gap-2.5 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={agreed}
+              onChange={(e) => setAgreed(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 shrink-0"
+            />
+            <span className="text-sm text-slate-600">
+              I agree to the VesselRFQ{' '}
+              <a
+                href="/app/terms"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Terms of Service
+              </a>
+            </span>
+          </label>
+
           <button
             type="submit"
-            disabled={loading}
-            className="w-full bg-slate-900 hover:bg-slate-800 disabled:opacity-60 text-white font-medium text-sm rounded-lg px-4 py-2.5 transition-colors"
+            disabled={loading || !agreed}
+            className="w-full bg-slate-900 hover:bg-slate-800 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium text-sm rounded-lg px-4 py-2.5 transition-colors"
           >
             {loading ? 'Creating account…' : 'Create fabricator account'}
           </button>
