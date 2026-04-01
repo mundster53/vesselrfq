@@ -3,6 +3,7 @@ import Stripe from 'stripe'
 import { eq } from 'drizzle-orm'
 import { db } from '../_lib/db.js'
 import { users } from '../../db/schema.js'
+import { sendEmail, fabricatorOnboardingHtml, fabricatorOnboardingText } from '../_lib/email.js'
 
 // Vercel must not parse the body — Stripe signature verification requires the raw bytes.
 export const config = { api: { bodyParser: false } }
@@ -65,7 +66,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         : eq(users.email, customerEmail!.toLowerCase())
 
       const [user] = await db
-        .select({ id: users.id, role: users.role })
+        .select({ id: users.id, email: users.email, role: users.role })
         .from(users)
         .where(whereClause)
         .limit(1)
@@ -84,6 +85,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .where(eq(users.id, user.id))
 
       console.log(`[webhook] Activated fabricator account id=${user.id}`)
+
+      try {
+        await sendEmail(
+          user.email,
+          'Welcome to VesselRFQ — here\'s how to get your configurator live',
+          fabricatorOnboardingHtml(user.id, user.email),
+          fabricatorOnboardingText(user.id, user.email),
+        )
+        console.log(`[webhook] Onboarding email sent to ${user.email}`)
+      } catch (emailErr) {
+        // Log but don't fail the webhook — account is already activated
+        console.error('[webhook] Failed to send onboarding email:', emailErr)
+      }
     }
 
     else if (event.type === 'customer.subscription.deleted') {
