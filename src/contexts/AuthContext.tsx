@@ -10,8 +10,8 @@ export interface AuthUser {
 interface AuthContextValue {
   user: AuthUser | null
   loading: boolean
-  login: (email: string, password: string) => Promise<void>
-  register: (email: string, password: string) => Promise<void>
+  login: (email: string, password: string) => Promise<AuthUser>
+  register: (email: string, password: string, role?: 'buyer' | 'fabricator') => Promise<AuthUser>
   logout: () => void
 }
 
@@ -36,22 +36,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setLoading(false))
   }, [])
 
-  async function login(email: string, password: string) {
+  async function login(email: string, password: string): Promise<AuthUser> {
     const { token, user } = await api.post<{ token: string; user: AuthUser }>('/auth/login', {
       email,
       password,
     })
     localStorage.setItem(TOKEN_KEY, token)
     setUser(user)
+    return user
   }
 
-  async function register(email: string, password: string) {
+  async function register(email: string, password: string, role: 'buyer' | 'fabricator' = 'buyer'): Promise<AuthUser> {
     const { token, user } = await api.post<{ token: string; user: AuthUser }>('/auth/register', {
       email,
       password,
+      role,
     })
     localStorage.setItem(TOKEN_KEY, token)
     setUser(user)
+    return user
   }
 
   function logout() {

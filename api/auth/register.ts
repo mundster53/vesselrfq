@@ -8,7 +8,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
-    const { email, password } = req.body as { email?: string; password?: string }
+    const { email, password, role } = req.body as { email?: string; password?: string; role?: string }
 
     if (!email || !password) return res.status(400).json({ error: 'Email and password are required' })
     if (password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters' })
@@ -17,10 +17,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const existing = await db.select({ id: users.id }).from(users).where(eq(users.email, email.toLowerCase())).limit(1)
     if (existing.length) return res.status(409).json({ error: 'An account with that email already exists' })
 
+    const assignedRole: 'buyer' | 'fabricator' = role === 'fabricator' ? 'fabricator' : 'buyer'
     const passwordHash = await hashPassword(password)
     const [user] = await db
       .insert(users)
-      .values({ email: email.toLowerCase(), passwordHash, role: 'buyer' })
+      .values({ email: email.toLowerCase(), passwordHash, role: assignedRole })
       .returning({ id: users.id, email: users.email, role: users.role })
 
     const token = await signToken({ userId: user.id, role: user.role })

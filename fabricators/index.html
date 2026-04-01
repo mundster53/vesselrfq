@@ -510,7 +510,7 @@
           We put a <span class="hl-white">vessel configurator on your website</span>. Your customers design their vessel online, submit a spec-complete RFQ, and get a bid back faster. You get what you need to estimate. They <span class="hl-white">save time and money</span>. And you have <span class="hl-white">something worth announcing</span>.
         </p>
         <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:4px">
-          <button id="checkout-btn" onclick="startCheckout()" class="btn btn-green btn-green-lg">Get started — $197/mo</button>
+          <a href="/app/fabricator-register" class="btn btn-green btn-green-lg">Create your account</a>
           <a href="#contact-form" style="font-size:13px;color:#64748b;text-decoration:underline;text-underline-offset:3px">or get the details first</a>
         </div>
       </div>
@@ -739,27 +739,5 @@
     <a href="https://vesselrfq.com">vesselrfq.com</a>
   </footer>
 
-  <script>
-    async function startCheckout() {
-      const btn = document.getElementById('checkout-btn')
-      btn.disabled = true
-      btn.textContent = 'Loading\u2026'
-      try {
-        const res = await fetch('/api/fabricator/checkout', { method: 'POST' })
-        const data = await res.json()
-        if (data.url) {
-          window.location.href = data.url
-        } else {
-          btn.disabled = false
-          btn.textContent = 'Get started \u2014 $197/mo'
-          alert('Something went wrong. Please try again.')
-        }
-      } catch {
-        btn.disabled = false
-        btn.textContent = 'Get started \u2014 $197/mo'
-        alert('Something went wrong. Please try again.')
-      }
-    }
-  </script>
 </body>
 </html>

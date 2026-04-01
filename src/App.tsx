@@ -7,6 +7,7 @@ import DashboardPage from './pages/DashboardPage'
 import VesselDesignerPage from './pages/VesselDesignerPage'
 import RfqSubmittedPage from './pages/RfqSubmittedPage'
 import FabricatorDashboard from './pages/FabricatorDashboard'
+import FabricatorRegisterPage from './pages/FabricatorRegisterPage'
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/fabricator-register" element={<FabricatorRegisterPage />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/designer" element={<VesselDesignerPage />} />

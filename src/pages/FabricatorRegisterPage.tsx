@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { ApiError } from '../lib/api'
 
-export default function RegisterPage() {
+export default function FabricatorRegisterPage() {
   const { register } = useAuth()
   const navigate = useNavigate()
 
@@ -19,8 +19,8 @@ export default function RegisterPage() {
     if (password !== confirm) return setError('Passwords do not match')
     setLoading(true)
     try {
-      await register(email, password, 'buyer')
-      navigate('/dashboard')
+      await register(email, password, 'fabricator')
+      navigate('/fabricator-dashboard')
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Registration failed')
     } finally {
@@ -33,7 +33,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-bold text-slate-900">VesselRFQ</h1>
-          <p className="text-slate-500 text-sm mt-1">Create a buyer account</p>
+          <p className="text-slate-500 text-sm mt-1">Create a fabricator account</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
@@ -51,7 +51,7 @@ export default function RegisterPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="you@company.com"
+              placeholder="you@yourshop.com"
             />
           </div>
 
@@ -84,7 +84,7 @@ export default function RegisterPage() {
             disabled={loading}
             className="w-full bg-slate-900 hover:bg-slate-800 disabled:opacity-60 text-white font-medium text-sm rounded-lg px-4 py-2.5 transition-colors"
           >
-            {loading ? 'Creating account…' : 'Create account'}
+            {loading ? 'Creating account…' : 'Create fabricator account'}
           </button>
         </form>
 

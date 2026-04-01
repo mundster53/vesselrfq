@@ -17,8 +17,8 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
     try {
-      await login(email, password)
-      navigate('/dashboard')
+      const user = await login(email, password)
+      navigate(user.role === 'fabricator' ? '/fabricator-dashboard' : '/dashboard')
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Login failed')
     } finally {
