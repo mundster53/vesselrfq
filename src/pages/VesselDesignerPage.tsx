@@ -614,10 +614,51 @@ export default function VesselDesignerPage() {
 
   // ── Submit ─────────────────────────────────────────────────────────────────
 
+  // ── Derived validity ───────────────────────────────────────────────────────
+
+  const tankCanSubmit = !!(
+    form.title.trim()
+    && form.shellOd && parseFloat(form.shellOd) > 0
+    && form.shellLength && parseFloat(form.shellLength) > 0
+    && form.shellMaterial
+    && form.mawp && parseFloat(form.mawp) > 0
+    && form.designTemp && parseFloat(form.designTemp) > 0
+    && form.corrosionAllowance && parseFloat(form.corrosionAllowance) > 0
+  )
+
+  const hxCanSubmit = !!(
+    hxForm.title.trim()
+    && hxForm.shellOd && parseFloat(hxForm.shellOd) > 0
+    && hxForm.shellLength && parseFloat(hxForm.shellLength) > 0
+    && hxForm.shellMaterial
+    && hxForm.shellMawp && parseFloat(hxForm.shellMawp) > 0
+    && hxForm.shellDesignTemp && parseFloat(hxForm.shellDesignTemp) > 0
+    && hxForm.shellCorrosionAllowance && parseFloat(hxForm.shellCorrosionAllowance) > 0
+  )
+
   async function handleSubmit() {
     setError('')
     const title = vesselType === 'tank' ? form.title : hxForm.title
     if (!title.trim()) return setError('RFQ title is required')
+
+    if (vesselType === 'tank') {
+      if (!form.shellOd || parseFloat(form.shellOd) <= 0)           return setError('Shell diameter is required')
+      if (!form.shellLength || parseFloat(form.shellLength) <= 0)   return setError('Shell length is required')
+      if (!form.shellMaterial)                                       return setError('Shell material is required')
+      if (!form.mawp || parseFloat(form.mawp) <= 0)                 return setError('MAWP is required')
+      if (!form.designTemp || parseFloat(form.designTemp) <= 0)     return setError('Design temperature is required')
+      if (!form.corrosionAllowance || parseFloat(form.corrosionAllowance) <= 0)
+                                                                     return setError('Corrosion allowance is required')
+    } else {
+      if (!hxForm.shellOd || parseFloat(hxForm.shellOd) <= 0)       return setError('Shell diameter is required')
+      if (!hxForm.shellLength || parseFloat(hxForm.shellLength) <= 0) return setError('Shell length is required')
+      if (!hxForm.shellMaterial)                                     return setError('Shell material is required')
+      if (!hxForm.shellMawp || parseFloat(hxForm.shellMawp) <= 0)   return setError('Shell side MAWP is required')
+      if (!hxForm.shellDesignTemp || parseFloat(hxForm.shellDesignTemp) <= 0)
+                                                                     return setError('Shell side design temperature is required')
+      if (!hxForm.shellCorrosionAllowance || parseFloat(hxForm.shellCorrosionAllowance) <= 0)
+                                                                     return setError('Shell side corrosion allowance is required')
+    }
 
     setSubmitting(true)
     try {
@@ -770,7 +811,8 @@ export default function VesselDesignerPage() {
                 />
                 <p className="text-xs text-slate-400 mt-1">Give this RFQ a descriptive title</p>
               </div>
-              <button onClick={handleSubmit} disabled={submitting}
+              <button onClick={handleSubmit}
+                disabled={submitting || (vesselType === 'tank' ? !tankCanSubmit : !hxCanSubmit)}
                 className="shrink-0 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium text-sm px-4 py-2 rounded-lg transition-colors">
                 {submitting ? 'Submitting…' : 'Submit RFQ'}
               </button>
@@ -1590,7 +1632,7 @@ export default function VesselDesignerPage() {
                       <div className="flex items-center justify-between pt-1">
                         <button type="button" onClick={() => setHxStep(3)}
                           className="text-slate-500 hover:text-slate-700 text-sm transition-colors">← Back</button>
-                        <button onClick={handleSubmit} disabled={submitting}
+                        <button onClick={handleSubmit} disabled={submitting || !hxCanSubmit}
                           className="bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium text-sm px-5 py-2.5 rounded-lg transition-colors">
                           {submitting ? 'Submitting…' : 'Submit RFQ'}
                         </button>
@@ -1608,7 +1650,7 @@ export default function VesselDesignerPage() {
                 ← Back to dashboard
               </button>
               {vesselType === 'tank' && (
-                <button onClick={handleSubmit} disabled={submitting}
+                <button onClick={handleSubmit} disabled={submitting || !tankCanSubmit}
                   className="bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium text-sm px-5 py-2.5 rounded-lg transition-colors">
                   {submitting ? 'Submitting…' : 'Submit RFQ'}
                 </button>

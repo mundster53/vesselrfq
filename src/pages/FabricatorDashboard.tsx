@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
+import { api } from '../lib/api'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -46,6 +47,89 @@ interface SpecItem {
   fullWidth?: boolean
 }
 
+// ── API types ─────────────────────────────────────────────────────────────────
+
+interface ApiNozzle {
+  id: number
+  rfqId: number
+  mark: string
+  size: string
+  rating: string
+  flangeType: string
+  facing: string
+  material: string
+  service: string | null
+  quantity: number
+  location: string
+}
+
+interface ApiRfq {
+  id: number
+  title: string
+  status: string
+  vesselType: string | null
+  shellOd: string | null
+  shellLength: string | null
+  shellMaterial: string | null
+  headType: string | null
+  mawp: string | null
+  designTemp: number | null
+  corrosionAllowance: string | null
+  orientation: string | null
+  supportType: string | null
+  createdAt: string
+  buyerEmail: string
+  nozzles: ApiNozzle[]
+}
+
+// ── Mapping helpers ───────────────────────────────────────────────────────────
+
+function mapDbStatus(s: string): RfqStatus {
+  if (s === 'quoted')  return 'quoted'
+  if (s === 'awarded') return 'awarded'
+  return 'received'
+}
+
+function fmtReceived(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+function buyerInitials(email: string): string {
+  return email.charAt(0).toUpperCase()
+}
+
+function mapApiRfq(r: ApiRfq): RfqRecord {
+  return {
+    id: `RFQ-${r.id}`,
+    vesselType: r.vesselType === 'heat_exchanger' ? 'Heat Exchanger' : 'Pressure Vessel',
+    shellId:           r.shellOd        ? `${r.shellOd}"` : '—',
+    ttLength:          r.shellLength    ? `${r.shellLength}"` : '—',
+    orientation:       r.orientation   ?? '—',
+    headType:          r.headType      ?? '—',
+    supportType:       r.supportType   ?? '—',
+    designPressure:    r.mawp          ? `${r.mawp} PSI` : '—',
+    designTemp:        r.designTemp    ? `${r.designTemp}°F` : '—',
+    material:          r.shellMaterial ?? '—',
+    corrosionAllowance: r.corrosionAllowance ? `${r.corrosionAllowance}"` : '—',
+    service: '—',
+    nozzles: r.nozzles.map(n => ({
+      mark:    n.mark,
+      size:    n.size,
+      rating:  n.rating,
+      service: n.service ?? '',
+    })),
+    buyer: {
+      initials: buyerInitials(r.buyerEmail),
+      name:     r.buyerEmail,
+      company:  '',
+      email:    r.buyerEmail,
+    },
+    status:       mapDbStatus(r.status),
+    dateReceived: fmtReceived(r.createdAt),
+    quoteAmount:  '',
+  }
+}
+
 // ── Status config ─────────────────────────────────────────────────────────────
 
 const STATUS_CFG: Record<RfqStatus, { label: string; bg: string; color: string; border: string }> = {
@@ -63,134 +147,6 @@ const FILTER_OPTIONS: { value: FilterState; label: string }[] = [
   { value: 'reviewed', label: 'Reviewed' },
   { value: 'quoted',   label: 'Quoted' },
   { value: 'awarded',  label: 'Awarded' },
-]
-
-// ── Mock data ─────────────────────────────────────────────────────────────────
-
-const MOCK_RFQS: RfqRecord[] = [
-  {
-    id: 'RFQ-1001',
-    vesselType: 'Pressure Vessel',
-    shellId: '60"',
-    ttLength: "20'-0\"",
-    orientation: 'Horizontal',
-    headType: '2:1 Elliptical',
-    supportType: 'Saddles',
-    designPressure: '285 PSI',
-    designTemp: '650°F',
-    material: 'SA-516-70',
-    corrosionAllowance: '0.125"',
-    service: 'Hydrocarbon Service',
-    nozzles: [
-      { mark: 'N1', size: '6"',  rating: '300#', service: 'Inlet' },
-      { mark: 'N2', size: '6"',  rating: '300#', service: 'Outlet' },
-      { mark: 'N3', size: '2"',  rating: '300#', service: 'Drain' },
-      { mark: 'N4', size: '18"', rating: '150#', service: 'Manway' },
-    ],
-    buyer: { initials: 'JW', name: 'James Whitfield', company: 'Valero Energy', email: 'j.whitfield@valero.com' },
-    status: 'received',
-    dateReceived: 'Mar 28, 2026',
-    quoteAmount: '',
-  },
-  {
-    id: 'RFQ-1002',
-    vesselType: 'Separator',
-    shellId: '48"',
-    ttLength: "14'-0\"",
-    orientation: 'Vertical',
-    headType: '2:1 Elliptical',
-    supportType: 'Skirt',
-    designPressure: '150 PSI',
-    designTemp: '300°F',
-    material: 'SA-516-70',
-    corrosionAllowance: '0.125"',
-    service: 'Three-Phase Separator',
-    nozzles: [
-      { mark: 'N1', size: '8"',  rating: '150#', service: 'Gas Outlet' },
-      { mark: 'N2', size: '6"',  rating: '150#', service: 'Liquid Inlet' },
-      { mark: 'N3', size: '4"',  rating: '150#', service: 'Water Outlet' },
-      { mark: 'N4', size: '4"',  rating: '150#', service: 'Oil Outlet' },
-      { mark: 'N5', size: '18"', rating: '150#', service: 'Manway' },
-    ],
-    buyer: { initials: 'SO', name: 'Sarah Okonkwo', company: 'Bechtel Corporation', email: 's.okonkwo@bechtel.com' },
-    status: 'reviewed',
-    dateReceived: 'Mar 25, 2026',
-    quoteAmount: '',
-  },
-  {
-    id: 'RFQ-1003',
-    vesselType: 'Heat Exchanger',
-    shellId: '36"',
-    ttLength: "12'-0\"",
-    orientation: 'Horizontal',
-    headType: 'TEMA AES',
-    supportType: 'Saddles',
-    designPressure: '300 PSI',
-    designTemp: '500°F',
-    material: 'SA-516-70',
-    corrosionAllowance: '0.0625"',
-    service: 'Crude Preheat',
-    nozzles: [
-      { mark: 'N1', size: '6"', rating: '300#', service: 'Shell Inlet' },
-      { mark: 'N2', size: '6"', rating: '300#', service: 'Shell Outlet' },
-      { mark: 'N3', size: '4"', rating: '300#', service: 'Tube Inlet' },
-      { mark: 'N4', size: '4"', rating: '300#', service: 'Tube Outlet' },
-    ],
-    buyer: { initials: 'MD', name: 'Marcus Delgado', company: 'Phillips 66', email: 'm.delgado@phillips66.com' },
-    status: 'quoted',
-    dateReceived: 'Mar 20, 2026',
-    quoteAmount: '145000',
-  },
-  {
-    id: 'RFQ-1004',
-    vesselType: 'Accumulator',
-    shellId: '72"',
-    ttLength: "30'-0\"",
-    orientation: 'Horizontal',
-    headType: '2:1 Elliptical',
-    supportType: 'Saddles',
-    designPressure: '500 PSI',
-    designTemp: '750°F',
-    material: 'SA-516-70',
-    corrosionAllowance: '0.1875"',
-    service: 'High Pressure Flash Drum',
-    nozzles: [
-      { mark: 'N1', size: '10"', rating: '600#', service: 'Inlet' },
-      { mark: 'N2', size: '10"', rating: '600#', service: 'Outlet' },
-      { mark: 'N3', size: '3"',  rating: '600#', service: 'Vent' },
-      { mark: 'N4', size: '2"',  rating: '600#', service: 'Drain' },
-      { mark: 'N5', size: '18"', rating: '150#', service: 'Manway' },
-      { mark: 'N6', size: '4"',  rating: '600#', service: 'Instrument' },
-    ],
-    buyer: { initials: 'LC', name: 'Linda Chen', company: 'Fluor Corporation', email: 'l.chen@fluor.com' },
-    status: 'awarded',
-    dateReceived: 'Mar 15, 2026',
-    quoteAmount: '287500',
-  },
-  {
-    id: 'RFQ-1005',
-    vesselType: 'Pressure Vessel',
-    shellId: '42"',
-    ttLength: "16'-0\"",
-    orientation: 'Vertical',
-    headType: 'ASME F&D',
-    supportType: 'Legs',
-    designPressure: '200 PSI',
-    designTemp: '400°F',
-    material: 'SA-240-316L',
-    corrosionAllowance: '0.0625"',
-    service: 'Caustic Service',
-    nozzles: [
-      { mark: 'N1', size: '4"',  rating: '150#', service: 'Inlet' },
-      { mark: 'N2', size: '4"',  rating: '150#', service: 'Outlet' },
-      { mark: 'N3', size: '2"',  rating: '150#', service: 'Vent' },
-      { mark: 'N4', size: '18"', rating: '150#', service: 'Manway' },
-    ],
-    buyer: { initials: 'DT', name: 'Derek Tompkins', company: 'ExxonMobil', email: 'd.tompkins@exxonmobil.com' },
-    status: 'received',
-    dateReceived: 'Mar 29, 2026',
-    quoteAmount: '',
-  },
 ]
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -556,9 +512,18 @@ function DetailPanel({
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function FabricatorDashboard() {
-  const [rfqs, setRfqs] = useState<RfqRecord[]>(MOCK_RFQS)
+  const [rfqs, setRfqs] = useState<RfqRecord[]>([])
+  const [loading, setLoading] = useState(true)
+  const [fetchError, setFetchError] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [filter, setFilter] = useState<FilterState>('all')
+
+  useEffect(() => {
+    api.get<{ rfqs: ApiRfq[] }>('/rfqs/all')
+      .then(({ rfqs: rows }) => setRfqs(rows.map(mapApiRfq)))
+      .catch(() => setFetchError('Failed to load RFQs'))
+      .finally(() => setLoading(false))
+  }, [])
 
   const filtered = filter === 'all' ? rfqs : rfqs.filter(r => r.status === filter)
   const selected = rfqs.find(r => r.id === selectedId) ?? null
@@ -693,6 +658,21 @@ export default function FabricatorDashboard() {
 
         {/* Table */}
         <div style={{ overflowY: 'auto', flex: 1 }}>
+          {loading && (
+            <div style={{ padding: '40px 24px', textAlign: 'center', color: '#475569', fontSize: 13 }}>
+              Loading RFQs…
+            </div>
+          )}
+          {fetchError && (
+            <div style={{ padding: '20px 24px', color: '#f87171', fontSize: 13 }}>
+              {fetchError}
+            </div>
+          )}
+          {!loading && !fetchError && rfqs.length === 0 && (
+            <div style={{ padding: '40px 24px', textAlign: 'center', color: '#475569', fontSize: 13 }}>
+              No RFQs submitted yet.
+            </div>
+          )}
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr>

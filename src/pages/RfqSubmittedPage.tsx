@@ -82,9 +82,9 @@ export default function RfqSubmittedPage() {
         {/* Info box */}
         <div className="rounded-xl bg-blue-50 border border-blue-200 px-5 py-4 mb-8">
           <p className="text-sm text-blue-800 leading-relaxed">
-            <span className="font-semibold">What happens next?</span> Your RFQ will be routed
-            to a maximum of 3 qualified ASME fabricators in your region with protected
-            territories. Expect quotes within <span className="font-semibold">5–7 business days</span>.
+            <span className="font-semibold">What happens next?</span> Your RFQ has been
+            submitted to <span className="font-semibold">{import.meta.env.VITE_FABRICATOR_NAME ?? 'your fabricator'}</span>.
+            They will review your specifications and contact you with a quote.
             A confirmation has been sent to your email.
           </p>
         </div>
