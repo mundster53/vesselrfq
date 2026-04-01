@@ -8,6 +8,7 @@ import type {
   VesselDesignState,
   HxDesignState,
   NozzleRow,
+  NozzleType,
   HeadType,
   ShellMaterial,
   SupportType,
@@ -59,6 +60,7 @@ const FLANGE_TYPES: { value: FlangeType; label: string }[] = [
   { value: 'LJFSE', label: 'LJFSE — Lap Joint Flange with Stub End' },
   { value: 'BFSO',  label: 'BFSO — Blind Flange (Slip On neck)' },
   { value: 'BF',    label: 'BF — Blind Flange' },
+  { value: 'TC',    label: 'TC — Threaded Coupling' },
 ]
 
 const NOZZLE_MATERIAL_SENTINEL = '__nozzle_custom__'
@@ -312,17 +314,17 @@ const initialHxState: HxDesignState = {
   tubeCorrosionAllowance: '',
   tubeFluid: '',
   nozzles: [
-    { mark: 'N1', service: 'Shell Inlet',         size: '4', rating: '150', projection: 6, flangeType: 'RFWN', facing: 'RF', material: 'SA-105', materialCustom: '', location: 'shell',      quantity: 1, shellAngle: null, headPos: 'center' },
-    { mark: 'N2', service: 'Shell Outlet',        size: '4', rating: '150', projection: 6, flangeType: 'RFWN', facing: 'RF', material: 'SA-105', materialCustom: '', location: 'shell',      quantity: 1, shellAngle: null, headPos: 'center' },
-    { mark: 'N3', service: 'Tube Inlet (Channel)',  size: '3', rating: '150', projection: 6, flangeType: 'RFWN', facing: 'RF', material: 'SA-105', materialCustom: '', location: 'right_head', quantity: 1, shellAngle: null, headPos: 'center' },
-    { mark: 'N4', service: 'Tube Outlet (Channel)', size: '3', rating: '150', projection: 6, flangeType: 'RFWN', facing: 'RF', material: 'SA-105', materialCustom: '', location: 'right_head', quantity: 1, shellAngle: null, headPos: 'center' },
+    { mark: 'N1', service: 'Shell Inlet',          nozzleType: 'standard', size: '4', rating: '150', projection: 6, flangeType: 'RFWN', facing: 'RF', material: 'SA-105', materialCustom: '', location: 'shell',      quantity: 1, shellAngle: null, headPos: 'center' },
+    { mark: 'N2', service: 'Shell Outlet',         nozzleType: 'standard', size: '4', rating: '150', projection: 6, flangeType: 'RFWN', facing: 'RF', material: 'SA-105', materialCustom: '', location: 'shell',      quantity: 1, shellAngle: null, headPos: 'center' },
+    { mark: 'N3', service: 'Tube Inlet (Channel)',  nozzleType: 'standard', size: '3', rating: '150', projection: 6, flangeType: 'RFWN', facing: 'RF', material: 'SA-105', materialCustom: '', location: 'right_head', quantity: 1, shellAngle: null, headPos: 'center' },
+    { mark: 'N4', service: 'Tube Outlet (Channel)', nozzleType: 'standard', size: '3', rating: '150', projection: 6, flangeType: 'RFWN', facing: 'RF', material: 'SA-105', materialCustom: '', location: 'right_head', quantity: 1, shellAngle: null, headPos: 'center' },
   ],
   notes: '',
 }
 
 function emptyNozzle(mark: string): NozzleRow {
   return {
-    mark, service: '', size: '4', rating: '150', projection: 6,
+    mark, service: '', nozzleType: 'standard', size: '4', rating: '150', projection: 6,
     flangeType: 'RFWN', facing: 'RF', material: 'SA-105', materialCustom: '',
     quantity: 1, location: 'shell', shellAngle: null, headPos: 'center',
   }
@@ -361,6 +363,10 @@ function FieldLabel({ children, unit, help }: { children: string; unit?: string;
 
 const nozzleCellCls = 'w-full border border-slate-300 rounded-lg px-2.5 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
 
+const MANWAY_SIZES = ['18"', '20"', '24"', 'Other']
+const MANWAY_COVER_TYPES = ['Blind Flange', 'Tube Turn Head Cover']
+const MANWAY_COVER_HANDLING = ['Hinged', 'Loose', 'Davit Arm']
+
 function NozzleCard({ nozzle, onUpdate, onRemove, locationOptions, serviceOptions }: {
   nozzle: NozzleRow
   onUpdate: <K extends keyof NozzleRow>(key: K, value: NozzleRow[K]) => void
@@ -368,6 +374,9 @@ function NozzleCard({ nozzle, onUpdate, onRemove, locationOptions, serviceOption
   locationOptions: { value: NozzleLocation; label: string }[]
   serviceOptions?: string[]
 }) {
+  const isManway = nozzle.nozzleType === 'manway'
+  const isSightGlass = nozzle.nozzleType === 'sight_glass'
+
   return (
     <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
       {/* Header */}
@@ -391,40 +400,112 @@ function NozzleCard({ nozzle, onUpdate, onRemove, locationOptions, serviceOption
       </div>
       {/* Body */}
       <div className="px-3 pb-3 pt-2.5 space-y-3">
-        {/* Row 1: Size, Rating, Projection */}
-        <div className="grid grid-cols-3 gap-3">
-          <div>
-            <p className="text-xs text-slate-500 font-medium mb-1">Size (NPS)</p>
-            <select value={nozzle.size} onChange={e => onUpdate('size', e.target.value)}
-              className={nozzleCellCls}>
-              {NPS_SIZES.map(s => <option key={s} value={s}>{s}&quot;</option>)}
-            </select>
+        {/* Nozzle Type */}
+        <div>
+          <p className="text-xs text-slate-500 font-medium mb-1">Nozzle Type</p>
+          <div className="flex flex-wrap gap-3">
+            {([['standard', 'Standard'], ['sight_glass', 'Sight Glass'], ['manway', 'Manway']] as [NozzleType, string][]).map(([val, label]) => (
+              <label key={val} className="flex items-center gap-1.5 cursor-pointer">
+                <input type="radio" name={`nozzleType-${nozzle.mark}`} value={val}
+                  checked={(nozzle.nozzleType ?? 'standard') === val}
+                  onChange={() => onUpdate('nozzleType', val)}
+                  className="accent-blue-600" />
+                <span className="text-sm text-slate-700">{label}</span>
+              </label>
+            ))}
           </div>
-          <div>
-            <p className="text-xs text-slate-500 font-medium mb-1">Rating</p>
-            <select value={nozzle.rating} onChange={e => onUpdate('rating', e.target.value as NozzleRating)}
-              className={nozzleCellCls}>
-              {RATINGS.map(r => <option key={r} value={r}>{r}#</option>)}
-            </select>
-          </div>
-          <div>
-            <p className="text-xs text-slate-500 font-medium mb-1">Projection (in)</p>
-            <input type="number" min="0" step="1" value={nozzle.projection}
-              onChange={e => onUpdate('projection', parseFloat(e.target.value) || 0)}
-              className={nozzleCellCls} />
-          </div>
+          {isSightGlass && (
+            <p className="text-xs text-slate-500 mt-1.5">Sight glass — specify size and rating below. Cover type and glass type in Remarks.</p>
+          )}
         </div>
-        {/* Row 2: Flange Type, Material, Location */}
+
+        {/* Manway sub-options */}
+        {isManway && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 rounded-lg p-3">
+            <div>
+              <p className="text-xs text-slate-500 font-medium mb-1">Manway Size</p>
+              <select value={nozzle.manwaySize ?? '24"'}
+                onChange={e => onUpdate('manwaySize', e.target.value)}
+                className={nozzleCellCls}>
+                {MANWAY_SIZES.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 font-medium mb-1">Cover Type</p>
+              <select value={nozzle.manwayCoverType ?? 'Blind Flange'}
+                onChange={e => onUpdate('manwayCoverType', e.target.value)}
+                className={nozzleCellCls}>
+                {MANWAY_COVER_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 font-medium mb-1">Cover Handling</p>
+              <select value={nozzle.manwayCoverHandling ?? 'Hinged'}
+                onChange={e => onUpdate('manwayCoverHandling', e.target.value)}
+                className={nozzleCellCls}>
+                {MANWAY_COVER_HANDLING.map(h => <option key={h} value={h}>{h}</option>)}
+              </select>
+            </div>
+          </div>
+        )}
+
+        {/* Row 1: Size, Rating, Projection */}
+        {!isManway && (
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <p className="text-xs text-slate-500 font-medium mb-1">Size (NPS)</p>
+              <select value={nozzle.size} onChange={e => onUpdate('size', e.target.value)}
+                className={nozzleCellCls}>
+                {NPS_SIZES.map(s => <option key={s} value={s}>{s}&quot;</option>)}
+              </select>
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 font-medium mb-1">Rating</p>
+              <select value={nozzle.rating} onChange={e => onUpdate('rating', e.target.value as NozzleRating)}
+                className={nozzleCellCls}>
+                {RATINGS.map(r => <option key={r} value={r}>{r}#</option>)}
+              </select>
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 font-medium mb-1">Projection (in)</p>
+              <input type="number" min="0" step="1" value={nozzle.projection}
+                onChange={e => onUpdate('projection', parseFloat(e.target.value) || 0)}
+                className={nozzleCellCls} />
+            </div>
+          </div>
+        )}
+        {isManway && (
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <p className="text-xs text-slate-500 font-medium mb-1">Rating</p>
+              <select value={nozzle.rating} onChange={e => onUpdate('rating', e.target.value as NozzleRating)}
+                className={nozzleCellCls}>
+                {RATINGS.map(r => <option key={r} value={r}>{r}#</option>)}
+              </select>
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 font-medium mb-1">Projection (in)</p>
+              <input type="number" min="0" step="1" value={nozzle.projection}
+                onChange={e => onUpdate('projection', parseFloat(e.target.value) || 0)}
+                className={nozzleCellCls} />
+            </div>
+          </div>
+        )}
+
+        {/* Row 2: Connection Type, Material, Location */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <p className="text-xs text-slate-500 font-medium mb-1">
-              Flange Type
+              Connection Type
               <HelpTip text="Facing is implied by the designation — RF = raised face, FF = flat face, RJ = ring joint. For blind flanges, note the required facing in the Remarks field." />
             </p>
             <select value={nozzle.flangeType} onChange={e => onUpdate('flangeType', e.target.value as FlangeType)}
               className={nozzleCellCls}>
               {FLANGE_TYPES.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
             </select>
+            {nozzle.flangeType === 'TC' && (
+              <p className="text-xs text-slate-400 mt-1">Commonly used for PI, TI, level gauges, and level indicators.</p>
+            )}
           </div>
           <div>
             <p className="text-xs text-slate-500 font-medium mb-1">Material</p>
@@ -766,13 +847,18 @@ export default function VesselDesignerPage() {
       <div className="flex-1 min-h-0 flex flex-col lg:flex-row">
 
         {/* ── 3D Viewer ───────────────────────────────────────────────────── */}
-        <div className="relative h-56 sm:h-72 lg:h-auto lg:flex-1 bg-slate-950 order-first lg:order-last">
-          {vesselType === 'tank'
-            ? <VesselViewer form={form} />
-            : <HeatExchangerViewer form={hxForm} />
-          }
-          <div className="absolute bottom-3 right-3 text-slate-600 text-xs select-none pointer-events-none">
-            Drag to orbit · Scroll to zoom
+        <div className="lg:flex-1 order-first lg:order-last flex flex-col">
+          <div className="relative h-56 sm:h-72 lg:flex-1 bg-slate-950">
+            {vesselType === 'tank'
+              ? <VesselViewer form={form} />
+              : <HeatExchangerViewer form={hxForm} />
+            }
+            <div className="absolute bottom-3 right-3 text-slate-600 text-xs select-none pointer-events-none">
+              Drag to orbit · Scroll to zoom
+            </div>
+          </div>
+          <div className="bg-slate-900 px-4 py-2 text-center">
+            <p className="text-slate-500 text-xs">Tip: Click and drag with your left mouse button to rotate the vessel.</p>
           </div>
         </div>
 
@@ -934,6 +1020,67 @@ export default function VesselDesignerPage() {
                     </button>
                   </div>
                 </section>
+
+                {/* ── Vertical Vessel Accessories ───────────────────────── */}
+                {form.orientation === 'vertical' && (
+                  <section className="bg-white border border-slate-200 rounded-xl p-5">
+                    <SectionHeader>Vertical Vessel Accessories</SectionHeader>
+                    <div className="space-y-4">
+                      {/* Caged Ladder */}
+                      <label className="flex items-center gap-2.5 cursor-pointer">
+                        <input type="checkbox" checked={!!form.ladderCaged}
+                          onChange={e => setField('ladderCaged', e.target.checked)}
+                          className="accent-blue-600 w-4 h-4" />
+                        <span className="text-sm text-slate-700 font-medium">Caged Ladder</span>
+                      </label>
+
+                      {/* Platforms */}
+                      <div>
+                        <label className="flex items-center gap-2.5 cursor-pointer">
+                          <input type="checkbox" checked={!!form.platforms}
+                            onChange={e => setField('platforms', e.target.checked)}
+                            className="accent-blue-600 w-4 h-4" />
+                          <span className="text-sm text-slate-700 font-medium">Platforms</span>
+                        </label>
+                        {form.platforms && (
+                          <div className="mt-3 ml-6 grid grid-cols-2 gap-4">
+                            <div>
+                              <FieldLabel>Number of Platforms</FieldLabel>
+                              <select value={form.platformCount ?? '1'}
+                                onChange={e => setField('platformCount', e.target.value)}
+                                className={selectCls}>
+                                {['1','2','3','4','5'].map(n => <option key={n} value={n}>{n}</option>)}
+                              </select>
+                            </div>
+                            <div>
+                              <FieldLabel
+                                help="Partial = one side of vessel; Full = wraps around the full circumference (360°).">
+                                Coverage
+                              </FieldLabel>
+                              <select value={form.platformCoverage ?? 'Partial'}
+                                onChange={e => setField('platformCoverage', e.target.value)}
+                                className={selectCls}>
+                                <option value="Partial">Partial</option>
+                                <option value="Full (360°)">Full (360°)</option>
+                              </select>
+                            </div>
+                            <p className="col-span-2 text-xs text-slate-400">
+                              Platform grating and handrails per OSHA 1910.23. Specific elevations and load requirements in Remarks.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Handrails */}
+                      <label className="flex items-center gap-2.5 cursor-pointer">
+                        <input type="checkbox" checked={!!form.handrails}
+                          onChange={e => setField('handrails', e.target.checked)}
+                          className="accent-blue-600 w-4 h-4" />
+                        <span className="text-sm text-slate-700 font-medium">Handrails</span>
+                      </label>
+                    </div>
+                  </section>
+                )}
 
                 {/* ── Supports ──────────────────────────────────────────── */}
                 <section className="bg-white border border-slate-200 rounded-xl p-5">

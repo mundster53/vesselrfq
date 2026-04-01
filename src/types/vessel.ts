@@ -12,6 +12,7 @@ export type FlangeType =
   | 'RJWN'
   | 'LJWN' | 'LJFSE'
   | 'BFSO' | 'BF'
+  | 'TC'
 
 export type FlangeFacing = 'RF' | 'FF' | 'RTJ'
 
@@ -31,9 +32,12 @@ export type NozzleMaterial =
   | 'SA-182-F304'
   | 'SA-182-F316'
 
+export type NozzleType = 'standard' | 'sight_glass' | 'manway'
+
 export interface NozzleRow {
   mark: string
   service: string
+  nozzleType: NozzleType
   size: string
   rating: NozzleRating
   projection: number
@@ -48,6 +52,10 @@ export interface NozzleRow {
   shellAngle: number | null
   // Head nozzles: 'center' = on head axis, 'offset' = 30% off-center.
   headPos: 'center' | 'offset'
+  // Manway sub-options (only when nozzleType === 'manway')
+  manwaySize?: string
+  manwayCoverType?: string
+  manwayCoverHandling?: string
 }
 
 export type Orientation = 'horizontal' | 'vertical'
@@ -67,6 +75,12 @@ export interface VesselDesignState {
   saddleWidth: string
   nozzles: NozzleRow[]
   notes: string
+  // Vertical vessel accessories (only when orientation === 'vertical')
+  ladderCaged?: boolean
+  platforms?: boolean
+  platformCount?: string
+  platformCoverage?: string
+  handrails?: boolean
 }
 
 export type RfqStatus = 'draft' | 'submitted' | 'quoted' | 'awarded'
