@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { api } from '../lib/api'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -272,6 +273,117 @@ function SpecGrid({ items }: { items: SpecItem[] }) {
   )
 }
 
+// ── PDF export ────────────────────────────────────────────────────────────────
+
+function printRfq(rfq: RfqRecord) {
+  const w = window.open('', '_blank', 'width=900,height=700')
+  if (!w) return
+  const today = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+
+  const specRow = (label: string, value: string) =>
+    `<tr><td class="spec-label">${label}</td><td class="spec-value">${value}</td></tr>`
+
+  const nozzleRows = rfq.nozzles.map((n, i) =>
+    `<tr class="${i % 2 === 0 ? 'even' : ''}">
+      <td>${n.mark}</td><td>${n.size}</td><td>${n.rating}</td><td>${n.service || '—'}</td>
+    </tr>`
+  ).join('')
+
+  w.document.write(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>${rfq.id} — VesselRFQ</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 13px; color: #1e293b; background: #fff; padding: 40px 48px; }
+  .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #1e293b; padding-bottom: 16px; margin-bottom: 24px; }
+  .logo { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .logo span { color: #2563eb; }
+  .logo-sub { font-size: 11px; color: #64748b; margin-top: 2px; }
+  .rfq-meta { text-align: right; }
+  .rfq-num { font-size: 18px; font-weight: 700; color: #1e293b; }
+  .rfq-type { font-size: 12px; color: #64748b; margin-top: 2px; }
+  .rfq-title { font-size: 15px; font-weight: 600; color: #1e293b; margin: 0 0 4px; }
+  h2 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: #64748b; margin: 20px 0 8px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+  table { width: 100%; border-collapse: collapse; }
+  .spec-table .spec-label { width: 180px; color: #64748b; font-size: 12px; padding: 5px 8px 5px 0; vertical-align: top; }
+  .spec-table .spec-value { font-weight: 500; color: #1e293b; font-size: 12px; padding: 5px 0; }
+  .nozzle-table th { text-align: left; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #64748b; padding: 6px 10px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; }
+  .nozzle-table td { padding: 6px 10px; color: #1e293b; font-size: 12px; }
+  .nozzle-table tr.even td { background: #f8fafc; }
+  .buyer-block { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 24px; }
+  .buyer-field { font-size: 12px; color: #1e293b; padding: 3px 0; }
+  .buyer-label { font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; }
+  .footer { margin-top: 48px; padding-top: 12px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; font-size: 10px; color: #94a3b8; }
+  @media print {
+    body { padding: 24px 32px; }
+    @page { margin: 0.75in; size: letter portrait; }
+  }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <div class="logo">Vessel<span>RFQ</span></div>
+      <div class="logo-sub">ASME Pressure Vessel Marketplace</div>
+    </div>
+    <div class="rfq-meta">
+      <div class="rfq-num">${rfq.id}</div>
+      <div class="rfq-type">${rfq.vesselType}</div>
+      <div class="rfq-type" style="margin-top:4px">Received ${rfq.dateReceived}</div>
+    </div>
+  </div>
+
+  <div class="rfq-title">${rfq.id} — ${rfq.vesselType}</div>
+
+  <h2>Buyer</h2>
+  <div class="buyer-block">
+    <div>
+      <div class="buyer-label">Name / Email</div>
+      <div class="buyer-field">${rfq.buyer.name}</div>
+    </div>
+    <div>
+      <div class="buyer-label">Company</div>
+      <div class="buyer-field">${rfq.buyer.company || '—'}</div>
+    </div>
+  </div>
+
+  <h2>Vessel Geometry</h2>
+  <table class="spec-table">
+    ${specRow('Shell OD', rfq.shellId)}
+    ${specRow('T/T Length', rfq.ttLength)}
+    ${specRow('Vessel Type', rfq.vesselType)}
+    ${specRow('Orientation', rfq.orientation)}
+    ${specRow('Head Type', rfq.headType)}
+    ${specRow('Support Type', rfq.supportType)}
+  </table>
+
+  <h2>Design Conditions</h2>
+  <table class="spec-table">
+    ${specRow('Design Pressure', rfq.designPressure)}
+    ${specRow('Design Temp', rfq.designTemp)}
+    ${specRow('Shell Material', rfq.material)}
+    ${specRow('Corrosion Allowance', rfq.corrosionAllowance)}
+  </table>
+
+  <h2>Nozzle Schedule</h2>
+  <table class="nozzle-table">
+    <thead><tr><th>Mark</th><th>Size</th><th>Rating</th><th>Service</th></tr></thead>
+    <tbody>${nozzleRows || '<tr><td colspan="4" style="color:#94a3b8;padding:8px 10px">No nozzles specified</td></tr>'}</tbody>
+  </table>
+
+  <div class="footer">
+    <span>VesselRFQ &nbsp;·&nbsp; vesselrfq.com &nbsp;·&nbsp; ASME Pressure Vessel Marketplace</span>
+    <span>Generated ${today}</span>
+  </div>
+</body>
+</html>`)
+  w.document.close()
+  w.focus()
+  setTimeout(() => { w.print(); w.close() }, 300)
+}
+
 // ── Detail Panel ──────────────────────────────────────────────────────────────
 
 function DetailPanel({
@@ -464,7 +576,7 @@ function DetailPanel({
             </button>
           </div>
 
-          <div style={{ position: 'relative' }}>
+          <div style={{ position: 'relative', marginBottom: 8 }}>
             <button
               onMouseEnter={() => setShowBomTip(true)}
               onMouseLeave={() => setShowBomTip(false)}
@@ -502,6 +614,23 @@ function DetailPanel({
               </div>
             )}
           </div>
+
+          <button
+            onClick={() => printRfq(rfq)}
+            style={{
+              width: '100%',
+              padding: '8px',
+              background: 'transparent',
+              border: '0.5px solid #334155',
+              borderRadius: 6,
+              color: '#94a3b8',
+              fontSize: 12,
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+            }}
+          >
+            Download PDF
+          </button>
         </Section>
 
       </div>
@@ -517,12 +646,23 @@ export default function FabricatorDashboard() {
   const [fetchError, setFetchError] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [filter, setFilter] = useState<FilterState>('all')
+  const [searchParams] = useSearchParams()
+  const rfqParam = searchParams.get('rfq')
 
   useEffect(() => {
     api.get<{ rfqs: ApiRfq[] }>('/rfqs/all')
-      .then(({ rfqs: rows }) => setRfqs(rows.map(mapApiRfq)))
+      .then(({ rfqs: rows }) => {
+        const mapped = rows.map(mapApiRfq)
+        setRfqs(mapped)
+        if (rfqParam) {
+          const target = mapped.find(r => r.id === `RFQ-${rfqParam}`)
+          if (target) setSelectedId(target.id)
+        }
+      })
       .catch(() => setFetchError('Failed to load RFQs'))
       .finally(() => setLoading(false))
+  // rfqParam intentionally omitted — only run on mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const filtered = filter === 'all' ? rfqs : rfqs.filter(r => r.status === filter)

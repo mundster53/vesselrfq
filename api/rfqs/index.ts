@@ -3,7 +3,7 @@ import { eq, desc, sql } from 'drizzle-orm'
 import { db } from '../_lib/db.js'
 import { rfqs, nozzles, users } from '../../db/schema.js'
 import { requireAuth } from '../_lib/auth.js'
-import { sendEmail, buyerConfirmationHtml, buyerConfirmationText, adminNotificationHtml, adminNotificationText } from '../_lib/email.js'
+import { sendEmail, buyerConfirmationHtml, buyerConfirmationText, adminNotificationHtml, adminNotificationText, fabricatorNotificationHtml, fabricatorNotificationText } from '../_lib/email.js'
 
 const ADMIN_EMAIL = process.env.NOTIFICATION_EMAIL ?? 'rfqs@vesselrfq.com'
 
@@ -207,10 +207,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           nozzleCount,
           notes:         rfq.notes,
         }
-        await Promise.all([
+        const emailPromises: Promise<unknown>[] = [
           sendEmail(buyer.email, `RFQ Received — ${rfq.title}`, buyerConfirmationHtml(emailParams), buyerConfirmationText(emailParams)),
           sendEmail(ADMIN_EMAIL, `New RFQ #${rfq.id} — ${rfq.title}`, adminNotificationHtml(emailParams), adminNotificationText(emailParams)),
-        ])
+        ]
+
+        // Notify fabricator if this RFQ was submitted through their embed
+        if (rfq.fabricatorId) {
+          const [fab] = await db.select({ email: users.email }).from(users).where(eq(users.id, parseInt(rfq.fabricatorId)))
+          if (fab) {
+            const vesselType = (rfq.vesselType ?? 'tank') as 'tank' | 'heat_exchanger'
+            const vesselLabel = vesselType === 'heat_exchanger' ? 'Heat Exchanger' : 'Pressure Vessel'
+            const odPart = rfq.shellOd ? ` ${rfq.shellOd}"` : ''
+            const subject = `New RFQ — ${vesselLabel}${odPart} ${rfq.title}`
+            emailPromises.push(sendEmail(fab.email, subject, fabricatorNotificationHtml(emailParams), fabricatorNotificationText(emailParams)))
+          }
+        }
+
+        await Promise.all(emailPromises)
       }
     } catch (emailErr) {
       console.error('[rfqs] email send failed', emailErr)

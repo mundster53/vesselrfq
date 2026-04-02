@@ -372,6 +372,117 @@ RFQ #${p.rfqId} · Buyer: ${p.buyerEmail}
 ${specs.join('\n')}`
 }
 
+export function fabricatorNotificationHtml(p: RfqEmailParams): string {
+  const isTank = p.vesselType === 'tank'
+  const vesselLabel = isTank ? 'Pressure Vessel' : 'Heat Exchanger'
+  const dashboardUrl = `https://vesselrfq.com/app/fabricator-dashboard?rfq=${p.rfqId}`
+
+  const specsRows = isTank
+    ? [
+        row('Vessel Type', vesselLabel),
+        row('Shell OD', p.shellOd ? `${p.shellOd}"` : null),
+        row('T/T Length', p.shellLength ? `${p.shellLength}"` : null),
+        row('Shell Material', p.shellMaterial),
+        row('MAWP', p.mawp ? `${p.mawp} psig` : null),
+        row('Design Temp', p.designTemp != null ? `${p.designTemp}°F` : null),
+        row('Nozzles', p.nozzleCount || null),
+      ].join('')
+    : [
+        row('Vessel Type', vesselLabel),
+        row('Shell OD', p.shellOd ? `${p.shellOd}"` : null),
+        row('Shell Length', p.shellLength ? `${p.shellLength}"` : null),
+        row('Shell Material', p.shellMaterial),
+        row('Shell MAWP', p.shellMawp ? `${p.shellMawp} psig` : null),
+        row('Shell Design Temp', p.shellDesignTemp != null ? `${p.shellDesignTemp}°F` : null),
+        row('Nozzles', p.nozzleCount || null),
+      ].join('')
+
+  return `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
+  <div style="max-width:560px;margin:32px auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+
+    <!-- Header -->
+    <div style="background:#0f172a;padding:28px 32px">
+      <div style="font-size:20px;font-weight:700;color:#ffffff;letter-spacing:-0.3px">VesselRFQ</div>
+      <div style="font-size:13px;color:#94a3b8;margin-top:2px">ASME Pressure Vessel Marketplace</div>
+    </div>
+
+    <!-- Body -->
+    <div style="padding:32px">
+      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#1e293b">New RFQ Received</h1>
+      <p style="margin:0 0 4px;font-size:15px;color:#475569">${p.title}</p>
+      <p style="margin:0 0 24px;font-size:13px;color:#94a3b8">RFQ #${p.rfqId} &nbsp;·&nbsp; ${vesselLabel}</p>
+
+      <p style="margin:0 0 16px;font-size:14px;color:#475569;line-height:1.6">
+        A buyer has submitted a new RFQ through your VesselRFQ configurator. Review the specifications below and open your dashboard to respond.
+      </p>
+
+      <h2 style="margin:24px 0 0;font-size:14px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Specifications</h2>
+      ${tableWrap(specsRows)}
+
+      <p style="margin:24px 0 0">
+        <a href="${dashboardUrl}" style="display:inline-block;background:#2563eb;color:#ffffff;font-size:14px;font-weight:600;padding:10px 20px;border-radius:8px;text-decoration:none">View RFQ in Dashboard →</a>
+      </p>
+
+      <p style="margin:16px 0 0;font-size:13px;color:#94a3b8">
+        Or copy this link: <a href="${dashboardUrl}" style="color:#3b82f6;text-decoration:none">${dashboardUrl}</a>
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div style="padding:16px 32px;background:#f8fafc;border-top:1px solid #e2e8f0">
+      <p style="margin:0;font-size:12px;color:#94a3b8">
+        VesselRFQ &nbsp;·&nbsp; ASME Pressure Vessel Marketplace<br>
+        You are receiving this because you are a registered fabricator on vesselrfq.com.
+      </p>
+    </div>
+  </div>
+</body>
+</html>`
+}
+
+export function fabricatorNotificationText(p: RfqEmailParams): string {
+  const isTank = p.vesselType === 'tank'
+  const vesselLabel = isTank ? 'Pressure Vessel' : 'Heat Exchanger'
+  const dashboardUrl = `https://vesselrfq.com/app/fabricator-dashboard?rfq=${p.rfqId}`
+
+  const specs: string[] = isTank
+    ? [
+        `Vessel Type: ${vesselLabel}`,
+        p.shellOd       ? `Shell OD: ${p.shellOd}"` : '',
+        p.shellLength   ? `T/T Length: ${p.shellLength}"` : '',
+        p.shellMaterial ? `Shell Material: ${p.shellMaterial}` : '',
+        p.mawp          ? `MAWP: ${p.mawp} psig` : '',
+        p.designTemp != null ? `Design Temp: ${p.designTemp}°F` : '',
+        p.nozzleCount   ? `Nozzles: ${p.nozzleCount}` : '',
+      ].filter(Boolean)
+    : [
+        `Vessel Type: ${vesselLabel}`,
+        p.shellOd        ? `Shell OD: ${p.shellOd}"` : '',
+        p.shellLength    ? `Shell Length: ${p.shellLength}"` : '',
+        p.shellMaterial  ? `Shell Material: ${p.shellMaterial}` : '',
+        p.shellMawp      ? `Shell MAWP: ${p.shellMawp} psig` : '',
+        p.shellDesignTemp != null ? `Shell Design Temp: ${p.shellDesignTemp}°F` : '',
+        p.nozzleCount    ? `Nozzles: ${p.nozzleCount}` : '',
+      ].filter(Boolean)
+
+  return `New RFQ — ${p.title}
+RFQ #${p.rfqId} · ${vesselLabel}
+
+A buyer has submitted a new RFQ through your VesselRFQ configurator. Review the specifications below and open your dashboard to respond.
+
+SPECIFICATIONS
+${specs.join('\n')}
+
+View this RFQ in your dashboard:
+${dashboardUrl}
+
+VesselRFQ · ASME Pressure Vessel Marketplace
+vesselrfq.com`
+}
+
 export function adminNotificationHtml(p: RfqEmailParams): string {
   const isTank = p.vesselType === 'tank'
   const temaCode = (!isTank && p.temaFront && p.temaShell && p.temaRear)
