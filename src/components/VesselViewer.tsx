@@ -124,7 +124,7 @@ function buildVessel(
   const ht = form.headType || '2:1 Elliptical'
   const hd = headDepth(r, ht)
   const saddleH = Math.max(r * 0.20, 6)
-  const saddleW = Math.max(r * 0.60, 12)
+  const saddleW = Math.max(r * 0.30, 6)
   const wallThk = Math.max(r * 0.022, 0.25)
 
   // ── Materials ──────────────────────────────────────────────────────────────
