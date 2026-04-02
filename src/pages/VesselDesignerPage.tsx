@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar'
 import VesselViewer from '../components/VesselViewer'
 import HeatExchangerViewer from '../components/HeatExchangerViewer'
 import { api, ApiError } from '../lib/api'
+import { useEmbed } from '../contexts/EmbedContext'
 import type {
   VesselDesignState,
   HxDesignState,
@@ -581,6 +582,7 @@ const selectCls = inputCls
 
 export default function VesselDesignerPage() {
   const navigate = useNavigate()
+  const { shopId } = useEmbed()
 
   const [vesselType, setVesselType] = useState<VesselType>('tank')
   const [form, setForm]             = useState<VesselDesignState>(initialTankState)
@@ -767,6 +769,7 @@ export default function VesselDesignerPage() {
           supportType: form.supportType || undefined,
           saddleHeight: form.saddleHeight || undefined,
           saddleWidth: form.saddleWidth || undefined,
+          fabricatorId: shopId || undefined,
           notes: form.notes || undefined,
           nozzles: form.nozzles.map(n => ({
             ...n,
@@ -822,6 +825,7 @@ export default function VesselDesignerPage() {
           tubeDesignTemp: hxForm.tubeDesignTemp || undefined,
           tubeCorrosionAllowance: hxForm.tubeCorrosionAllowance || undefined,
           tubeFluid: hxForm.tubeFluid || undefined,
+          fabricatorId: shopId || undefined,
           notes: hxForm.notes || undefined,
           nozzles: hxForm.nozzles.map(n => ({
             ...n,
