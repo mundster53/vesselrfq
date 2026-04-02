@@ -348,11 +348,15 @@ function buildVessel(
   const posNzls   = form.nozzles.filter((n) => n.location === 'right_head') // +axis end
   const negNzls   = form.nozzles.filter((n) => n.location === 'left_head')  // −axis end
 
+  // When vertical vessel has lugs, offset auto-distributed nozzles by 45° so they
+  // land between lugs (at 45°/135°/225°/315°) rather than on them (0°/90°/180°/270°).
+  const lugAngleOffset = (isV && form.supportType === 'lugs') ? 45 : 0
+
   shellNzls.forEach((nz, i) => {
     const count = shellNzls.length
     const angleDeg = nz.shellAngle !== null && nz.shellAngle !== undefined
       ? nz.shellAngle
-      : (i / count) * 360
+      : (i / count) * 360 + lugAngleOffset
     const theta = (angleDeg * Math.PI) / 180
     const axisPos = count === 1 ? 0 : ((i / (count - 1)) * 0.6 - 0.3) * L
 
