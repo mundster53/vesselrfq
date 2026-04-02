@@ -981,6 +981,43 @@ export default function VesselDesignerPage() {
                   </div>
                 </section>
 
+                {/* ── Supports ──────────────────────────────────────────── */}
+                <section className="bg-white border border-slate-200 rounded-xl p-5">
+                  <SectionHeader>Supports</SectionHeader>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <FieldLabel>Support Type</FieldLabel>
+                      <div className="flex flex-wrap gap-3">
+                        {(form.orientation === 'horizontal' ? HORIZONTAL_SUPPORTS : VERTICAL_SUPPORTS).map(({ value, label }) => (
+                          <label key={value} className="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="supportType" value={value}
+                              checked={form.supportType === value}
+                              onChange={() => {
+                                setField('supportType', value as SupportType)
+                                if (value !== 'saddles') { setField('saddleHeight', ''); setField('saddleWidth', '') }
+                              }} className="accent-blue-600" />
+                            <span className="text-sm text-slate-700">{label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                    {form.supportType === 'saddles' && (
+                      <div className="sm:col-span-2 grid grid-cols-2 gap-4 max-w-sm">
+                        <div>
+                          <FieldLabel unit="in">Saddle Height</FieldLabel>
+                          <input type="number" min="0" step="0.125" value={form.saddleHeight}
+                            onChange={fieldInput('saddleHeight')} className={inputCls} placeholder="18" />
+                        </div>
+                        <div>
+                          <FieldLabel unit="in">Saddle Width</FieldLabel>
+                          <input type="number" min="0" step="0.125" value={form.saddleWidth}
+                            onChange={fieldInput('saddleWidth')} className={inputCls} placeholder="12" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </section>
+
                 {/* ── Head Configuration ────────────────────────────────── */}
                 <section className="bg-white border border-slate-200 rounded-xl p-5">
                   <SectionHeader>Head Configuration</SectionHeader>
@@ -1100,43 +1137,6 @@ export default function VesselDesignerPage() {
                     </div>
                   </section>
                 )}
-
-                {/* ── Supports ──────────────────────────────────────────── */}
-                <section className="bg-white border border-slate-200 rounded-xl p-5">
-                  <SectionHeader>Supports</SectionHeader>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <FieldLabel>Support Type</FieldLabel>
-                      <div className="flex flex-wrap gap-3">
-                        {(form.orientation === 'horizontal' ? HORIZONTAL_SUPPORTS : VERTICAL_SUPPORTS).map(({ value, label }) => (
-                          <label key={value} className="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="supportType" value={value}
-                              checked={form.supportType === value}
-                              onChange={() => {
-                                setField('supportType', value as SupportType)
-                                if (value !== 'saddles') { setField('saddleHeight', ''); setField('saddleWidth', '') }
-                              }} className="accent-blue-600" />
-                            <span className="text-sm text-slate-700">{label}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                    {form.supportType === 'saddles' && (
-                      <div className="sm:col-span-2 grid grid-cols-2 gap-4 max-w-sm">
-                        <div>
-                          <FieldLabel unit="in">Saddle Height</FieldLabel>
-                          <input type="number" min="0" step="0.125" value={form.saddleHeight}
-                            onChange={fieldInput('saddleHeight')} className={inputCls} placeholder="18" />
-                        </div>
-                        <div>
-                          <FieldLabel unit="in">Saddle Width</FieldLabel>
-                          <input type="number" min="0" step="0.125" value={form.saddleWidth}
-                            onChange={fieldInput('saddleWidth')} className={inputCls} placeholder="12" />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </section>
 
                 {/* ── Notes ─────────────────────────────────────────────── */}
                 <section className="bg-white border border-slate-200 rounded-xl p-5">

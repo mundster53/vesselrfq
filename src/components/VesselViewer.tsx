@@ -366,9 +366,10 @@ function buildVessel(
     } else if (nz.nozzleType === 'manway') {
       const od = manwayOD(nz)
       // Horizontal: manways on the side (theta=π/2), never on top (theta=0)
-      // Vertical: standard radial placement on shell is already correct
+      // Vertical: apply same lug offset as standard nozzles; also shift elevation below lug zone
       const mTheta = !isV ? Math.PI / 2 : theta
-      if (isV) addShellNozzle_V(axisPos, mTheta, od)
+      const mAxisPos = (isV && form.supportType === 'lugs') ? -(L * 0.35) : axisPos
+      if (isV) addShellNozzle_V(mAxisPos, mTheta, od)
       else     addShellNozzle_H(axisPos, mTheta, od)
     } else {
       const od = npsPipeOD(nz.size)
@@ -395,7 +396,8 @@ function buildVessel(
       } else if (nz.nozzleType === 'manway' && isV) {
         // Vertical vessels: redirect head manways to shell side rather than top/bottom heads
         const od = manwayOD(nz)
-        const mTheta = (vHeadManwayIdx % 2 === 0) ? Math.PI / 2 : -Math.PI / 2
+        const baseAngle = form.supportType === 'lugs' ? Math.PI / 4 : Math.PI / 2
+        const mTheta = (vHeadManwayIdx % 2 === 0) ? baseAngle : baseAngle + Math.PI
         const mY = -(L / 4) - Math.floor(vHeadManwayIdx / 2) * L * 0.12
         addShellNozzle_V(mY, mTheta, od)
         vHeadManwayIdx++
