@@ -359,12 +359,22 @@ function buildVessel(
     if (nz.nozzleType === 'sight_glass') {
       if (isV) addSightGlassShell_V(axisPos, theta, npsPipeOD(nz.size))
       else     addSightGlassShell_H(axisPos, theta, npsPipeOD(nz.size))
+    } else if (nz.nozzleType === 'manway') {
+      const od = manwayOD(nz)
+      // Horizontal: manways on the side (theta=π/2), never on top (theta=0)
+      // Vertical: standard radial placement on shell is already correct
+      const mTheta = !isV ? Math.PI / 2 : theta
+      if (isV) addShellNozzle_V(axisPos, mTheta, od)
+      else     addShellNozzle_H(axisPos, mTheta, od)
     } else {
-      const od = nz.nozzleType === 'manway' ? manwayOD(nz) : npsPipeOD(nz.size)
+      const od = npsPipeOD(nz.size)
       if (isV) addShellNozzle_V(axisPos, theta, od)
       else     addShellNozzle_H(axisPos, theta, od)
     }
   })
+
+  // Counter for redirected vertical-vessel head manways → shell side placement
+  let vHeadManwayIdx = 0
 
   const placeEndNozzles = (nzls: typeof posNzls, apexPos: number, isPos: boolean) => {
     nzls.forEach((nz, i) => {
@@ -378,6 +388,13 @@ function buildVessel(
       if (nz.nozzleType === 'sight_glass') {
         if (isV) addSightGlassHead_V(apexPos, off1, off2, isPos ? 1 : -1, npsPipeOD(nz.size))
         else     addSightGlassHead_H(apexPos, off1, off2, isPos ? -Math.PI / 2 : Math.PI / 2, npsPipeOD(nz.size))
+      } else if (nz.nozzleType === 'manway' && isV) {
+        // Vertical vessels: redirect head manways to shell side rather than top/bottom heads
+        const od = manwayOD(nz)
+        const mTheta = (vHeadManwayIdx % 2 === 0) ? Math.PI / 2 : -Math.PI / 2
+        const mY = -(L / 4) - Math.floor(vHeadManwayIdx / 2) * L * 0.12
+        addShellNozzle_V(mY, mTheta, od)
+        vHeadManwayIdx++
       } else {
         const od = nz.nozzleType === 'manway' ? manwayOD(nz) : npsPipeOD(nz.size)
         if (isV) addHeadNozzle_V(apexPos, off1, off2, isPos ? 1 : -1, od)
@@ -486,18 +503,31 @@ function buildVessel(
   else if (form.supportType === 'skirt') {
     const skirtH = Math.max(r * 1.4, 18)
     supportExtent = Math.max(0, skirtH - hd)  // how far skirt extends below head apex
-    // Skirt cylinder — attaches at tangent line and descends to base plate.
-    // Access opening (24" dia, front-facing +Z) is carved by leaving a gap in the arc.
-    // CylinderGeometry: theta=0 → +Z, theta=π/2 → +X. Gap centered at theta=0.
     const skirtR = r + 1
-    const gapHalfChord = Math.min(12, skirtR * 0.45) // half-chord of 24" opening, capped
-    const gapHalf = Math.asin(gapHalfChord / skirtR)
+    const skirtCenterY = -(L / 2 + skirtH / 2)
+
+    // Full-circle skirt cylinder
     const skirt = new THREE.Mesh(
-      new THREE.CylinderGeometry(skirtR, skirtR, skirtH, 64, 1, true, gapHalf, 2 * Math.PI - 2 * gapHalf),
+      new THREE.CylinderGeometry(skirtR, skirtR, skirtH, 64, 1, true),
       skirtMat
     )
-    skirt.position.y = -(L / 2 + skirtH / 2)   // top of skirt at tangent line (−L/2)
+    skirt.position.y = skirtCenterY   // top of skirt at tangent line (−L/2)
     grp.add(skirt)
+
+    // ── Circular access opening simulation ─────────────────────────────────
+    // No CSG in Three.js — simulate with a dark disc (radius=12", 24" dia) on
+    // the front face (+Z, theta=0 → z=skirtR in CylinderGeometry convention).
+    // A slightly lighter ring frames the edge to read as a cut opening.
+    const openingR = Math.min(12, skirtR * 0.45)  // 24" dia, capped for small vessels
+    const openingMat = new THREE.MeshStandardMaterial({ color: 0x080c12, roughness: 0.95, metalness: 0.05 })
+    const openingDisc = new THREE.Mesh(new THREE.CircleGeometry(openingR, 48), openingMat)
+    openingDisc.position.set(0, skirtCenterY, skirtR + 0.05)  // flush on +Z face
+    grp.add(openingDisc)
+
+    const rimMat = new THREE.MeshStandardMaterial({ color: 0xc8cfd8, roughness: 0.65, metalness: 0.45 })
+    const openingRim = new THREE.Mesh(new THREE.RingGeometry(openingR, openingR + 1.25, 48), rimMat)
+    openingRim.position.set(0, skirtCenterY, skirtR + 0.08)   // just proud of the disc
+    grp.add(openingRim)
 
     // ── Base ring: solid flat annular plate (washer) at bottom of skirt ───
     const brIR  = Math.max(r - 3, 2)   // inner edge (slightly inside skirt)
