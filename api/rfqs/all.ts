@@ -45,7 +45,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       })
       .from(rfqs)
       .innerJoin(users, eq(rfqs.buyerId, users.id))
-      .where(eq(rfqs.status, 'submitted'))
+      .where(eq(rfqs.fabricatorId, String(auth.userId)))
       .orderBy(desc(rfqs.createdAt))
 
     const rfqIds = rows.map(r => r.id)

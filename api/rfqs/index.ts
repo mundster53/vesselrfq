@@ -82,6 +82,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       tubeCorrosionAllowance?: string
       tubeFluid?: string
 
+      fabricatorId?: string
       notes?: string
       nozzles?: Array<{
         mark: string
@@ -149,6 +150,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           tubeCorrosionAllowance: body.tubeCorrosionAllowance || null,
           tubeFluid:        body.tubeFluid || null,
 
+          fabricatorId: body.fabricatorId || null,
           notes: body.notes || null,
         })
         .returning()

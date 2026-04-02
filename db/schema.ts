@@ -73,6 +73,8 @@ export const rfqs = pgTable('rfqs', {
   tubeCorrosionAllowance: numeric('tube_side_ca'),
   tubeFluid:             text('tube_side_fluid'),
 
+  fabricatorId: text('fabricator_id'),
+
   notes: text('notes'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),

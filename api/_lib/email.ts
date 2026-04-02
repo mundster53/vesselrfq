@@ -33,7 +33,7 @@ function firstName(email: string): string {
 
 export function fabricatorOnboardingText(userId: number, email: string): string {
   const name = firstName(email)
-  const embedSrc = `https://vesselrfq.com/app?shop=${userId}`
+  const embedSrc = `https://vesselrfq.com/app/embed?shop=${userId}`
   const iframeSnippet = `<iframe src="${embedSrc}" width="100%" height="900" frameborder="0" style="border:none;"></iframe>`
   return `Hi ${name},
 
@@ -65,7 +65,7 @@ vesselrfq.com`
 export function fabricatorOnboardingHtml(userId: number, email: string): string {
   const name = firstName(email)
   const dashboardUrl = 'https://vesselrfq.com/app/fabricator-dashboard'
-  const embedSrc = `https://vesselrfq.com/app?shop=${userId}`
+  const embedSrc = `https://vesselrfq.com/app/embed?shop=${userId}`
   const iframeSnippet = `&lt;iframe src="${embedSrc}" width="100%" height="900" frameborder="0" style="border:none;"&gt;&lt;/iframe&gt;`
 
   return `<!DOCTYPE html>

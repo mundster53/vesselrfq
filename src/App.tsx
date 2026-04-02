@@ -10,6 +10,7 @@ import RfqSubmittedPage from './pages/RfqSubmittedPage'
 import FabricatorDashboard from './pages/FabricatorDashboard'
 import FabricatorRegisterPage from './pages/FabricatorRegisterPage'
 import TermsPage from './pages/TermsPage'
+import EmbedPage from './pages/EmbedPage'
 
 function MobileWarningBanner() {
   const [dismissed, setDismissed] = useState(false)
@@ -40,6 +41,7 @@ export default function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/fabricator-register" element={<FabricatorRegisterPage />} />
           <Route path="/terms" element={<TermsPage />} />
+          <Route path="/embed" element={<EmbedPage />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/designer" element={<VesselDesignerPage />} />
