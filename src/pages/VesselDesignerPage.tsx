@@ -967,24 +967,22 @@ export default function VesselDesignerPage() {
                   </div>
                 </section>
 
-                {/* ── Orientation ───────────────────────────────────────── */}
+                {/* ── Orientation and Supports ──────────────────────────── */}
                 <section className="bg-white border border-slate-200 rounded-xl p-5">
-                  <SectionHeader>Orientation</SectionHeader>
-                  <div className="flex gap-6">
-                    {(['horizontal', 'vertical'] as Orientation[]).map(o => (
-                      <label key={o} className="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="orientation" value={o} checked={form.orientation === o}
-                          onChange={() => handleOrientationChange(o)} className="accent-blue-600" />
-                        <span className="text-sm text-slate-700 capitalize">{o}</span>
-                      </label>
-                    ))}
-                  </div>
-                </section>
-
-                {/* ── Supports ──────────────────────────────────────────── */}
-                <section className="bg-white border border-slate-200 rounded-xl p-5">
-                  <SectionHeader>Supports</SectionHeader>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <SectionHeader>Orientation and Supports</SectionHeader>
+                  <div className="flex flex-col gap-5">
+                    <div>
+                      <FieldLabel>Orientation</FieldLabel>
+                      <div className="flex gap-6">
+                        {(['horizontal', 'vertical'] as Orientation[]).map(o => (
+                          <label key={o} className="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="orientation" value={o} checked={form.orientation === o}
+                              onChange={() => handleOrientationChange(o)} className="accent-blue-600" />
+                            <span className="text-sm text-slate-700 capitalize">{o}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
                     <div>
                       <FieldLabel>Support Type</FieldLabel>
                       <div className="flex flex-wrap gap-3">
@@ -992,29 +990,12 @@ export default function VesselDesignerPage() {
                           <label key={value} className="flex items-center gap-2 cursor-pointer">
                             <input type="radio" name="supportType" value={value}
                               checked={form.supportType === value}
-                              onChange={() => {
-                                setField('supportType', value as SupportType)
-                                if (value !== 'saddles') { setField('saddleHeight', ''); setField('saddleWidth', '') }
-                              }} className="accent-blue-600" />
+                              onChange={() => setField('supportType', value as SupportType)} className="accent-blue-600" />
                             <span className="text-sm text-slate-700">{label}</span>
                           </label>
                         ))}
                       </div>
                     </div>
-                    {form.supportType === 'saddles' && (
-                      <div className="sm:col-span-2 grid grid-cols-2 gap-4 max-w-sm">
-                        <div>
-                          <FieldLabel unit="in">Saddle Height</FieldLabel>
-                          <input type="number" min="0" step="0.125" value={form.saddleHeight}
-                            onChange={fieldInput('saddleHeight')} className={inputCls} placeholder="18" />
-                        </div>
-                        <div>
-                          <FieldLabel unit="in">Saddle Width</FieldLabel>
-                          <input type="number" min="0" step="0.125" value={form.saddleWidth}
-                            onChange={fieldInput('saddleWidth')} className={inputCls} placeholder="12" />
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </section>
 

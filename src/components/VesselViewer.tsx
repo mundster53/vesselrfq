@@ -123,8 +123,8 @@ function buildVessel(
   const L = Math.max(parseFloat(form.shellLength) || 120, 8)
   const ht = form.headType || '2:1 Elliptical'
   const hd = headDepth(r, ht)
-  const saddleH = Math.max(parseFloat(form.saddleHeight) || r * 0.42, 4)
-  const saddleW = Math.max(parseFloat(form.saddleWidth) || 6, 3)
+  const saddleH = Math.max(r * 0.20, 6)
+  const saddleW = Math.max(r * 0.60, 12)
   const wallThk = Math.max(r * 0.022, 0.25)
 
   // ── Materials ──────────────────────────────────────────────────────────────
@@ -857,7 +857,7 @@ export default function VesselViewer({ form }: { form: VesselDesignState }) {
     const L   = Math.max(parseFloat(form.shellLength) || 120, 8)
     const r   = od / 2
     const hd  = headDepth(r, form.headType || '2:1 Elliptical')
-    const sH  = Math.max(parseFloat(form.saddleHeight) || r * 0.42, 4)
+    const sH  = Math.max(r * 0.20, 6)
 
     if (mode === '3d') {
       fitCamera(ctx.camera, ctx.controls, form.orientation === 'vertical', od, L, hd, sH)
@@ -895,7 +895,7 @@ export default function VesselViewer({ form }: { form: VesselDesignState }) {
     const r = od / 2
     const L = Math.max(parseFloat(form.shellLength) || 120, 8)
     const hd = headDepth(r, form.headType || '2:1 Elliptical')
-    const saddleH = Math.max(parseFloat(form.saddleHeight) || r * 0.42, 4)
+    const saddleH = Math.max(r * 0.20, 6)
     const legVertH = Math.max(r * 1.3, 18)
     const skirtH   = Math.max(r * 1.4, 18)
 
