@@ -139,6 +139,8 @@ function buildVessel(
   // Saddle-specific materials
   const saddleMat   = new THREE.MeshStandardMaterial({ color: 0xb0bcc8, metalness: 0.48, roughness: 0.55, side: THREE.DoubleSide })
   const saddleSolid = new THREE.MeshStandardMaterial({ color: 0xb0bcc8, metalness: 0.48, roughness: 0.55 })
+  // Sight glass — warm amber/bronze, visually distinct from steel nozzles
+  const sightGlassMat = new THREE.MeshStandardMaterial({ color: 0x8B6914, metalness: 0.15, roughness: 0.80 })
 
   // ── Shell ──────────────────────────────────────────────────────────────────
   // Horizontal: rotation.z = −π/2 rotates CylinderGeometry's Y-axis to world +X.
@@ -267,6 +269,77 @@ function buildVessel(
     addCyl(pr * 1.25 + 0.25, 0.12, nL + fT + 0.06 + wallThk, flangeMat)
   }
 
+  // ── Sight glass nozzle helpers (~2" projection, amber material) ─────────────
+
+  function addSightGlassShell_H(xPos: number, theta: number, pipeOD: number) {
+    const pr = pipeOD / 2, fR = flangeOR(pipeOD) * 0.7
+    const ny = Math.cos(theta), nz = Math.sin(theta)
+    const nL = 2
+    const addCyl = (rTop: number, height: number, dist: number, mat: THREE.MeshStandardMaterial) => {
+      const m = new THREE.Mesh(new THREE.CylinderGeometry(rTop, rTop, height, 24), mat)
+      m.position.set(xPos, (r + dist) * ny, (r + dist) * nz)
+      m.rotation.x = theta
+      grp.add(m)
+    }
+    const padH = wallThk * 2.8
+    addCyl(pr * 1.6, padH, padH * 0.35, vesselMat)
+    addCyl(pr, nL, nL / 2, sightGlassMat)
+    addCyl(fR, 0.75, nL + 0.375, sightGlassMat)
+  }
+
+  function addSightGlassShell_V(yPos: number, theta: number, pipeOD: number) {
+    const pr = pipeOD / 2, fR = flangeOR(pipeOD) * 0.7
+    const nx = Math.cos(theta), nz = Math.sin(theta)
+    const rotAxis = new THREE.Vector3(nz, 0, -nx)
+    const nL = 2
+    const addCyl = (rTop: number, height: number, dist: number, mat: THREE.MeshStandardMaterial) => {
+      const m = new THREE.Mesh(new THREE.CylinderGeometry(rTop, rTop, height, 24), mat)
+      m.position.set((r + dist) * nx, yPos, (r + dist) * nz)
+      m.setRotationFromAxisAngle(rotAxis, Math.PI / 2)
+      grp.add(m)
+    }
+    const padH = wallThk * 2.8
+    addCyl(pr * 1.6, padH, padH * 0.35, vesselMat)
+    addCyl(pr, nL, nL / 2, sightGlassMat)
+    addCyl(fR, 0.75, nL + 0.375, sightGlassMat)
+  }
+
+  function addSightGlassHead_H(headX: number, yOff: number, zOff: number, rotZ: number, pipeOD: number) {
+    const pr = pipeOD / 2, fR = flangeOR(pipeOD) * 0.7
+    const sign = rotZ < 0 ? 1 : -1
+    const nL = 2
+    const addCyl = (rTop: number, height: number, dist: number, mat: THREE.MeshStandardMaterial) => {
+      const m = new THREE.Mesh(new THREE.CylinderGeometry(rTop, rTop, height, 24), mat)
+      m.rotation.z = rotZ
+      m.position.set(headX + sign * dist, yOff, zOff)
+      grp.add(m)
+    }
+    const padH = wallThk * 2.8
+    addCyl(pr * 1.6, padH, padH * 0.35, vesselMat)
+    addCyl(pr, nL, nL / 2 + wallThk, sightGlassMat)
+    addCyl(fR, 0.75, nL + 0.375 + wallThk, sightGlassMat)
+  }
+
+  function addSightGlassHead_V(headY: number, xOff: number, zOff: number, sign: 1 | -1, pipeOD: number) {
+    const pr = pipeOD / 2, fR = flangeOR(pipeOD) * 0.7
+    const nL = 2
+    const addCyl = (rTop: number, height: number, dist: number, mat: THREE.MeshStandardMaterial) => {
+      const m = new THREE.Mesh(new THREE.CylinderGeometry(rTop, rTop, height, 24), mat)
+      m.position.set(xOff, headY + sign * dist, zOff)
+      grp.add(m)
+    }
+    const padH = wallThk * 2.8
+    addCyl(pr * 1.6, padH, padH * 0.35, vesselMat)
+    addCyl(pr, nL, nL / 2 + wallThk, sightGlassMat)
+    addCyl(fR, 0.75, nL + 0.375 + wallThk, sightGlassMat)
+  }
+
+  // ── Manway OD helper — parse '20"' → 20, fall back to 20 ─────────────────
+  function manwayOD(nz: typeof form.nozzles[0]): number {
+    const raw = (nz.manwaySize ?? '20"').replace(/['"]/g, '')
+    return parseFloat(raw) || 20
+  }
+
   // ── Place nozzles ──────────────────────────────────────────────────────────
   // DB values kept as 'left_head' / 'right_head' in both orientations.
   // Semantically: right_head = positive-axis end (+X horizontal, +Y vertical).
@@ -283,10 +356,13 @@ function buildVessel(
     const theta = (angleDeg * Math.PI) / 180
     const axisPos = count === 1 ? 0 : ((i / (count - 1)) * 0.6 - 0.3) * L
 
-    if (isV) {
-      addShellNozzle_V(axisPos, theta, npsPipeOD(nz.size))
+    if (nz.nozzleType === 'sight_glass') {
+      if (isV) addSightGlassShell_V(axisPos, theta, npsPipeOD(nz.size))
+      else     addSightGlassShell_H(axisPos, theta, npsPipeOD(nz.size))
     } else {
-      addShellNozzle_H(axisPos, theta, npsPipeOD(nz.size))
+      const od = nz.nozzleType === 'manway' ? manwayOD(nz) : npsPipeOD(nz.size)
+      if (isV) addShellNozzle_V(axisPos, theta, od)
+      else     addShellNozzle_H(axisPos, theta, od)
     }
   })
 
@@ -299,10 +375,13 @@ function buildVessel(
       const off1 = offsetR * Math.cos(ang)
       const off2 = offsetR * Math.sin(ang)
 
-      if (isV) {
-        addHeadNozzle_V(apexPos, off1, off2, isPos ? 1 : -1, npsPipeOD(nz.size))
+      if (nz.nozzleType === 'sight_glass') {
+        if (isV) addSightGlassHead_V(apexPos, off1, off2, isPos ? 1 : -1, npsPipeOD(nz.size))
+        else     addSightGlassHead_H(apexPos, off1, off2, isPos ? -Math.PI / 2 : Math.PI / 2, npsPipeOD(nz.size))
       } else {
-        addHeadNozzle_H(apexPos, off1, off2, isPos ? -Math.PI / 2 : Math.PI / 2, npsPipeOD(nz.size))
+        const od = nz.nozzleType === 'manway' ? manwayOD(nz) : npsPipeOD(nz.size)
+        if (isV) addHeadNozzle_V(apexPos, off1, off2, isPos ? 1 : -1, od)
+        else     addHeadNozzle_H(apexPos, off1, off2, isPos ? -Math.PI / 2 : Math.PI / 2, od)
       }
     })
   }
@@ -407,8 +486,16 @@ function buildVessel(
   else if (form.supportType === 'skirt') {
     const skirtH = Math.max(r * 1.4, 18)
     supportExtent = Math.max(0, skirtH - hd)  // how far skirt extends below head apex
-    // Skirt cylinder — attaches at tangent line and descends to base plate
-    const skirt = new THREE.Mesh(new THREE.CylinderGeometry(r + 1, r + 1, skirtH, 48, 1, true), skirtMat)
+    // Skirt cylinder — attaches at tangent line and descends to base plate.
+    // Access opening (24" dia, front-facing +Z) is carved by leaving a gap in the arc.
+    // CylinderGeometry: theta=0 → +Z, theta=π/2 → +X. Gap centered at theta=0.
+    const skirtR = r + 1
+    const gapHalfChord = Math.min(12, skirtR * 0.45) // half-chord of 24" opening, capped
+    const gapHalf = Math.asin(gapHalfChord / skirtR)
+    const skirt = new THREE.Mesh(
+      new THREE.CylinderGeometry(skirtR, skirtR, skirtH, 64, 1, true, gapHalf, 2 * Math.PI - 2 * gapHalf),
+      skirtMat
+    )
     skirt.position.y = -(L / 2 + skirtH / 2)   // top of skirt at tangent line (−L/2)
     grp.add(skirt)
 

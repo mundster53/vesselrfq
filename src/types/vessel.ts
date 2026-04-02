@@ -58,7 +58,7 @@ export interface NozzleRow {
   // Manway sub-options (only when nozzleType === 'manway')
   manwaySize?: string
   manwayCoverType?: string
-  manwayCoverHandling?: string
+  manwayCoverSupport?: string
 }
 
 export type Orientation = 'horizontal' | 'vertical'
@@ -92,6 +92,7 @@ export interface RfqSummary {
   id: number
   title: string
   status: RfqStatus
+  vesselType: string | null
   shellOd: string | null
   shellLength: string | null
   shellMaterial: string | null

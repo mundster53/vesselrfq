@@ -373,7 +373,7 @@ const nozzleCellCls = 'w-full border border-slate-300 rounded-lg px-2.5 py-1.5 t
 
 const MANWAY_SIZES = ['18"', '20"', '24"', 'Other']
 const MANWAY_COVER_TYPES = ['Blind Flange', 'Tube Turn Head Cover']
-const MANWAY_COVER_HANDLING = ['Hinged', 'Loose', 'Davit Arm']
+const MANWAY_COVER_SUPPORT = ['Hinged', 'Loose', 'Davit Arm']
 
 function NozzleCard({ nozzle, onUpdate, onRemove, locationOptions, serviceOptions }: {
   nozzle: NozzleRow
@@ -447,11 +447,11 @@ function NozzleCard({ nozzle, onUpdate, onRemove, locationOptions, serviceOption
               </select>
             </div>
             <div>
-              <p className="text-xs text-slate-500 font-medium mb-1">Cover Handling</p>
-              <select value={nozzle.manwayCoverHandling ?? 'Hinged'}
-                onChange={e => onUpdate('manwayCoverHandling', e.target.value)}
+              <p className="text-xs text-slate-500 font-medium mb-1">Cover Support</p>
+              <select value={nozzle.manwayCoverSupport ?? 'Hinged'}
+                onChange={e => onUpdate('manwayCoverSupport', e.target.value)}
                 className={nozzleCellCls}>
-                {MANWAY_COVER_HANDLING.map(h => <option key={h} value={h}>{h}</option>)}
+                {MANWAY_COVER_SUPPORT.map(h => <option key={h} value={h}>{h}</option>)}
               </select>
             </div>
           </div>
@@ -1074,11 +1074,13 @@ export default function VesselDesignerPage() {
                                 help="Partial = one side of vessel; Full = wraps around the full circumference (360°).">
                                 Coverage
                               </FieldLabel>
-                              <select value={form.platformCoverage ?? 'Partial'}
+                              <select value={form.platformCoverage ?? '1/2 circumference'}
                                 onChange={e => setField('platformCoverage', e.target.value)}
                                 className={selectCls}>
-                                <option value="Partial">Partial</option>
-                                <option value="Full (360°)">Full (360°)</option>
+                                <option value="1/4 circumference">1/4 circumference</option>
+                                <option value="1/2 circumference">1/2 circumference</option>
+                                <option value="3/4 circumference">3/4 circumference</option>
+                                <option value="Full circumference">Full circumference</option>
                               </select>
                             </div>
                             <p className="col-span-2 text-xs text-slate-400">
