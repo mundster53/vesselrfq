@@ -8,10 +8,6 @@ import { sendEmail, fabricatorOnboardingHtml, fabricatorOnboardingText } from '.
 // Vercel must not parse the body — Stripe signature verification requires the raw bytes.
 export const config = { api: { bodyParser: false } }
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? '', {
-  apiVersion: '2025-02-24.acacia',
-})
-
 function getRawBody(req: VercelRequest): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = []
@@ -26,11 +22,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+  const testMode = process.env.STRIPE_TEST_MODE === 'true'
+
+  const stripeKey = testMode ? process.env.STRIPE_TEST_SECRET_KEY : process.env.STRIPE_SECRET_KEY
+  if (!stripeKey) {
+    console.error(`[webhook] ${testMode ? 'STRIPE_TEST_SECRET_KEY' : 'STRIPE_SECRET_KEY'} is not set`)
+    return res.status(500).json({ error: 'Payment configuration error' })
+  }
+
+  const stripe = new Stripe(stripeKey, { apiVersion: '2025-02-24.acacia' })
+
+  const webhookSecret = testMode ? process.env.STRIPE_TEST_WEBHOOK_SECRET : process.env.STRIPE_WEBHOOK_SECRET
   if (!webhookSecret) {
-    console.error('[webhook] STRIPE_WEBHOOK_SECRET is not set')
+    console.error(`[webhook] ${testMode ? 'STRIPE_TEST_WEBHOOK_SECRET' : 'STRIPE_WEBHOOK_SECRET'} is not set`)
     return res.status(500).json({ error: 'Webhook secret not configured' })
   }
+
+  console.log(`[webhook] running in ${testMode ? 'TEST' : 'LIVE'} mode`)
 
   const signature = req.headers['stripe-signature']
   if (!signature) {
