@@ -113,7 +113,7 @@ export const nozzles = pgTable('nozzles', {
   rfqId: integer('rfq_id').references(() => rfqs.id, { onDelete: 'cascade' }).notNull(),
   mark: text('mark').notNull(),
   size: text('size').notNull(),
-  rating: text('rating').notNull(),
+  rating: text('rating'),
   flangeType: text('flange_type').notNull(),
   facing: text('facing').notNull(),
   material: text('material').notNull(),
