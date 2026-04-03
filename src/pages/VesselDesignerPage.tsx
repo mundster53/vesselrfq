@@ -1272,6 +1272,9 @@ export default function VesselDesignerPage() {
                         </div>
                       )}
                     </div>
+                    <p className="text-xs text-slate-400">
+                      Note: Internal coils and external coil jackets are not shown in the 3D preview. All coil specifications will be included in your submitted RFQ.
+                    </p>
                   </div>
                 </section>
 
