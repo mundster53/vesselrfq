@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { api, ApiError } from '../lib/api'
 
@@ -14,7 +14,6 @@ function dbg(msg: string, data?: unknown) {
 
 export default function FabricatorRegisterPage() {
   const { register, logout } = useAuth()
-  const navigate = useNavigate()
   dbg('FabricatorRegisterPage mounted')
 
   const [email, setEmail] = useState('')
