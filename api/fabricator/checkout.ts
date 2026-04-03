@@ -15,6 +15,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    const stripeKey = process.env.STRIPE_SECRET_KEY
+    if (!stripeKey) {
+      console.error('[checkout] STRIPE_SECRET_KEY is not set')
+      return res.status(500).json({ error: 'Payment configuration error' })
+    }
+
     const auth = await requireAuth(req, res)
     if (!auth) return
 
@@ -52,9 +58,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       cancel_url: 'https://vesselrfq.com/fabricators',
     })
 
+    if (!session.url) {
+      console.error('[checkout] Stripe session created but URL is null', { sessionId: session.id })
+      return res.status(500).json({ error: 'Checkout session URL unavailable' })
+    }
+
     return res.status(200).json({ url: session.url })
   } catch (err) {
-    console.error('[checkout] stripe error', err)
+    console.error('[checkout] error', err)
     return res.status(500).json({ error: 'Failed to create checkout session' })
   }
 }
