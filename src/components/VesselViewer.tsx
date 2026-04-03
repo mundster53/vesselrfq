@@ -772,6 +772,13 @@ export default function VesselViewer({ form }: { form: VesselDesignState }) {
   const ctxRef      = useRef<Ctx | null>(null)
   const viewModeRef = useRef<ViewMode>('3d')
   const [viewMode, setViewMode] = useState<ViewMode>('3d')
+  const saved3dCamera = useRef<{
+    position: THREE.Vector3
+    target: THREE.Vector3
+    fov: number
+    near: number
+    far: number
+  } | null>(null)
 
   // Init once
   useEffect(() => {
@@ -859,8 +866,31 @@ export default function VesselViewer({ form }: { form: VesselDesignState }) {
     const hd  = headDepth(r, form.headType || '2:1 Elliptical')
     const sH  = Math.max(r * 0.20, 6)
 
+    // Save 3D camera state before leaving it
+    if (viewModeRef.current === '3d' && mode !== '3d') {
+      saved3dCamera.current = {
+        position: ctx.camera.position.clone(),
+        target:   ctx.controls.target.clone(),
+        fov:      ctx.camera.fov,
+        near:     ctx.camera.near,
+        far:      ctx.camera.far,
+      }
+    }
+
     if (mode === '3d') {
-      fitCamera(ctx.camera, ctx.controls, form.orientation === 'vertical', od, L, hd, sH)
+      if (saved3dCamera.current) {
+        const s = saved3dCamera.current
+        ctx.camera.fov  = s.fov
+        ctx.camera.near = s.near
+        ctx.camera.far  = s.far
+        ctx.camera.up.set(0, 1, 0)
+        ctx.camera.position.copy(s.position)
+        ctx.camera.updateProjectionMatrix()
+        ctx.controls.target.copy(s.target)
+        ctx.controls.update()
+      } else {
+        fitCamera(ctx.camera, ctx.controls, form.orientation === 'vertical', od, L, hd, sH)
+      }
     } else {
       // Near-orthographic top / bottom view using very small FOV
       const size = Math.max(od * 1.5, L * 1.2, 80)
@@ -883,6 +913,8 @@ export default function VesselViewer({ form }: { form: VesselDesignState }) {
     const ctx = ctxRef.current
     if (!ctx) return
     const inOrtho = viewModeRef.current !== '3d'
+    // Vessel dimensions may have changed — saved 3D position is now stale
+    saved3dCamera.current = null
     disposeGroup(ctx.vesselGroup)
     buildVessel(ctx.vesselGroup, ctx.camera, ctx.controls, form, inOrtho)
 
