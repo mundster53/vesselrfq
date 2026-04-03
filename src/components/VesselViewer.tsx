@@ -857,8 +857,6 @@ export default function VesselViewer({ form }: { form: VesselDesignState }) {
   function switchView(mode: ViewMode) {
     const ctx = ctxRef.current
     if (!ctx) return
-    viewModeRef.current = mode
-    setViewMode(mode)
 
     const od  = Math.max(parseFloat(form.shellOd) || 48, 6)
     const L   = Math.max(parseFloat(form.shellLength) || 120, 8)
@@ -866,7 +864,7 @@ export default function VesselViewer({ form }: { form: VesselDesignState }) {
     const hd  = headDepth(r, form.headType || '2:1 Elliptical')
     const sH  = Math.max(r * 0.20, 6)
 
-    // Save 3D camera state before leaving it
+    // Save 3D camera state before leaving it — must run before viewModeRef is updated
     if (viewModeRef.current === '3d' && mode !== '3d') {
       saved3dCamera.current = {
         position: ctx.camera.position.clone(),
@@ -876,6 +874,9 @@ export default function VesselViewer({ form }: { form: VesselDesignState }) {
         far:      ctx.camera.far,
       }
     }
+
+    viewModeRef.current = mode
+    setViewMode(mode)
 
     if (mode === '3d') {
       if (saved3dCamera.current) {
