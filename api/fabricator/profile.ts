@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { eq } from 'drizzle-orm'
 import { db } from '../_lib/db.js'
-import { fabricatorProfiles } from '../../db/schema.js'
+import { fabricatorProfiles, users } from '../../db/schema.js'
 import { requireAuth } from '../_lib/auth.js'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -75,6 +75,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           rfqEmail:    rfqEmail.trim(),
         },
       })
+
+    // Ensure active=true — webhook may have missed in test mode.
+    // Reaching this endpoint requires a valid JWT + Stripe success redirect.
+    await db
+      .update(users)
+      .set({ active: true })
+      .where(eq(users.id, auth.userId))
 
     return res.status(200).json({ ok: true })
   }
