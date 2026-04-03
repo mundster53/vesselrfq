@@ -5,6 +5,7 @@ export interface AuthUser {
   id: number
   email: string
   role: 'buyer' | 'fabricator'
+  active?: boolean
 }
 
 interface AuthContextValue {

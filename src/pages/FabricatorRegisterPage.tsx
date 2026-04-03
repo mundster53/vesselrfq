@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { ApiError } from '../lib/api'
+import { api, ApiError } from '../lib/api'
 
 export default function FabricatorRegisterPage() {
   const { register } = useAuth()
@@ -21,7 +21,8 @@ export default function FabricatorRegisterPage() {
     setLoading(true)
     try {
       await register(email, password, 'fabricator')
-      navigate('/fabricator-dashboard')
+      const { url } = await api.post<{ url: string }>('/fabricator/checkout')
+      window.location.href = url
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Registration failed')
     } finally {
@@ -105,7 +106,7 @@ export default function FabricatorRegisterPage() {
             disabled={loading || !agreed}
             className="w-full bg-slate-900 hover:bg-slate-800 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium text-sm rounded-lg px-4 py-2.5 transition-colors"
           >
-            {loading ? 'Creating account…' : 'Create fabricator account'}
+            {loading ? 'Redirecting to payment…' : 'Create fabricator account'}
           </button>
         </form>
 

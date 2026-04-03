@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
+import FabricatorRoute from './components/FabricatorRoute'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import DashboardPage from './pages/DashboardPage'
@@ -46,7 +47,9 @@ export default function App() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/designer" element={<VesselDesignerPage />} />
             <Route path="/rfq-submitted" element={<RfqSubmittedPage />} />
-            <Route path="/fabricator-dashboard" element={<FabricatorDashboard />} />
+            <Route element={<FabricatorRoute />}>
+              <Route path="/fabricator-dashboard" element={<FabricatorDashboard />} />
+            </Route>
           </Route>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Routes>

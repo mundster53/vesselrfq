@@ -12,7 +12,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!auth) return
 
     const [user] = await db
-      .select({ id: users.id, email: users.email, role: users.role })
+      .select({ id: users.id, email: users.email, role: users.role, active: users.active })
       .from(users)
       .where(eq(users.id, auth.userId))
       .limit(1)
