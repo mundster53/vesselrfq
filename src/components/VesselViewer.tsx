@@ -756,12 +756,16 @@ function buildVessel(
 
 // ── Three.js context ─────────────────────────────────────────────────────────
 interface Ctx {
-  renderer: THREE.WebGLRenderer
-  camera: THREE.PerspectiveCamera
-  controls: OrbitControls
+  renderer:   THREE.WebGLRenderer
+  camera:     THREE.PerspectiveCamera
+  controls:   OrbitControls
   vesselGroup: THREE.Group
-  grid: THREE.GridHelper
-  frameId: number
+  grid:       THREE.GridHelper
+  frameId:    number
+  scene:      THREE.Scene
+  keyLight:   THREE.DirectionalLight
+  fillLight:  THREE.DirectionalLight
+  rimLight:   THREE.DirectionalLight
 }
 
 type ViewMode = '3d' | 'top' | 'bottom'
@@ -841,7 +845,7 @@ export default function VesselViewer({ form }: { form: VesselDesignState }) {
     })
     ro.observe(mount)
 
-    ctxRef.current = { renderer, camera, controls, vesselGroup, grid, frameId }
+    ctxRef.current = { renderer, camera, controls, vesselGroup, grid, frameId, scene, keyLight: key, fillLight: fill, rimLight: rim }
 
     return () => {
       cancelAnimationFrame(frameId)
@@ -879,6 +883,17 @@ export default function VesselViewer({ form }: { form: VesselDesignState }) {
     setViewMode(mode)
 
     if (mode === '3d') {
+      // Restore fog
+      ctx.scene.fog = new THREE.FogExp2(0x1a1f2e, 0.00055)
+
+      // Restore original light positions
+      ctx.keyLight.position.set(160, 260, 130)
+      ctx.keyLight.intensity = 1.05
+      ctx.fillLight.position.set(-160, 70, -110)
+      ctx.fillLight.intensity = 0.48
+      ctx.rimLight.position.set(0, -120, -220)
+      ctx.rimLight.intensity = 0.28
+
       if (saved3dCamera.current) {
         const s = saved3dCamera.current
         ctx.camera.fov  = s.fov
@@ -897,6 +912,29 @@ export default function VesselViewer({ form }: { form: VesselDesignState }) {
       const size = Math.max(od * 1.5, L * 1.2, 80)
       const dist = size * 14
       const sign = mode === 'top' ? 1 : -1
+
+      // Disable fog — camera is far away and fog would darken the vessel
+      ctx.scene.fog = null
+
+      // Reposition lights to fire from the camera's direction so the visible
+      // face is fully illuminated regardless of view angle.
+      if (mode === 'top') {
+        // Camera above looking down — light from above to hit upward-facing surfaces
+        ctx.keyLight.position.set(0, 500, 1)
+        ctx.keyLight.intensity = 1.1
+        ctx.fillLight.position.set(500, 300, 0)
+        ctx.fillLight.intensity = 0.55
+        ctx.rimLight.position.set(-300, 200, 300)
+        ctx.rimLight.intensity = 0.35
+      } else {
+        // Camera below looking up — light from below to hit downward-facing surfaces
+        ctx.keyLight.position.set(0, -500, 1)
+        ctx.keyLight.intensity = 1.1
+        ctx.fillLight.position.set(500, -300, 0)
+        ctx.fillLight.intensity = 0.55
+        ctx.rimLight.position.set(-300, -200, 300)
+        ctx.rimLight.intensity = 0.35
+      }
 
       ctx.camera.fov  = 5
       ctx.camera.near = dist * 0.04
