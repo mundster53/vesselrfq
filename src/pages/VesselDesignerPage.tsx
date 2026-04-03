@@ -375,15 +375,17 @@ const MANWAY_SIZES = ['18"', '20"', '24"', 'Other']
 const MANWAY_COVER_TYPES = ['Blind Flange', 'Tube Turn Head Cover']
 const MANWAY_COVER_SUPPORT = ['Hinged', 'Loose', 'Davit Arm']
 
-function NozzleCard({ nozzle, onUpdate, onRemove, locationOptions, serviceOptions }: {
+function NozzleCard({ nozzle, onUpdate, onRemove, locationOptions, serviceOptions, orientation }: {
   nozzle: NozzleRow
   onUpdate: <K extends keyof NozzleRow>(key: K, value: NozzleRow[K]) => void
   onRemove: () => void
   locationOptions: { value: NozzleLocation; label: string }[]
   serviceOptions?: string[]
+  orientation?: Orientation
 }) {
   const isManway = nozzle.nozzleType === 'manway'
   const isSightGlass = nozzle.nozzleType === 'sight_glass'
+  const isAgitator = nozzle.nozzleType === 'agitator'
 
   return (
     <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
@@ -412,18 +414,24 @@ function NozzleCard({ nozzle, onUpdate, onRemove, locationOptions, serviceOption
         <div>
           <p className="text-xs text-slate-500 font-medium mb-1">Nozzle Type</p>
           <div className="flex flex-wrap gap-3">
-            {([['standard', 'Standard'], ['sight_glass', 'Sight Glass'], ['manway', 'Manway']] as [NozzleType, string][]).map(([val, label]) => (
-              <label key={val} className="flex items-center gap-1.5 cursor-pointer">
-                <input type="radio" name={`nozzleType-${nozzle.mark}`} value={val}
-                  checked={(nozzle.nozzleType ?? 'standard') === val}
-                  onChange={() => onUpdate('nozzleType', val)}
-                  className="accent-blue-600" />
-                <span className="text-sm text-slate-700">{label}</span>
-              </label>
-            ))}
+            {([['standard', 'Standard'], ['sight_glass', 'Sight Glass'], ['manway', 'Manway'], ['agitator', 'Agitator']] as [NozzleType, string][]).map(([val, label]) => {
+              if (val === 'agitator' && orientation !== 'vertical') return null
+              return (
+                <label key={val} className="flex items-center gap-1.5 cursor-pointer">
+                  <input type="radio" name={`nozzleType-${nozzle.mark}`} value={val}
+                    checked={(nozzle.nozzleType ?? 'standard') === val}
+                    onChange={() => onUpdate('nozzleType', val)}
+                    className="accent-blue-600" />
+                  <span className="text-sm text-slate-700">{label}</span>
+                </label>
+              )
+            })}
           </div>
           {isSightGlass && (
             <p className="text-xs text-slate-500 mt-1.5">Sight glass — specify size and rating below. Cover type and glass type in Remarks.</p>
+          )}
+          {isAgitator && (
+            <p className="text-xs text-slate-500 mt-1.5">Agitator size and drive details to be confirmed on approval drawings.</p>
           )}
         </div>
 
@@ -598,6 +606,30 @@ export default function VesselDesignerPage() {
   const hxCustomTubesheetMatRef   = useRef<HTMLInputElement>(null)
   const hxCustomTubeMatRef        = useRef<HTMLInputElement>(null)
 
+  // ── Coil state ─────────────────────────────────────────────────────────────
+  const [internalCoilEnabled, setInternalCoilEnabled]     = useState(false)
+  const [internalCoilPipeSize, setInternalCoilPipeSize]   = useState('2"')
+  const [internalCoilTurns, setInternalCoilTurns]         = useState(1)
+  const [externalCoilEnabled, setExternalCoilEnabled]     = useState(false)
+  const [externalCoilType, setExternalCoilType]           = useState<'Dimple jacket' | 'Half-pipe coil'>('Dimple jacket')
+  const [externalCoilPipeSize, setExternalCoilPipeSize]   = useState('2"')
+  const [externalCoilCoverage, setExternalCoilCoverage]   = useState('1/2')
+
+  // ── Insulation state ────────────────────────────────────────────────────────
+  const [insulated, setInsulated]                         = useState(false)
+  const [insulationType, setInsulationType]               = useState('Mineral wool')
+  const [insulationOther, setInsulationOther]             = useState('')
+  const [insulationThickness, setInsulationThickness]     = useState('')
+  const [insulationJacket, setInsulationJacket]           = useState('Aluminum')
+  const [insulationShell, setInsulationShell]             = useState(true)
+  const [insulationHeads, setInsulationHeads]             = useState(true)
+
+  // ── Painting state ──────────────────────────────────────────────────────────
+  const [surfacePrep, setSurfacePrep]   = useState('SSPC-SP6 Commercial blast')
+  const [primer, setPrimer]             = useState('Inorganic zinc')
+  const [topcoat, setTopcoat]           = useState('Epoxy')
+  const [finishType, setFinishType]     = useState('Mill finish')
+
   // ── HX Wizard state ────────────────────────────────────────────────────────
   const [hxStep, setHxStep]               = useState(1)
   const [hxStepsDone, setHxStepsDone]     = useState<Set<number>>(new Set())
@@ -771,10 +803,33 @@ export default function VesselDesignerPage() {
           saddleWidth: form.saddleWidth || undefined,
           fabricatorId: shopId || undefined,
           notes: form.notes || undefined,
-          nozzles: form.nozzles.map(n => ({
-            ...n,
-            material: n.material === NOZZLE_MATERIAL_SENTINEL ? n.materialCustom : n.material,
-          })),
+          nozzles: [
+            ...form.nozzles.map(n => ({
+              ...n,
+              material: n.material === NOZZLE_MATERIAL_SENTINEL ? n.materialCustom : n.material,
+            })),
+            ...(internalCoilEnabled ? [
+              { mark: 'CI', service: 'Coil Inlet',  size: internalCoilPipeSize, autoGenerated: true },
+              { mark: 'CO', service: 'Coil Outlet', size: internalCoilPipeSize, autoGenerated: true },
+            ] : []),
+          ],
+          internalCoil: internalCoilEnabled,
+          internalCoilPipeSize: internalCoilEnabled ? internalCoilPipeSize : undefined,
+          internalCoilTurns: internalCoilEnabled ? internalCoilTurns : undefined,
+          externalCoil: externalCoilEnabled,
+          externalCoilType: externalCoilEnabled ? externalCoilType : undefined,
+          externalCoilPipeSize: (externalCoilEnabled && externalCoilType === 'Half-pipe coil') ? externalCoilPipeSize : undefined,
+          externalCoilCoverage: externalCoilEnabled ? externalCoilCoverage : undefined,
+          insulated,
+          insulationType: insulated ? (insulationType === 'Other' ? insulationOther : insulationType) : undefined,
+          insulationThickness: insulated && insulationThickness ? parseFloat(insulationThickness) : undefined,
+          insulationJacket: insulated ? insulationJacket : undefined,
+          insulationShell: insulated ? insulationShell : undefined,
+          insulationHeads: insulated ? insulationHeads : undefined,
+          ...(['SA-240-304', 'SA-240-304L', 'SA-240-316', 'SA-240-316L'].includes(form.shellMaterial)
+            ? { finishType }
+            : { surfacePrep, primer, topcoat }
+          ),
         })
         navigate('/rfq-submitted', {
           state: {
@@ -1047,8 +1102,22 @@ export default function VesselDesignerPage() {
                         onUpdate={(key, value) => updateNozzle(i, key, value)}
                         onRemove={() => removeNozzle(i)}
                         locationOptions={getLocations(form.orientation)}
+                        orientation={form.orientation}
                       />
                     ))}
+                    {internalCoilEnabled && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-xl px-3 py-2.5">
+                        <p className="text-xs font-semibold text-blue-700 mb-1.5">Auto-generated — Internal Coil</p>
+                        {['Coil Inlet', 'Coil Outlet'].map(label => (
+                          <div key={label} className="flex items-center gap-2 text-sm text-blue-800 mb-1 last:mb-0">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-blue-200 text-blue-800">
+                              {label === 'Coil Inlet' ? 'CI' : 'CO'}
+                            </span>
+                            <span>{label} — {internalCoilPipeSize}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     <button type="button" onClick={addNozzle}
                       className="w-full border-2 border-dashed border-slate-300 hover:border-blue-400 text-slate-500 hover:text-blue-600 rounded-xl py-3 text-sm font-medium transition-colors mt-1">
                       + Add Nozzle
@@ -1118,6 +1187,223 @@ export default function VesselDesignerPage() {
                     </div>
                   </section>
                 )}
+
+                {/* ── Coils ─────────────────────────────────────────────── */}
+                <section className="bg-white border border-slate-200 rounded-xl p-5">
+                  <SectionHeader>Coils</SectionHeader>
+                  <div className="space-y-5">
+
+                    {/* Internal coil */}
+                    <div>
+                      <label className="flex items-center gap-2.5 cursor-pointer mb-3">
+                        <input type="checkbox" checked={internalCoilEnabled}
+                          onChange={e => setInternalCoilEnabled(e.target.checked)}
+                          className="accent-blue-600 w-4 h-4" />
+                        <span className="text-sm text-slate-700 font-medium">Internal Coil</span>
+                      </label>
+                      {internalCoilEnabled && (
+                        <div className="ml-6 grid grid-cols-2 gap-4">
+                          <div>
+                            <FieldLabel>Pipe Size</FieldLabel>
+                            <select value={internalCoilPipeSize}
+                              onChange={e => setInternalCoilPipeSize(e.target.value)}
+                              className={selectCls}>
+                              {['1"', '1.5"', '2"', '3"', '4"'].map(s => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                          </div>
+                          <div>
+                            <FieldLabel>Number of Turns</FieldLabel>
+                            <input type="number" min={1} step={1} value={internalCoilTurns}
+                              onChange={e => setInternalCoilTurns(Math.max(1, parseInt(e.target.value) || 1))}
+                              className={inputCls} />
+                          </div>
+                          <p className="col-span-2 text-xs text-slate-400">
+                            Coil Inlet and Coil Outlet nozzles have been added to the nozzle schedule above.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* External coil */}
+                    <div>
+                      <label className="flex items-center gap-2.5 cursor-pointer mb-3">
+                        <input type="checkbox" checked={externalCoilEnabled}
+                          onChange={e => setExternalCoilEnabled(e.target.checked)}
+                          className="accent-blue-600 w-4 h-4" />
+                        <span className="text-sm text-slate-700 font-medium">External Coil / Jacket</span>
+                      </label>
+                      {externalCoilEnabled && (
+                        <div className="ml-6 space-y-4">
+                          <div>
+                            <FieldLabel>Type</FieldLabel>
+                            <div className="flex gap-6">
+                              {(['Dimple jacket', 'Half-pipe coil'] as const).map(t => (
+                                <label key={t} className="flex items-center gap-2 cursor-pointer">
+                                  <input type="radio" name="externalCoilType" value={t}
+                                    checked={externalCoilType === t}
+                                    onChange={() => setExternalCoilType(t)}
+                                    className="accent-blue-600" />
+                                  <span className="text-sm text-slate-700">{t}</span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+                          {externalCoilType === 'Half-pipe coil' && (
+                            <div>
+                              <FieldLabel>Pipe Size</FieldLabel>
+                              <select value={externalCoilPipeSize}
+                                onChange={e => setExternalCoilPipeSize(e.target.value)}
+                                className={selectCls}>
+                                {['2"', '3"', '4"'].map(s => <option key={s} value={s}>{s}</option>)}
+                              </select>
+                            </div>
+                          )}
+                          <div>
+                            <FieldLabel>Coverage</FieldLabel>
+                            <select value={externalCoilCoverage}
+                              onChange={e => setExternalCoilCoverage(e.target.value)}
+                              className={selectCls}>
+                              <option value="1/4">1/4</option>
+                              <option value="1/2">1/2</option>
+                              <option value="3/4">3/4</option>
+                              <option value="Full">Full</option>
+                            </select>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </section>
+
+                {/* ── Insulation ────────────────────────────────────────── */}
+                <section className="bg-white border border-slate-200 rounded-xl p-5">
+                  <SectionHeader>Insulation</SectionHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <FieldLabel>Insulation Required</FieldLabel>
+                      <div className="flex gap-6">
+                        {([['yes', 'Yes'], ['no', 'No']] as const).map(([val, label]) => (
+                          <label key={val} className="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="insulated" value={val}
+                              checked={insulated === (val === 'yes')}
+                              onChange={() => setInsulated(val === 'yes')}
+                              className="accent-blue-600" />
+                            <span className="text-sm text-slate-700">{label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                    {insulated && (
+                      <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <FieldLabel>Insulation Type</FieldLabel>
+                            <select value={insulationType}
+                              onChange={e => setInsulationType(e.target.value)}
+                              className={selectCls}>
+                              {['Mineral wool', 'Calcium silicate', 'Cellular glass', 'Foam glass', 'Aerogel', 'Other'].map(t => (
+                                <option key={t} value={t}>{t}</option>
+                              ))}
+                            </select>
+                            {insulationType === 'Other' && (
+                              <input type="text" value={insulationOther}
+                                onChange={e => setInsulationOther(e.target.value)}
+                                placeholder="Specify insulation type…"
+                                className={inputCls + ' mt-2'} />
+                            )}
+                          </div>
+                          <div>
+                            <FieldLabel unit="inches">Thickness</FieldLabel>
+                            <input type="number" min={0} step={0.5} value={insulationThickness}
+                              onChange={e => setInsulationThickness(e.target.value)}
+                              className={inputCls} placeholder="2" />
+                          </div>
+                          <div>
+                            <FieldLabel>Jacket Material</FieldLabel>
+                            <select value={insulationJacket}
+                              onChange={e => setInsulationJacket(e.target.value)}
+                              className={selectCls}>
+                              {['Aluminum', 'Stainless steel', 'Carbon steel'].map(m => (
+                                <option key={m} value={m}>{m}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                        <div>
+                          <FieldLabel>Coverage</FieldLabel>
+                          <div className="flex gap-6">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input type="checkbox" checked={insulationShell}
+                                onChange={e => setInsulationShell(e.target.checked)}
+                                className="accent-blue-600 w-4 h-4" />
+                              <span className="text-sm text-slate-700">Shell</span>
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input type="checkbox" checked={insulationHeads}
+                                onChange={e => setInsulationHeads(e.target.checked)}
+                                className="accent-blue-600 w-4 h-4" />
+                              <span className="text-sm text-slate-700">Heads</span>
+                            </label>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </section>
+
+                {/* ── Painting and Surface Prep ──────────────────────────── */}
+                {(() => {
+                  const isStainless = ['SA-240-304', 'SA-240-304L', 'SA-240-316', 'SA-240-316L'].includes(form.shellMaterial)
+                  return (
+                    <section className="bg-white border border-slate-200 rounded-xl p-5">
+                      <SectionHeader>Painting and Surface Prep</SectionHeader>
+                      {isStainless ? (
+                        <div className="space-y-3">
+                          <FieldLabel>Finish</FieldLabel>
+                          <div className="flex flex-col gap-2">
+                            {(['Mill finish', 'Brush blast — matte finish'] as const).map(opt => (
+                              <label key={opt} className="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="finishType" value={opt}
+                                  checked={finishType === opt}
+                                  onChange={() => setFinishType(opt)}
+                                  className="accent-blue-600" />
+                                <span className="text-sm text-slate-700">{opt}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <div>
+                            <FieldLabel>Surface Prep</FieldLabel>
+                            <select value={surfacePrep} onChange={e => setSurfacePrep(e.target.value)} className={selectCls}>
+                              <option value="SSPC-SP6 Commercial blast">SSPC-SP6 Commercial blast (Typical)</option>
+                              <option value="SSPC-SP10 Near white blast">SSPC-SP10 Near white blast</option>
+                              <option value="SSPC-SP1 Solvent clean">SSPC-SP1 Solvent clean</option>
+                            </select>
+                          </div>
+                          <div>
+                            <FieldLabel>Primer</FieldLabel>
+                            <select value={primer} onChange={e => setPrimer(e.target.value)} className={selectCls}>
+                              <option value="Inorganic zinc">Inorganic zinc (Typical)</option>
+                              <option value="Epoxy primer">Epoxy primer</option>
+                              <option value="Red oxide">Red oxide</option>
+                            </select>
+                          </div>
+                          <div>
+                            <FieldLabel>Topcoat</FieldLabel>
+                            <select value={topcoat} onChange={e => setTopcoat(e.target.value)} className={selectCls}>
+                              <option value="Epoxy">Epoxy (Typical)</option>
+                              <option value="Polyurethane">Polyurethane</option>
+                              <option value="Alkyd">Alkyd</option>
+                              <option value="High temp coating">High temp coating</option>
+                            </select>
+                          </div>
+                        </div>
+                      )}
+                    </section>
+                  )
+                })()}
 
                 {/* ── Notes ─────────────────────────────────────────────── */}
                 <section className="bg-white border border-slate-200 rounded-xl p-5">

@@ -35,7 +35,7 @@ export type NozzleMaterial =
   | 'SA-182-F304'
   | 'SA-182-F316'
 
-export type NozzleType = 'standard' | 'sight_glass' | 'manway'
+export type NozzleType = 'standard' | 'sight_glass' | 'manway' | 'agitator'
 
 export interface NozzleRow {
   mark: string
