@@ -1,4 +1,6 @@
 import { useState, useEffect, type FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 import { api, ApiError } from '../lib/api'
 
 const US_STATES = [
@@ -33,6 +35,8 @@ interface ProfileData {
 }
 
 export default function FabricatorOnboardingPage() {
+  const { refresh } = useAuth()
+  const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [checkLoading, setCheckLoading] = useState(true)
@@ -51,12 +55,12 @@ export default function FabricatorOnboardingPage() {
     api.get<{ exists: boolean; profile?: ProfileData }>('/fabricator/profile')
       .then(({ exists, profile }) => {
         if (exists && profile) {
-          window.location.href = '/app/fabricator-dashboard'
+          navigate('/fabricator-dashboard', { replace: true })
         }
       })
       .catch(() => {}) // ignore — just show the form
       .finally(() => setCheckLoading(false))
-  }, [])
+  }, [navigate])
 
   function toggleStamp(code: string) {
     setStamps(prev =>
@@ -77,7 +81,8 @@ export default function FabricatorOnboardingPage() {
         shopName, city, state, stamps, contactName, phone,
         website: website.trim() || null,
       })
-      window.location.href = '/app/fabricator-dashboard'
+      await refresh()
+      navigate('/fabricator-dashboard', { replace: true })
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Failed to save profile. Please try again.')
       setLoading(false)
