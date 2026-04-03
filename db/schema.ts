@@ -142,5 +142,5 @@ export const nozzles = pgTable('nozzles', {
   material: text('material'),
   service: text('service'),
   quantity: integer('quantity').default(1).notNull(),
-  location: text('location', { enum: ['shell', 'left_head', 'right_head'] }).notNull(),
+  location: text('location', { enum: ['shell', 'left_head', 'right_head'] }),
 })
