@@ -3,26 +3,35 @@ import { Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { api } from '../lib/api'
 
+function dbg(msg: string, data?: unknown) {
+  const entry = `[${new Date().toISOString()}] [FabricatorRoute] ${msg}${data !== undefined ? ' ' + JSON.stringify(data) : ''}`
+  console.log(entry)
+  try {
+    const prev = JSON.parse(localStorage.getItem('vrfq_debug') ?? '[]') as string[]
+    localStorage.setItem('vrfq_debug', JSON.stringify([...prev.slice(-20), entry]))
+  } catch {}
+}
+
 export default function FabricatorRoute() {
   const { user } = useAuth()
   const [checkoutError, setCheckoutError] = useState('')
 
-  console.log('[FabricatorRoute] user:', user, '| active:', user?.active, '| typeof active:', typeof user?.active)
+  dbg('render', { role: user?.role, active: user?.active, typeofActive: typeof user?.active })
 
   const needsPayment = user?.role === 'fabricator' && user.active === false
 
-  console.log('[FabricatorRoute] needsPayment:', needsPayment)
+  dbg('needsPayment=' + needsPayment)
 
   useEffect(() => {
     if (!needsPayment) return
-    console.log('[FabricatorRoute] needsPayment=true, calling checkout API')
+    dbg('calling checkout API')
     api.post<{ url: string }>('/fabricator/checkout', {})
       .then(({ url }) => {
-        console.log('[FabricatorRoute] checkout URL received:', url)
+        dbg('checkout URL received', { url })
         window.location.href = url
       })
       .catch((err) => {
-        console.error('[FabricatorRoute] checkout failed:', err)
+        dbg('checkout failed', { message: (err as Error)?.message })
         setCheckoutError('Unable to start checkout. Please contact support.')
       })
   }, [needsPayment])

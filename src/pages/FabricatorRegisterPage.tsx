@@ -3,9 +3,19 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { api, ApiError } from '../lib/api'
 
+function dbg(msg: string, data?: unknown) {
+  const entry = `[${new Date().toISOString()}] ${msg}${data !== undefined ? ' ' + JSON.stringify(data) : ''}`
+  console.log(entry)
+  try {
+    const prev = JSON.parse(localStorage.getItem('vrfq_debug') ?? '[]') as string[]
+    localStorage.setItem('vrfq_debug', JSON.stringify([...prev.slice(-20), entry]))
+  } catch {}
+}
+
 export default function FabricatorRegisterPage() {
   const { register, logout } = useAuth()
   const navigate = useNavigate()
+  dbg('FabricatorRegisterPage mounted')
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -19,27 +29,29 @@ export default function FabricatorRegisterPage() {
     setError('')
     if (password !== confirm) return setError('Passwords do not match')
     setLoading(true)
+    localStorage.setItem('vrfq_debug', '[]')
     try {
-      console.log('[register] step 1 — calling register()')
+      dbg('step 1 — calling register()')
       await register(email, password, 'fabricator')
-      console.log('[register] step 2 — register() succeeded, calling checkout')
+      dbg('step 2 — register() succeeded, calling /api/fabricator/checkout')
       try {
-        const { url } = await api.post<{ url: string }>('/fabricator/checkout', {})
-        console.log('[register] step 3 — checkout response url:', url)
+        const checkoutRes = await api.post<{ url: string }>('/fabricator/checkout', {})
+        dbg('step 3 — checkout response', checkoutRes)
+        const { url } = checkoutRes
         if (!url) {
-          console.error('[register] step 3 ERROR — url is null/undefined, aborting redirect')
+          dbg('step 3 ERROR — url is null/undefined')
           throw new Error('No checkout URL returned')
         }
-        console.log('[register] step 4 — setting window.location.href to Stripe URL')
+        dbg('step 4 — redirecting to Stripe', { url })
         window.location.href = url
       } catch (checkoutErr) {
-        console.error('[register] checkout failed:', checkoutErr)
+        dbg('checkout failed', { message: (checkoutErr as Error)?.message })
         logout()
-        console.log('[register] logged out, redirecting to /fabricators?error=checkout')
+        dbg('logged out — redirecting to /fabricators?error=checkout')
         window.location.href = '/fabricators?error=checkout'
       }
     } catch (err) {
-      console.error('[register] registration failed:', err)
+      dbg('registration failed', { message: (err as Error)?.message })
       setError(err instanceof ApiError ? err.message : 'Registration failed')
     } finally {
       setLoading(false)
