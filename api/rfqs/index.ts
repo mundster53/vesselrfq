@@ -84,6 +84,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       fabricatorId?: string
       notes?: string
+
+      // Painting & surface prep
+      surfacePrep?: string
+      primer?: string
+      topcoat?: string
+      finishType?: string
+
+      // Insulation
+      insulated?: boolean
+      insulationType?: string
+      insulationThickness?: string
+      insulationJacket?: string
+      insulationShell?: boolean
+      insulationHeads?: boolean
+
+      // Coils
+      internalCoil?: boolean
+      internalCoilPipeSize?: string
+      internalCoilTurns?: number
+      externalCoil?: boolean
+      externalCoilType?: string
+      externalCoilPipeSize?: string
+      externalCoilCoverage?: string
+
       nozzles?: Array<{
         mark: string
         size: string
@@ -152,6 +176,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
           fabricatorId: body.fabricatorId || null,
           notes: body.notes || null,
+
+          // Painting & surface prep
+          surfacePrep:         body.surfacePrep ?? null,
+          primer:              body.primer ?? null,
+          topcoat:             body.topcoat ?? null,
+          finishType:          body.finishType ?? null,
+
+          // Insulation
+          insulated:           body.insulated ?? null,
+          insulationType:      body.insulationType ?? null,
+          insulationThickness: body.insulationThickness ?? null,
+          insulationJacket:    body.insulationJacket ?? null,
+          insulationShell:     body.insulationShell ?? null,
+          insulationHeads:     body.insulationHeads ?? null,
+
+          // Coils
+          internalCoil:         body.internalCoil ?? null,
+          internalCoilPipeSize: body.internalCoilPipeSize ?? null,
+          internalCoilTurns:    body.internalCoilTurns ?? null,
+          externalCoil:         body.externalCoil ?? null,
+          externalCoilType:     body.externalCoilType ?? null,
+          externalCoilPipeSize: body.externalCoilPipeSize ?? null,
+          externalCoilCoverage: body.externalCoilCoverage ?? null,
         })
         .returning()
 

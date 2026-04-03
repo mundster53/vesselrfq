@@ -42,6 +42,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         supportType: rfqs.supportType,
         createdAt: rfqs.createdAt,
         buyerEmail: users.email,
+
+        // Painting & surface prep
+        surfacePrep:         rfqs.surfacePrep,
+        primer:              rfqs.primer,
+        topcoat:             rfqs.topcoat,
+        finishType:          rfqs.finishType,
+
+        // Insulation
+        insulated:           rfqs.insulated,
+        insulationType:      rfqs.insulationType,
+        insulationThickness: rfqs.insulationThickness,
+        insulationJacket:    rfqs.insulationJacket,
+        insulationShell:     rfqs.insulationShell,
+        insulationHeads:     rfqs.insulationHeads,
+
+        // Coils
+        internalCoil:         rfqs.internalCoil,
+        internalCoilPipeSize: rfqs.internalCoilPipeSize,
+        internalCoilTurns:    rfqs.internalCoilTurns,
+        externalCoil:         rfqs.externalCoil,
+        externalCoilType:     rfqs.externalCoilType,
+        externalCoilPipeSize: rfqs.externalCoilPipeSize,
+        externalCoilCoverage: rfqs.externalCoilCoverage,
       })
       .from(rfqs)
       .innerJoin(users, eq(rfqs.buyerId, users.id))

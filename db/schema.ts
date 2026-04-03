@@ -75,6 +75,29 @@ export const rfqs = pgTable('rfqs', {
 
   fabricatorId: text('fabricator_id'),
 
+  // Painting & surface prep
+  surfacePrep:         text('surface_prep'),
+  primer:              text('primer'),
+  topcoat:             text('topcoat'),
+  finishType:          text('finish_type'),
+
+  // Insulation
+  insulated:           boolean('insulated'),
+  insulationType:      text('insulation_type'),
+  insulationThickness: text('insulation_thickness'),
+  insulationJacket:    text('insulation_jacket'),
+  insulationShell:     boolean('insulation_shell'),
+  insulationHeads:     boolean('insulation_heads'),
+
+  // Coils
+  internalCoil:         boolean('internal_coil'),
+  internalCoilPipeSize: text('internal_coil_pipe_size'),
+  internalCoilTurns:    integer('internal_coil_turns'),
+  externalCoil:         boolean('external_coil'),
+  externalCoilType:     text('external_coil_type'),
+  externalCoilPipeSize: text('external_coil_pipe_size'),
+  externalCoilCoverage: text('external_coil_coverage'),
+
   notes: text('notes'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),

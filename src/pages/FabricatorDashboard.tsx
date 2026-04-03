@@ -40,6 +40,26 @@ interface RfqRecord {
   status: RfqStatus
   dateReceived: string
   quoteAmount: string
+  // Painting
+  surfacePrep: string | null
+  primer: string | null
+  topcoat: string | null
+  finishType: string | null
+  // Insulation
+  insulated: boolean | null
+  insulationType: string | null
+  insulationThickness: string | null
+  insulationJacket: string | null
+  insulationShell: boolean | null
+  insulationHeads: boolean | null
+  // Coils
+  internalCoil: boolean | null
+  internalCoilPipeSize: string | null
+  internalCoilTurns: number | null
+  externalCoil: boolean | null
+  externalCoilType: string | null
+  externalCoilPipeSize: string | null
+  externalCoilCoverage: string | null
 }
 
 interface SpecItem {
@@ -81,6 +101,26 @@ interface ApiRfq {
   createdAt: string
   buyerEmail: string
   nozzles: ApiNozzle[]
+  // Painting
+  surfacePrep: string | null
+  primer: string | null
+  topcoat: string | null
+  finishType: string | null
+  // Insulation
+  insulated: boolean | null
+  insulationType: string | null
+  insulationThickness: string | null
+  insulationJacket: string | null
+  insulationShell: boolean | null
+  insulationHeads: boolean | null
+  // Coils
+  internalCoil: boolean | null
+  internalCoilPipeSize: string | null
+  internalCoilTurns: number | null
+  externalCoil: boolean | null
+  externalCoilType: string | null
+  externalCoilPipeSize: string | null
+  externalCoilCoverage: string | null
 }
 
 // ── Mapping helpers ───────────────────────────────────────────────────────────
@@ -128,6 +168,23 @@ function mapApiRfq(r: ApiRfq): RfqRecord {
     status:       mapDbStatus(r.status),
     dateReceived: fmtReceived(r.createdAt),
     quoteAmount:  '',
+    surfacePrep:         r.surfacePrep,
+    primer:              r.primer,
+    topcoat:             r.topcoat,
+    finishType:          r.finishType,
+    insulated:           r.insulated,
+    insulationType:      r.insulationType,
+    insulationThickness: r.insulationThickness,
+    insulationJacket:    r.insulationJacket,
+    insulationShell:     r.insulationShell,
+    insulationHeads:     r.insulationHeads,
+    internalCoil:         r.internalCoil,
+    internalCoilPipeSize: r.internalCoilPipeSize,
+    internalCoilTurns:    r.internalCoilTurns,
+    externalCoil:         r.externalCoil,
+    externalCoilType:     r.externalCoilType,
+    externalCoilPipeSize: r.externalCoilPipeSize,
+    externalCoilCoverage: r.externalCoilCoverage,
   }
 }
 
@@ -373,6 +430,37 @@ function printRfq(rfq: RfqRecord) {
     <tbody>${nozzleRows || '<tr><td colspan="4" style="color:#94a3b8;padding:8px 10px">No nozzles specified</td></tr>'}</tbody>
   </table>
 
+  ${(rfq.surfacePrep || rfq.primer || rfq.topcoat || rfq.finishType) ? `
+  <h2>Painting &amp; Surface Prep</h2>
+  <table class="spec-table">
+    ${rfq.surfacePrep  ? specRow('Surface Prep', rfq.surfacePrep)  : ''}
+    ${rfq.primer       ? specRow('Primer',        rfq.primer)       : ''}
+    ${rfq.topcoat      ? specRow('Topcoat',       rfq.topcoat)      : ''}
+    ${rfq.finishType   ? specRow('Finish',         rfq.finishType)   : ''}
+  </table>` : ''}
+
+  ${rfq.insulated ? `
+  <h2>Insulation</h2>
+  <table class="spec-table">
+    ${rfq.insulationType      ? specRow('Type',      rfq.insulationType)      : ''}
+    ${rfq.insulationThickness ? specRow('Thickness', rfq.insulationThickness) : ''}
+    ${rfq.insulationJacket    ? specRow('Jacket',    rfq.insulationJacket)    : ''}
+    ${rfq.insulationShell != null ? specRow('Shell', rfq.insulationShell ? 'Yes' : 'No') : ''}
+    ${rfq.insulationHeads != null ? specRow('Heads', rfq.insulationHeads ? 'Yes' : 'No') : ''}
+  </table>` : ''}
+
+  ${(rfq.internalCoil || rfq.externalCoil) ? `
+  <h2>Coils</h2>
+  <table class="spec-table">
+    ${rfq.internalCoil ? specRow('Internal Coil', 'Yes') : ''}
+    ${rfq.internalCoilPipeSize ? specRow('Int. Pipe Size', rfq.internalCoilPipeSize) : ''}
+    ${rfq.internalCoilTurns != null ? specRow('Int. Turns', String(rfq.internalCoilTurns)) : ''}
+    ${rfq.externalCoil ? specRow('External Coil', 'Yes') : ''}
+    ${rfq.externalCoilType ? specRow('Ext. Type', rfq.externalCoilType) : ''}
+    ${rfq.externalCoilPipeSize ? specRow('Ext. Pipe Size', rfq.externalCoilPipeSize) : ''}
+    ${rfq.externalCoilCoverage ? specRow('Ext. Coverage', rfq.externalCoilCoverage) : ''}
+  </table>` : ''}
+
   <div class="footer">
     <span>VesselRFQ &nbsp;·&nbsp; vesselrfq.com &nbsp;·&nbsp; ASME Pressure Vessel Marketplace</span>
     <span>Generated ${today}</span>
@@ -528,6 +616,46 @@ function DetailPanel({
             </tbody>
           </table>
         </Section>
+
+        {/* Painting & Surface Prep */}
+        {(rfq.surfacePrep || rfq.primer || rfq.topcoat || rfq.finishType) && (
+          <Section label="Painting & Surface Prep">
+            <SpecGrid items={[
+              ...(rfq.surfacePrep  ? [{ label: 'Surface Prep', value: rfq.surfacePrep }]  : []),
+              ...(rfq.primer       ? [{ label: 'Primer',       value: rfq.primer }]       : []),
+              ...(rfq.topcoat      ? [{ label: 'Topcoat',      value: rfq.topcoat }]      : []),
+              ...(rfq.finishType   ? [{ label: 'Finish',       value: rfq.finishType }]   : []),
+            ]} />
+          </Section>
+        )}
+
+        {/* Insulation */}
+        {rfq.insulated && (
+          <Section label="Insulation">
+            <SpecGrid items={[
+              ...(rfq.insulationType      ? [{ label: 'Type',      value: rfq.insulationType }]      : []),
+              ...(rfq.insulationThickness ? [{ label: 'Thickness', value: rfq.insulationThickness }] : []),
+              ...(rfq.insulationJacket    ? [{ label: 'Jacket',    value: rfq.insulationJacket }]    : []),
+              ...(rfq.insulationShell != null ? [{ label: 'Shell', value: rfq.insulationShell ? 'Yes' : 'No' }] : []),
+              ...(rfq.insulationHeads != null ? [{ label: 'Heads', value: rfq.insulationHeads ? 'Yes' : 'No' }] : []),
+            ]} />
+          </Section>
+        )}
+
+        {/* Coils */}
+        {(rfq.internalCoil || rfq.externalCoil) && (
+          <Section label="Coils">
+            <SpecGrid items={[
+              ...(rfq.internalCoil ? [{ label: 'Internal Coil', value: 'Yes' }] : []),
+              ...(rfq.internalCoilPipeSize ? [{ label: 'Int. Pipe Size', value: rfq.internalCoilPipeSize }] : []),
+              ...(rfq.internalCoilTurns != null ? [{ label: 'Int. Turns', value: String(rfq.internalCoilTurns) }] : []),
+              ...(rfq.externalCoil ? [{ label: 'External Coil', value: 'Yes' }] : []),
+              ...(rfq.externalCoilType ? [{ label: 'Ext. Type', value: rfq.externalCoilType }] : []),
+              ...(rfq.externalCoilPipeSize ? [{ label: 'Ext. Pipe Size', value: rfq.externalCoilPipeSize }] : []),
+              ...(rfq.externalCoilCoverage ? [{ label: 'Ext. Coverage', value: rfq.externalCoilCoverage }] : []),
+            ]} />
+          </Section>
+        )}
 
         {/* Status & Quote */}
         <Section label="Status & Quote" noDivider>
