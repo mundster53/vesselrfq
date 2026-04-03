@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { api, ApiError } from '../lib/api'
 
 export default function FabricatorRegisterPage() {
-  const { register } = useAuth()
+  const { register, logout } = useAuth()
   const navigate = useNavigate()
 
   const [email, setEmail] = useState('')
@@ -21,8 +21,13 @@ export default function FabricatorRegisterPage() {
     setLoading(true)
     try {
       await register(email, password, 'fabricator')
-      const { url } = await api.post<{ url: string }>('/fabricator/checkout')
-      window.location.href = url
+      try {
+        const { url } = await api.post<{ url: string }>('/fabricator/checkout', {})
+        window.location.href = url
+      } catch {
+        logout()
+        window.location.href = '/fabricators?error=checkout'
+      }
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Registration failed')
     } finally {

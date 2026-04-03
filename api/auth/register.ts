@@ -22,7 +22,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const [user] = await db
       .insert(users)
       .values({ email: email.toLowerCase(), passwordHash, role: assignedRole, active: assignedRole === 'buyer' })
-      .returning({ id: users.id, email: users.email, role: users.role })
+      .returning({ id: users.id, email: users.email, role: users.role, active: users.active })
 
     const token = await signToken({ userId: user.id, role: user.role })
 
