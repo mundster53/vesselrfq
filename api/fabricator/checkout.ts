@@ -58,7 +58,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           quantity: 1,
         },
       ],
-      success_url: 'https://vesselrfq.com/fabricators/success',
+      success_url: 'https://vesselrfq.com/app/fabricator-onboarding',
       cancel_url: 'https://vesselrfq.com/fabricators',
     })
 

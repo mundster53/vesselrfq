@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, integer, numeric, boolean } from 'drizzle-orm/pg-core'
+import { pgTable, serial, text, timestamp, integer, numeric, boolean, unique } from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
@@ -79,6 +79,19 @@ export const rfqs = pgTable('rfqs', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
+
+export const fabricatorProfiles = pgTable('fabricator_profiles', {
+  id:          serial('id').primaryKey(),
+  userId:      integer('user_id').references(() => users.id).notNull(),
+  shopName:    text('shop_name').notNull(),
+  city:        text('city').notNull(),
+  state:       text('state').notNull(),
+  stamps:      text('stamps').array().notNull(),
+  contactName: text('contact_name').notNull(),
+  phone:       text('phone').notNull(),
+  website:     text('website'),
+  createdAt:   timestamp('created_at').defaultNow().notNull(),
+}, (t) => [unique().on(t.userId)])
 
 export const nozzles = pgTable('nozzles', {
   id: serial('id').primaryKey(),

@@ -1,0 +1,575 @@
+{
+  "id": "f8a06d00-c720-45e6-855a-172baed90ac2",
+  "prevId": "c1752b14-a43d-4a5d-b140-3c25457d6348",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.fabricator_profiles": {
+      "name": "fabricator_profiles",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "shop_name": {
+          "name": "shop_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "city": {
+          "name": "city",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "state": {
+          "name": "state",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "stamps": {
+          "name": "stamps",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contact_name": {
+          "name": "contact_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "phone": {
+          "name": "phone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "website": {
+          "name": "website",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "fabricator_profiles_user_id_users_id_fk": {
+          "name": "fabricator_profiles_user_id_users_id_fk",
+          "tableFrom": "fabricator_profiles",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "fabricator_profiles_user_id_unique": {
+          "name": "fabricator_profiles_user_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "user_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.nozzles": {
+      "name": "nozzles",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "rfq_id": {
+          "name": "rfq_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mark": {
+          "name": "mark",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "size": {
+          "name": "size",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rating": {
+          "name": "rating",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "flange_type": {
+          "name": "flange_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "facing": {
+          "name": "facing",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "material": {
+          "name": "material",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "service": {
+          "name": "service",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "quantity": {
+          "name": "quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "location": {
+          "name": "location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "nozzles_rfq_id_rfqs_id_fk": {
+          "name": "nozzles_rfq_id_rfqs_id_fk",
+          "tableFrom": "nozzles",
+          "tableTo": "rfqs",
+          "columnsFrom": [
+            "rfq_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.rfqs": {
+      "name": "rfqs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "buyer_id": {
+          "name": "buyer_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'draft'"
+        },
+        "vessel_type": {
+          "name": "vessel_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "shell_od": {
+          "name": "shell_od",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "shell_length": {
+          "name": "shell_length",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "shell_material": {
+          "name": "shell_material",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "head_type": {
+          "name": "head_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mawp": {
+          "name": "mawp",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "design_temp": {
+          "name": "design_temp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "corrosion_allowance": {
+          "name": "corrosion_allowance",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "support_type": {
+          "name": "support_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "saddle_height": {
+          "name": "saddle_height",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "saddle_width": {
+          "name": "saddle_width",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tema_front_head": {
+          "name": "tema_front_head",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tema_shell": {
+          "name": "tema_shell",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tema_rear_head": {
+          "name": "tema_rear_head",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hx_orientation": {
+          "name": "hx_orientation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "shells_in_series": {
+          "name": "shells_in_series",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "shells_in_parallel": {
+          "name": "shells_in_parallel",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tube_count": {
+          "name": "tube_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tube_od": {
+          "name": "tube_od",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tube_bwg": {
+          "name": "tube_bwg",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tube_length": {
+          "name": "tube_length",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tube_material": {
+          "name": "tube_material",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tube_layout": {
+          "name": "tube_layout",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tube_pitch": {
+          "name": "tube_pitch",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tube_joint": {
+          "name": "tube_joint",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "baffle_type": {
+          "name": "baffle_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "baffle_cut": {
+          "name": "baffle_cut",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "baffle_spacing": {
+          "name": "baffle_spacing",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "impingement_plate": {
+          "name": "impingement_plate",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "shell_side_pressure": {
+          "name": "shell_side_pressure",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "shell_side_temp": {
+          "name": "shell_side_temp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "shell_side_ca": {
+          "name": "shell_side_ca",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "shell_side_fluid": {
+          "name": "shell_side_fluid",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tube_side_pressure": {
+          "name": "tube_side_pressure",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tube_side_temp": {
+          "name": "tube_side_temp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tube_side_ca": {
+          "name": "tube_side_ca",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tube_side_fluid": {
+          "name": "tube_side_fluid",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fabricator_id": {
+          "name": "fabricator_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "rfqs_buyer_id_users_id_fk": {
+          "name": "rfqs_buyer_id_users_id_fk",
+          "tableFrom": "rfqs",
+          "tableTo": "users",
+          "columnsFrom": [
+            "buyer_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.users": {
+      "name": "users",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "password_hash": {
+          "name": "password_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'buyer'"
+        },
+        "active": {
+          "name": "active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "stripe_customer_id": {
+          "name": "stripe_customer_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "users_email_unique": {
+          "name": "users_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

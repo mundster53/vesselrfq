@@ -10,6 +10,7 @@ import VesselDesignerPage from './pages/VesselDesignerPage'
 import RfqSubmittedPage from './pages/RfqSubmittedPage'
 import FabricatorDashboard from './pages/FabricatorDashboard'
 import FabricatorRegisterPage from './pages/FabricatorRegisterPage'
+import FabricatorOnboardingPage from './pages/FabricatorOnboardingPage'
 import TermsPage from './pages/TermsPage'
 import EmbedPage from './pages/EmbedPage'
 
@@ -47,6 +48,7 @@ export default function App() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/designer" element={<VesselDesignerPage />} />
             <Route path="/rfq-submitted" element={<RfqSubmittedPage />} />
+            <Route path="/fabricator-onboarding" element={<FabricatorOnboardingPage />} />
             <Route element={<FabricatorRoute />}>
               <Route path="/fabricator-dashboard" element={<FabricatorDashboard />} />
             </Route>
