@@ -32,10 +32,11 @@ interface ProfileData {
   contactName: string
   phone: string
   website: string
+  rfqEmail: string | null
 }
 
 export default function FabricatorOnboardingPage() {
-  const { refresh } = useAuth()
+  const { user, refresh } = useAuth()
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
@@ -49,6 +50,7 @@ export default function FabricatorOnboardingPage() {
   const [contactName, setContactName] = useState('')
   const [phone, setPhone] = useState('')
   const [website, setWebsite] = useState('')
+  const [rfqEmail, setRfqEmail] = useState(user?.email ?? '')
 
   // If profile already exists, skip onboarding
   useEffect(() => {
@@ -80,6 +82,7 @@ export default function FabricatorOnboardingPage() {
       await api.post('/fabricator/profile', {
         shopName, city, state, stamps, contactName, phone,
         website: website.trim() || null,
+        rfqEmail: rfqEmail.trim(),
       })
       await refresh()
       navigate('/fabricator-dashboard', { replace: true })
@@ -100,7 +103,7 @@ export default function FabricatorOnboardingPage() {
   const stepValid = (() => {
     if (step === 1) return shopName.trim() !== '' && city.trim() !== '' && state !== ''
     if (step === 2) return stamps.length > 0
-    if (step === 3) return contactName.trim() !== '' && phone.trim() !== ''
+    if (step === 3) return contactName.trim() !== '' && phone.trim() !== '' && rfqEmail.trim() !== ''
     return false
   })()
 
@@ -239,6 +242,18 @@ export default function FabricatorOnboardingPage() {
                   className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="(713) 555-0100"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">RFQ notification email</label>
+                <input
+                  type="email"
+                  required
+                  value={rfqEmail}
+                  onChange={e => setRfqEmail(e.target.value)}
+                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <p className="text-xs text-slate-400 mt-1">Where should we send new RFQ alerts?</p>
               </div>
 
               <div>

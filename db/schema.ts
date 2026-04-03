@@ -90,6 +90,7 @@ export const fabricatorProfiles = pgTable('fabricator_profiles', {
   contactName: text('contact_name').notNull(),
   phone:       text('phone').notNull(),
   website:     text('website'),
+  rfqEmail:    text('rfq_email'),
   createdAt:   timestamp('created_at').defaultNow().notNull(),
 }, (t) => [unique().on(t.userId)])
 

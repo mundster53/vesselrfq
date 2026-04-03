@@ -34,7 +34,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === 'POST') {
-    const { shopName, city, state, stamps, contactName, phone, website } = req.body as {
+    const { shopName, city, state, stamps, contactName, phone, website, rfqEmail } = req.body as {
       shopName:    string
       city:        string
       state:       string
@@ -42,9 +42,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       contactName: string
       phone:       string
       website:     string | null
+      rfqEmail:    string
     }
 
-    if (!shopName || !city || !state || !Array.isArray(stamps) || stamps.length === 0 || !contactName || !phone) {
+    if (!shopName || !city || !state || !Array.isArray(stamps) || stamps.length === 0 || !contactName || !phone || !rfqEmail) {
       return res.status(400).json({ error: 'Missing required fields' })
     }
 
@@ -59,6 +60,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         contactName: contactName.trim(),
         phone:       phone.trim(),
         website:     website?.trim() || null,
+        rfqEmail:    rfqEmail.trim(),
       })
       .onConflictDoUpdate({
         target: fabricatorProfiles.userId,
@@ -70,6 +72,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           contactName: contactName.trim(),
           phone:       phone.trim(),
           website:     website?.trim() || null,
+          rfqEmail:    rfqEmail.trim(),
         },
       })
 
