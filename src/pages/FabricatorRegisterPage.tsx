@@ -20,15 +20,26 @@ export default function FabricatorRegisterPage() {
     if (password !== confirm) return setError('Passwords do not match')
     setLoading(true)
     try {
+      console.log('[register] step 1 — calling register()')
       await register(email, password, 'fabricator')
+      console.log('[register] step 2 — register() succeeded, calling checkout')
       try {
         const { url } = await api.post<{ url: string }>('/fabricator/checkout', {})
+        console.log('[register] step 3 — checkout response url:', url)
+        if (!url) {
+          console.error('[register] step 3 ERROR — url is null/undefined, aborting redirect')
+          throw new Error('No checkout URL returned')
+        }
+        console.log('[register] step 4 — setting window.location.href to Stripe URL')
         window.location.href = url
-      } catch {
+      } catch (checkoutErr) {
+        console.error('[register] checkout failed:', checkoutErr)
         logout()
+        console.log('[register] logged out, redirecting to /fabricators?error=checkout')
         window.location.href = '/fabricators?error=checkout'
       }
     } catch (err) {
+      console.error('[register] registration failed:', err)
       setError(err instanceof ApiError ? err.message : 'Registration failed')
     } finally {
       setLoading(false)
