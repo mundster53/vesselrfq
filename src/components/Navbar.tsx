@@ -18,9 +18,16 @@ export default function Navbar() {
         </Link>
         {user && (
           <div className="flex items-center gap-5 text-sm">
-            <Link to="/designer" className="text-slate-300 hover:text-white transition-colors">
-              New RFQ
-            </Link>
+            {user.role === 'buyer' && (
+              <Link to="/designer" className="text-slate-300 hover:text-white transition-colors">
+                New RFQ
+              </Link>
+            )}
+            {user.role === 'buyer' && (
+              <Link to="/buyer-profile" className="text-slate-300 hover:text-white transition-colors">
+                My profile
+              </Link>
+            )}
             <span className="text-slate-500 truncate max-w-xs">{user.email}</span>
             <button
               onClick={handleLogout}

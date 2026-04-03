@@ -94,6 +94,20 @@ export const fabricatorProfiles = pgTable('fabricator_profiles', {
   createdAt:   timestamp('created_at').defaultNow().notNull(),
 }, (t) => [unique().on(t.userId)])
 
+export const buyerProfiles = pgTable('buyer_profiles', {
+  id:          serial('id').primaryKey(),
+  userId:      integer('user_id').references(() => users.id).notNull(),
+  firstName:   text('first_name').notNull(),
+  lastName:    text('last_name').notNull(),
+  email:       text('email').notNull(),
+  companyName: text('company_name').notNull(),
+  jobTitle:    text('job_title').notNull(),
+  phone:       text('phone').notNull(),
+  city:        text('city').notNull(),
+  state:       text('state').notNull(),
+  createdAt:   timestamp('created_at').defaultNow().notNull(),
+}, (t) => [unique().on(t.userId)])
+
 export const nozzles = pgTable('nozzles', {
   id: serial('id').primaryKey(),
   rfqId: integer('rfq_id').references(() => rfqs.id, { onDelete: 'cascade' }).notNull(),

@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import FabricatorRoute from './components/FabricatorRoute'
+import BuyerProfileGuard from './components/BuyerProfileGuard'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import DashboardPage from './pages/DashboardPage'
@@ -11,6 +12,7 @@ import RfqSubmittedPage from './pages/RfqSubmittedPage'
 import FabricatorDashboard from './pages/FabricatorDashboard'
 import FabricatorRegisterPage from './pages/FabricatorRegisterPage'
 import FabricatorOnboardingPage from './pages/FabricatorOnboardingPage'
+import BuyerProfilePage from './pages/BuyerProfilePage'
 import TermsPage from './pages/TermsPage'
 import EmbedPage from './pages/EmbedPage'
 
@@ -45,10 +47,13 @@ export default function App() {
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/embed" element={<EmbedPage />} />
           <Route element={<ProtectedRoute />}>
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/designer" element={<VesselDesignerPage />} />
-            <Route path="/rfq-submitted" element={<RfqSubmittedPage />} />
+            <Route path="/buyer-profile" element={<BuyerProfilePage />} />
             <Route path="/fabricator-onboarding" element={<FabricatorOnboardingPage />} />
+            <Route element={<BuyerProfileGuard />}>
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/designer" element={<VesselDesignerPage />} />
+              <Route path="/rfq-submitted" element={<RfqSubmittedPage />} />
+            </Route>
             <Route element={<FabricatorRoute />}>
               <Route path="/fabricator-dashboard" element={<FabricatorDashboard />} />
             </Route>

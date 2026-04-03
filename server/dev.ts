@@ -7,6 +7,7 @@ import meHandler from '../api/auth/me'
 import rfqsHandler from '../api/rfqs/index'
 import checkoutHandler from '../api/fabricator/checkout'
 import profileHandler from '../api/fabricator/profile'
+import buyerProfileHandler from '../api/buyer/profile'
 
 const app = express()
 app.use(express.json())
@@ -21,6 +22,7 @@ app.all('/api/auth/me', wrap(meHandler))
 app.all('/api/rfqs', wrap(rfqsHandler))
 app.all('/api/fabricator/checkout', wrap(checkoutHandler))
 app.all('/api/fabricator/profile', wrap(profileHandler))
+app.all('/api/buyer/profile', wrap(buyerProfileHandler))
 
 const PORT = 3001
 app.listen(PORT, () => console.log(`API server → http://localhost:${PORT}`))
