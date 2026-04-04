@@ -25,6 +25,49 @@ const STATUS_COLOR_DARK: Record<string, string> = {
   awarded: 'bg-green-900 text-green-200',
 }
 
+interface RfqNozzle {
+  id: number
+  rfqId: number
+  mark: string
+  size: string
+  rating: string | null
+  flangeType: string | null
+  facing: string | null
+  material: string | null
+  service: string | null
+  quantity: number
+  location: string | null
+}
+
+interface RfqFull extends RfqSummary {
+  corrosionAllowance: string | null
+  orientation: string | null
+  supportType: string | null
+  saddleHeight: string | null
+  saddleWidth: string | null
+  // Painting
+  surfacePrep: string | null
+  primer: string | null
+  topcoat: string | null
+  finishType: string | null
+  // Insulation
+  insulated: boolean | null
+  insulationType: string | null
+  insulationThickness: string | null
+  insulationJacket: string | null
+  insulationShell: boolean | null
+  insulationHeads: boolean | null
+  // Coils
+  internalCoil: boolean | null
+  internalCoilPipeSize: string | null
+  internalCoilTurns: number | null
+  externalCoil: boolean | null
+  externalCoilType: string | null
+  externalCoilPipeSize: string | null
+  externalCoilCoverage: string | null
+  nozzles: RfqNozzle[]
+}
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-US', {
     month: 'short',
@@ -43,17 +86,26 @@ function SpecRow({ label, value }: { label: string; value: string | number | nul
   )
 }
 
-function RfqDetailPanel({ rfq, onClose }: { rfq: RfqSummary; onClose: () => void }) {
+function SectionHead({ label }: { label: string }) {
+  return (
+    <div className="text-xs font-medium tracking-widest uppercase text-slate-500 pt-4 pb-1 first:pt-0">
+      {label}
+    </div>
+  )
+}
+
+function RfqDetailPanel({ rfq, onClose }: { rfq: RfqFull; onClose: () => void }) {
   const isTank = rfq.vesselType !== 'heat_exchanger'
   const typeLabel = rfq.vesselType === 'heat_exchanger' ? 'Heat Exchanger' : 'Pressure Vessel / Tank'
+  const hasVerticalAccessories = !isTank ? false : rfq.orientation === 'vertical'
+  const hasPainting = !!(rfq.surfacePrep || rfq.primer || rfq.topcoat || rfq.finishType)
+  const hasInsulation = !!rfq.insulated
+  const hasCoils = !!(rfq.internalCoil || rfq.externalCoil)
 
   return (
     <>
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/40 z-40"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 bg-black/40 z-40" onClick={onClose} />
       {/* Panel */}
       <div className="fixed top-0 right-0 h-full w-full max-w-sm bg-slate-900 shadow-2xl z-50 flex flex-col">
         {/* Header */}
@@ -72,8 +124,8 @@ function RfqDetailPanel({ rfq, onClose }: { rfq: RfqSummary; onClose: () => void
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
-          <div className="flex items-center gap-2">
+        <div className="flex-1 overflow-y-auto px-5 py-4">
+          <div className="mb-3 flex items-center gap-2">
             <span className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLOR_DARK[rfq.status] ?? 'bg-slate-700 text-slate-200'}`}>
               {STATUS_LABEL[rfq.status] ?? rfq.status}
             </span>
@@ -81,32 +133,125 @@ function RfqDetailPanel({ rfq, onClose }: { rfq: RfqSummary; onClose: () => void
           </div>
 
           {/* Vessel Geometry */}
-          <div>
-            <div className="text-xs font-medium tracking-widest uppercase text-slate-500 mb-2">Vessel Geometry</div>
-            <div className="divide-y divide-slate-700/60">
-              <SpecRow label="Shell OD" value={rfq.shellOd ? `${rfq.shellOd}"` : null} />
-              <SpecRow label={isTank ? 'T/T Length' : 'Shell Length'} value={rfq.shellLength ? `${rfq.shellLength}"` : null} />
-              <SpecRow label="Shell Material" value={rfq.shellMaterial} />
-              {isTank && <SpecRow label="Head Type" value={rfq.headType} />}
-            </div>
+          <SectionHead label="Vessel Geometry" />
+          <div className="divide-y divide-slate-700/60 mb-2">
+            <SpecRow label="Shell OD" value={rfq.shellOd ? `${rfq.shellOd}"` : null} />
+            <SpecRow label={isTank ? 'T/T Length' : 'Shell Length'} value={rfq.shellLength ? `${rfq.shellLength}"` : null} />
+            <SpecRow label="Shell Material" value={rfq.shellMaterial} />
+            {isTank && <SpecRow label="Head Type" value={rfq.headType} />}
+            <SpecRow label="Orientation" value={rfq.orientation} />
+            <SpecRow label="Support Type" value={rfq.supportType} />
+            {rfq.supportType === 'saddles' && (
+              <>
+                <SpecRow label="Saddle Height" value={rfq.saddleHeight ? `${rfq.saddleHeight}"` : null} />
+                <SpecRow label="Saddle Width" value={rfq.saddleWidth ? `${rfq.saddleWidth}"` : null} />
+              </>
+            )}
           </div>
 
           {/* Design Conditions */}
-          <div>
-            <div className="text-xs font-medium tracking-widest uppercase text-slate-500 mb-2">Design Conditions</div>
-            <div className="divide-y divide-slate-700/60">
-              <SpecRow label={isTank ? 'MAWP' : 'Shell MAWP'} value={rfq.mawp ? `${rfq.mawp} psig` : null} />
-              <SpecRow label={isTank ? 'Design Temp' : 'Shell Design Temp'} value={rfq.designTemp != null ? `${rfq.designTemp}°F` : null} />
-            </div>
+          <SectionHead label="Design Conditions" />
+          <div className="divide-y divide-slate-700/60 mb-2">
+            <SpecRow label={isTank ? 'MAWP' : 'Shell MAWP'} value={rfq.mawp ? `${rfq.mawp} psig` : null} />
+            <SpecRow label={isTank ? 'Design Temp' : 'Shell Design Temp'} value={rfq.designTemp != null ? `${rfq.designTemp}°F` : null} />
+            <SpecRow label="Corrosion Allow." value={rfq.corrosionAllowance ? `${rfq.corrosionAllowance}"` : null} />
           </div>
 
           {/* Nozzle Schedule */}
-          <div>
-            <div className="text-xs font-medium tracking-widest uppercase text-slate-500 mb-2">Nozzle Schedule</div>
-            <div className="divide-y divide-slate-700/60">
-              <SpecRow label="Total Nozzles" value={rfq.nozzleCount || null} />
+          <SectionHead label="Nozzle Schedule" />
+          {rfq.nozzles.length === 0 ? (
+            <div className="text-slate-500 text-sm mb-2">No nozzles specified</div>
+          ) : (
+            <div className="mb-2 rounded overflow-hidden border border-slate-700">
+              <table className="w-full text-xs border-collapse">
+                <thead>
+                  <tr className="bg-slate-800">
+                    <th className="text-left px-2 py-1.5 font-medium text-slate-400 uppercase tracking-wider text-[10px]">Mark</th>
+                    <th className="text-left px-2 py-1.5 font-medium text-slate-400 uppercase tracking-wider text-[10px]">Size</th>
+                    <th className="text-left px-2 py-1.5 font-medium text-slate-400 uppercase tracking-wider text-[10px]">Rating</th>
+                    <th className="text-left px-2 py-1.5 font-medium text-slate-400 uppercase tracking-wider text-[10px]">Qty</th>
+                    <th className="text-left px-2 py-1.5 font-medium text-slate-400 uppercase tracking-wider text-[10px]">Loc</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rfq.nozzles.map((n, i) => (
+                    <>
+                      <tr key={`${n.id}-a`} className={i % 2 === 0 ? 'bg-slate-900' : 'bg-slate-800/50'}>
+                        <td className="px-2 pt-1.5 pb-0.5 text-blue-400 font-medium">{n.mark}</td>
+                        <td className="px-2 pt-1.5 pb-0.5 text-slate-200">{n.size}</td>
+                        <td className="px-2 pt-1.5 pb-0.5 text-slate-200">{n.rating ?? '—'}</td>
+                        <td className="px-2 pt-1.5 pb-0.5 text-slate-200">{n.quantity}</td>
+                        <td className="px-2 pt-1.5 pb-0.5 text-slate-300">{n.location?.replace('_', ' ') ?? '—'}</td>
+                      </tr>
+                      <tr key={`${n.id}-b`} className={i % 2 === 0 ? 'bg-slate-900' : 'bg-slate-800/50'}>
+                        <td colSpan={5} className="px-2 pb-1.5 pt-0 text-[10px] text-slate-500">
+                          {[
+                            n.flangeType ? `Flange: ${n.flangeType}` : null,
+                            n.facing     ? `Facing: ${n.facing}`     : null,
+                            n.material   ? `Mtl: ${n.material}`      : null,
+                            n.service    ? `Svc: ${n.service}`       : null,
+                          ].filter(Boolean).join(' · ') || '—'}
+                        </td>
+                      </tr>
+                    </>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          </div>
+          )}
+
+          {/* Vertical Vessel Accessories */}
+          {hasVerticalAccessories && (
+            <>
+              <SectionHead label="Vertical Vessel Accessories" />
+              <div className="divide-y divide-slate-700/60 mb-2">
+                <SpecRow label="Orientation" value="Vertical" />
+              </div>
+            </>
+          )}
+
+          {/* Coils */}
+          {hasCoils && (
+            <>
+              <SectionHead label="Coils" />
+              <div className="divide-y divide-slate-700/60 mb-2">
+                {rfq.internalCoil && <SpecRow label="Internal Coil" value="Yes" />}
+                <SpecRow label="Int. Pipe Size" value={rfq.internalCoilPipeSize} />
+                <SpecRow label="Int. Turns" value={rfq.internalCoilTurns} />
+                {rfq.externalCoil && <SpecRow label="External Coil" value="Yes" />}
+                <SpecRow label="Ext. Type" value={rfq.externalCoilType} />
+                <SpecRow label="Ext. Pipe Size" value={rfq.externalCoilPipeSize} />
+                <SpecRow label="Ext. Coverage" value={rfq.externalCoilCoverage} />
+              </div>
+            </>
+          )}
+
+          {/* Insulation */}
+          {hasInsulation && (
+            <>
+              <SectionHead label="Insulation" />
+              <div className="divide-y divide-slate-700/60 mb-2">
+                <SpecRow label="Type" value={rfq.insulationType} />
+                <SpecRow label="Thickness" value={rfq.insulationThickness} />
+                <SpecRow label="Jacket" value={rfq.insulationJacket} />
+                {rfq.insulationShell != null && <SpecRow label="Shell" value={rfq.insulationShell ? 'Yes' : 'No'} />}
+                {rfq.insulationHeads != null && <SpecRow label="Heads" value={rfq.insulationHeads ? 'Yes' : 'No'} />}
+              </div>
+            </>
+          )}
+
+          {/* Painting & Surface Prep */}
+          {hasPainting && (
+            <>
+              <SectionHead label="Painting & Surface Prep" />
+              <div className="divide-y divide-slate-700/60 mb-2">
+                <SpecRow label="Surface Prep" value={rfq.surfacePrep} />
+                <SpecRow label="Primer" value={rfq.primer} />
+                <SpecRow label="Topcoat" value={rfq.topcoat} />
+                <SpecRow label="Finish" value={rfq.finishType} />
+              </div>
+            </>
+          )}
         </div>
       </div>
     </>
@@ -114,14 +259,14 @@ function RfqDetailPanel({ rfq, onClose }: { rfq: RfqSummary; onClose: () => void
 }
 
 export default function DashboardPage() {
-  const [rfqs, setRfqs] = useState<RfqSummary[]>([])
+  const [rfqs, setRfqs] = useState<RfqFull[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [selectedRfq, setSelectedRfq] = useState<RfqSummary | null>(null)
+  const [selectedRfq, setSelectedRfq] = useState<RfqFull | null>(null)
 
   useEffect(() => {
     api
-      .get<{ rfqs: RfqSummary[] }>('/rfqs')
+      .get<{ rfqs: RfqFull[] }>('/rfqs')
       .then(({ rfqs }) => setRfqs(rfqs))
       .catch((err) => setError(err instanceof ApiError ? err.message : 'Failed to load RFQs'))
       .finally(() => setLoading(false))

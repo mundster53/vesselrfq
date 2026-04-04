@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { eq, desc, sql } from 'drizzle-orm'
+import { eq, desc, inArray } from 'drizzle-orm'
 import { db } from '../_lib/db.js'
 import { rfqs, nozzles, users } from '../../db/schema.js'
 import { requireAuth } from '../_lib/auth.js'
@@ -26,14 +26,49 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         headType: rfqs.headType,
         mawp: rfqs.mawp,
         designTemp: rfqs.designTemp,
+        corrosionAllowance: rfqs.corrosionAllowance,
+        orientation: rfqs.orientation,
+        supportType: rfqs.supportType,
+        saddleHeight: rfqs.saddleHeight,
+        saddleWidth: rfqs.saddleWidth,
         createdAt: rfqs.createdAt,
-        nozzleCount: sql<number>`(select count(*) from nozzles where nozzles.rfq_id = ${rfqs.id})::int`,
+        // Painting & surface prep
+        surfacePrep:         rfqs.surfacePrep,
+        primer:              rfqs.primer,
+        topcoat:             rfqs.topcoat,
+        finishType:          rfqs.finishType,
+        // Insulation
+        insulated:           rfqs.insulated,
+        insulationType:      rfqs.insulationType,
+        insulationThickness: rfqs.insulationThickness,
+        insulationJacket:    rfqs.insulationJacket,
+        insulationShell:     rfqs.insulationShell,
+        insulationHeads:     rfqs.insulationHeads,
+        // Coils
+        internalCoil:         rfqs.internalCoil,
+        internalCoilPipeSize: rfqs.internalCoilPipeSize,
+        internalCoilTurns:    rfqs.internalCoilTurns,
+        externalCoil:         rfqs.externalCoil,
+        externalCoilType:     rfqs.externalCoilType,
+        externalCoilPipeSize: rfqs.externalCoilPipeSize,
+        externalCoilCoverage: rfqs.externalCoilCoverage,
       })
       .from(rfqs)
       .where(eq(rfqs.buyerId, auth.userId))
       .orderBy(desc(rfqs.createdAt))
 
-    return res.status(200).json({ rfqs: rows })
+    const rfqIds = rows.map(r => r.id)
+    const allNozzles = rfqIds.length > 0
+      ? await db.select().from(nozzles).where(inArray(nozzles.rfqId, rfqIds))
+      : []
+
+    const result = rows.map(r => ({
+      ...r,
+      nozzleCount: allNozzles.filter(n => n.rfqId === r.id).length,
+      nozzles: allNozzles.filter(n => n.rfqId === r.id),
+    }))
+
+    return res.status(200).json({ rfqs: result })
   }
 
   // ─── POST — create RFQ ──────────────────────────────────────────────────────
