@@ -11,8 +11,13 @@ type FilterState = RfqStatus | 'all'
 interface NozzleItem {
   mark: string
   size: string
-  rating: string
-  service: string
+  rating: string | null
+  flangeType: string | null
+  facing: string | null
+  material: string | null
+  service: string | null
+  quantity: number
+  location: string | null
 }
 
 interface Buyer {
@@ -154,10 +159,15 @@ function mapApiRfq(r: ApiRfq): RfqRecord {
     corrosionAllowance: r.corrosionAllowance ? `${r.corrosionAllowance}"` : '—',
     service: '—',
     nozzles: r.nozzles.map(n => ({
-      mark:    n.mark,
-      size:    n.size,
-      rating:  n.rating,
-      service: n.service ?? '',
+      mark:      n.mark,
+      size:      n.size,
+      rating:    n.rating,
+      flangeType: n.flangeType,
+      facing:    n.facing,
+      material:  n.material,
+      service:   n.service,
+      quantity:  n.quantity,
+      location:  n.location,
     })),
     buyer: {
       initials: buyerInitials(r.buyerEmail),
@@ -342,7 +352,7 @@ function printRfq(rfq: RfqRecord) {
 
   const nozzleRows = rfq.nozzles.map((n, i) =>
     `<tr class="${i % 2 === 0 ? 'even' : ''}">
-      <td>${n.mark}</td><td>${n.size}</td><td>${n.rating}</td><td>${n.service || '—'}</td>
+      <td>${n.mark}</td><td>${n.size}</td><td>${n.rating || '—'}</td><td>${n.quantity}</td><td>${n.flangeType || '—'}</td><td>${n.facing || '—'}</td><td>${n.material || '—'}</td><td>${(n.location || '—').replace('_', ' ')}</td><td>${n.service || '—'}</td>
     </tr>`
   ).join('')
 
@@ -426,8 +436,8 @@ function printRfq(rfq: RfqRecord) {
 
   <h2>Nozzle Schedule</h2>
   <table class="nozzle-table">
-    <thead><tr><th>Mark</th><th>Size</th><th>Rating</th><th>Service</th></tr></thead>
-    <tbody>${nozzleRows || '<tr><td colspan="4" style="color:#94a3b8;padding:8px 10px">No nozzles specified</td></tr>'}</tbody>
+    <thead><tr><th>Mark</th><th>Size</th><th>Rating</th><th>Qty</th><th>Flange Type</th><th>Facing</th><th>Material</th><th>Location</th><th>Service</th></tr></thead>
+    <tbody>${nozzleRows || '<tr><td colspan="9" style="color:#94a3b8;padding:8px 10px">No nozzles specified</td></tr>'}</tbody>
   </table>
 
   ${(rfq.surfacePrep || rfq.primer || rfq.topcoat || rfq.finishType) ? `
@@ -573,7 +583,7 @@ function DetailPanel({
         {/* Vessel Geometry */}
         <Section label="Vessel Geometry">
           <SpecGrid items={[
-            { label: 'Shell ID',     value: rfq.shellId },
+            { label: 'Shell OD',     value: rfq.shellId },
             { label: 'T/T Length',   value: rfq.ttLength },
             { label: 'Vessel Type',  value: rfq.vesselType },
             { label: 'Orientation',  value: rfq.orientation },
@@ -595,26 +605,44 @@ function DetailPanel({
 
         {/* Nozzle Schedule */}
         <Section label="Nozzle Schedule">
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-            <thead>
-              <tr>
-                <NTh>Mark</NTh>
-                <NTh>Size</NTh>
-                <NTh>Rating</NTh>
-                <NTh>Service</NTh>
-              </tr>
-            </thead>
-            <tbody>
-              {rfq.nozzles.map((n, i) => (
-                <tr key={n.mark} style={{ background: i % 2 === 0 ? '#0f172a' : '#1e293b' }}>
-                  <td style={{ padding: '5px 8px', color: '#60a5fa', fontWeight: 500 }}>{n.mark}</td>
-                  <td style={{ padding: '5px 8px', color: '#cbd5e1' }}>{n.size}</td>
-                  <td style={{ padding: '5px 8px', color: '#cbd5e1' }}>{n.rating}</td>
-                  <td style={{ padding: '5px 8px', color: '#64748b' }}>{n.service}</td>
+          {rfq.nozzles.length === 0 ? (
+            <div style={{ fontSize: 12, color: '#475569' }}>No nozzles specified</div>
+          ) : (
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+              <thead>
+                <tr>
+                  <NTh>Mark</NTh>
+                  <NTh>Size</NTh>
+                  <NTh>Rating</NTh>
+                  <NTh>Qty</NTh>
+                  <NTh>Location</NTh>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {rfq.nozzles.map((n, i) => (
+                  <>
+                    <tr key={`${n.mark}-a`} style={{ background: i % 2 === 0 ? '#0f172a' : '#1e293b' }}>
+                      <td style={{ padding: '5px 8px 2px', color: '#60a5fa', fontWeight: 500 }}>{n.mark}</td>
+                      <td style={{ padding: '5px 8px 2px', color: '#cbd5e1' }}>{n.size}</td>
+                      <td style={{ padding: '5px 8px 2px', color: '#cbd5e1' }}>{n.rating ?? '—'}</td>
+                      <td style={{ padding: '5px 8px 2px', color: '#cbd5e1' }}>{n.quantity}</td>
+                      <td style={{ padding: '5px 8px 2px', color: '#94a3b8' }}>{n.location?.replace('_', ' ') ?? '—'}</td>
+                    </tr>
+                    <tr key={`${n.mark}-b`} style={{ background: i % 2 === 0 ? '#0f172a' : '#1e293b' }}>
+                      <td colSpan={5} style={{ padding: '0 8px 5px', color: '#475569', fontSize: 10 }}>
+                        {[
+                          n.flangeType ? `Flange: ${n.flangeType}` : null,
+                          n.facing     ? `Facing: ${n.facing}`     : null,
+                          n.material   ? `Mtl: ${n.material}`      : null,
+                          n.service    ? `Svc: ${n.service}`       : null,
+                        ].filter(Boolean).join(' · ') || '—'}
+                      </td>
+                    </tr>
+                  </>
+                ))}
+              </tbody>
+            </table>
+          )}
         </Section>
 
         {/* Painting & Surface Prep */}

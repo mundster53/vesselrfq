@@ -72,37 +72,40 @@ function RfqDetailPanel({ rfq, onClose }: { rfq: RfqSummary; onClose: () => void
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto px-5 py-4">
-          <div className="mb-4 flex items-center gap-2">
+        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
+          <div className="flex items-center gap-2">
             <span className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLOR_DARK[rfq.status] ?? 'bg-slate-700 text-slate-200'}`}>
               {STATUS_LABEL[rfq.status] ?? rfq.status}
             </span>
-            {typeLabel && (
-              <span className="text-xs text-slate-400">{typeLabel}</span>
-            )}
+            <span className="text-xs text-slate-400">{typeLabel}</span>
           </div>
 
-          <div className="divide-y divide-slate-700">
-            {isTank ? (
-              <>
-                <SpecRow label="Shell OD" value={rfq.shellOd ? `${rfq.shellOd}"` : null} />
-                <SpecRow label="T/T Length" value={rfq.shellLength ? `${rfq.shellLength}"` : null} />
-                <SpecRow label="Shell Material" value={rfq.shellMaterial} />
-                <SpecRow label="Head Type" value={rfq.headType} />
-                <SpecRow label="MAWP" value={rfq.mawp ? `${rfq.mawp} psig` : null} />
-                <SpecRow label="Design Temp" value={rfq.designTemp != null ? `${rfq.designTemp}°F` : null} />
-                <SpecRow label="Nozzles" value={rfq.nozzleCount || null} />
-              </>
-            ) : (
-              <>
-                <SpecRow label="Shell OD" value={rfq.shellOd ? `${rfq.shellOd}"` : null} />
-                <SpecRow label="Shell Length" value={rfq.shellLength ? `${rfq.shellLength}"` : null} />
-                <SpecRow label="Shell Material" value={rfq.shellMaterial} />
-                <SpecRow label="Shell MAWP" value={rfq.mawp ? `${rfq.mawp} psig` : null} />
-                <SpecRow label="Shell Design Temp" value={rfq.designTemp != null ? `${rfq.designTemp}°F` : null} />
-                <SpecRow label="Nozzles" value={rfq.nozzleCount || null} />
-              </>
-            )}
+          {/* Vessel Geometry */}
+          <div>
+            <div className="text-xs font-medium tracking-widest uppercase text-slate-500 mb-2">Vessel Geometry</div>
+            <div className="divide-y divide-slate-700/60">
+              <SpecRow label="Shell OD" value={rfq.shellOd ? `${rfq.shellOd}"` : null} />
+              <SpecRow label={isTank ? 'T/T Length' : 'Shell Length'} value={rfq.shellLength ? `${rfq.shellLength}"` : null} />
+              <SpecRow label="Shell Material" value={rfq.shellMaterial} />
+              {isTank && <SpecRow label="Head Type" value={rfq.headType} />}
+            </div>
+          </div>
+
+          {/* Design Conditions */}
+          <div>
+            <div className="text-xs font-medium tracking-widest uppercase text-slate-500 mb-2">Design Conditions</div>
+            <div className="divide-y divide-slate-700/60">
+              <SpecRow label={isTank ? 'MAWP' : 'Shell MAWP'} value={rfq.mawp ? `${rfq.mawp} psig` : null} />
+              <SpecRow label={isTank ? 'Design Temp' : 'Shell Design Temp'} value={rfq.designTemp != null ? `${rfq.designTemp}°F` : null} />
+            </div>
+          </div>
+
+          {/* Nozzle Schedule */}
+          <div>
+            <div className="text-xs font-medium tracking-widest uppercase text-slate-500 mb-2">Nozzle Schedule</div>
+            <div className="divide-y divide-slate-700/60">
+              <SpecRow label="Total Nozzles" value={rfq.nozzleCount || null} />
+            </div>
           </div>
         </div>
       </div>
