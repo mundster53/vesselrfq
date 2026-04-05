@@ -15,6 +15,8 @@ import FabricatorOnboardingPage from './pages/FabricatorOnboardingPage'
 import BuyerProfilePage from './pages/BuyerProfilePage'
 import TermsPage from './pages/TermsPage'
 import EmbedPage from './pages/EmbedPage'
+import AdminRoute from './components/AdminRoute'
+import AdminDashboard from './pages/AdminDashboard'
 
 function MobileWarningBanner() {
   const [dismissed, setDismissed] = useState(false)
@@ -57,6 +59,9 @@ export default function App() {
             <Route element={<FabricatorRoute />}>
               <Route path="/fabricator-dashboard" element={<FabricatorDashboard />} />
             </Route>
+          </Route>
+          <Route element={<AdminRoute />}>
+            <Route path="/admin" element={<AdminDashboard />} />
           </Route>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Routes>

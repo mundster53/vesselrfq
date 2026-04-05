@@ -4,7 +4,7 @@ import { api } from '../lib/api'
 export interface AuthUser {
   id: number
   email: string
-  role: 'buyer' | 'fabricator'
+  role: 'buyer' | 'fabricator' | 'admin'
   active?: boolean
 }
 
