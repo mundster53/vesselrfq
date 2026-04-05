@@ -63,10 +63,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       const [saved] = await db
         .insert(fabricatorBidProfiles)
-        .values({ ...values, createdAt: now })
+        .values({ ...values, createdAt: now } as typeof fabricatorBidProfiles.$inferInsert)
         .onConflictDoUpdate({
           target: fabricatorBidProfiles.userId,
-          set:    values,
+          set:    values as Partial<typeof fabricatorBidProfiles.$inferInsert>,
         })
         .returning()
 

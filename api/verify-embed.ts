@@ -26,7 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         verified:      false,
         checkedAt,
         failureReason: 'No website on file',
-      })
+      } as typeof embedVerifications.$inferInsert)
       return res.status(200).json({
         verified:   false,
         reason:     'No website on file',
@@ -68,7 +68,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       verified,
       checkedAt,
       failureReason,
-    })
+    } as typeof embedVerifications.$inferInsert)
 
     return res.status(200).json({
       verified,

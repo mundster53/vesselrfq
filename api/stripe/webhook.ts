@@ -89,7 +89,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .set({
           active: true,
           ...(stripeCustomerId ? { stripeCustomerId } : {}),
-        })
+        } as Partial<typeof users.$inferInsert>)
         .where(eq(users.id, user.id))
 
       console.log(`[webhook] Activated fabricator account id=${user.id}`)
@@ -130,7 +130,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       await db
         .update(users)
-        .set({ active: false })
+        .set({ active: false } as Partial<typeof users.$inferInsert>)
         .where(eq(users.id, user.id))
 
       console.log(`[webhook] Deactivated fabricator account id=${user.id}`)

@@ -61,7 +61,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         phone:       phone.trim(),
         website:     website?.trim() || null,
         rfqEmail:    rfqEmail.trim(),
-      })
+      } as typeof fabricatorProfiles.$inferInsert)
       .onConflictDoUpdate({
         target: fabricatorProfiles.userId,
         set: {
@@ -73,14 +73,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           phone:       phone.trim(),
           website:     website?.trim() || null,
           rfqEmail:    rfqEmail.trim(),
-        },
+        } as Partial<typeof fabricatorProfiles.$inferInsert>,
       })
 
     // Ensure active=true — webhook may have missed in test mode.
     // Reaching this endpoint requires a valid JWT + Stripe success redirect.
     await db
       .update(users)
-      .set({ active: true })
+      .set({ active: true } as Partial<typeof users.$inferInsert>)
       .where(eq(users.id, auth.userId))
 
     return res.status(200).json({ ok: true })

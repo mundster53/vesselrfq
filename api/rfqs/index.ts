@@ -234,7 +234,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           externalCoilType:     body.externalCoilType ?? null,
           externalCoilPipeSize: body.externalCoilPipeSize ?? null,
           externalCoilCoverage: body.externalCoilCoverage ?? null,
-        })
+        } as typeof rfqs.$inferInsert)
         .returning()
 
       if (body.nozzles?.length) {

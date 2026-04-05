@@ -73,7 +73,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (failedUserIds.length > 0) {
       const suspended = await db
         .update(fabricatorBidProfiles)
-        .set({ profileComplete: false })
+        .set({ profileComplete: false } as Partial<typeof fabricatorBidProfiles.$inferInsert>)
         .where(
           and(
             inArray(fabricatorBidProfiles.userId, failedUserIds),
