@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import VesselViewer from '../components/VesselViewer'
 import HeatExchangerViewer from '../components/HeatExchangerViewer'
+import MarketplaceSubmitModal from '../components/MarketplaceSubmitModal'
 import { api, ApiError } from '../lib/api'
 import { useEmbed } from '../contexts/EmbedContext'
 import type {
@@ -591,12 +592,14 @@ const selectCls = inputCls
 export default function VesselDesignerPage() {
   const navigate = useNavigate()
   const { shopId } = useEmbed()
+  const isDirectBuyer = !shopId
 
   const [vesselType, setVesselType] = useState<VesselType>('tank')
   const [form, setForm]             = useState<VesselDesignState>(initialTankState)
   const [hxForm, setHxForm]         = useState<HxDesignState>(initialHxState)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError]           = useState('')
+  const [showSubmitModal, setShowSubmitModal] = useState(false)
   const [useCustomMaterial, setUseCustomMaterial] = useState(false)
   const [hxUseCustomShellMat,      setHxUseCustomShellMat]      = useState(false)
   const [hxUseCustomTubesheetMat,  setHxUseCustomTubesheetMat]  = useState(false)
@@ -760,6 +763,96 @@ export default function VesselDesignerPage() {
     && hxForm.shellCorrosionAllowance && parseFloat(hxForm.shellCorrosionAllowance) > 0
   )
 
+  // ── Body builders (shared by embed submit and marketplace submit) ──────────
+
+  function buildTankBody() {
+    return {
+      vesselType: 'tank',
+      title: form.title.trim(),
+      shellOd: form.shellOd || undefined,
+      shellLength: form.shellLength || undefined,
+      shellMaterial: form.shellMaterial || undefined,
+      headType: form.headType || undefined,
+      mawp: form.mawp || undefined,
+      designTemp: form.designTemp || undefined,
+      corrosionAllowance: form.corrosionAllowance || undefined,
+      supportType: form.supportType || undefined,
+      saddleHeight: form.saddleHeight || undefined,
+      saddleWidth: form.saddleWidth || undefined,
+      fabricatorId: shopId || undefined,
+      notes: form.notes || undefined,
+      nozzles: form.nozzles.map(n => ({
+        ...n,
+        material: n.material === NOZZLE_MATERIAL_SENTINEL ? n.materialCustom : n.material,
+      })),
+      internalCoil: internalCoilEnabled,
+      internalCoilPipeSize: internalCoilEnabled ? internalCoilPipeSize : undefined,
+      internalCoilTurns: internalCoilEnabled ? internalCoilTurns : undefined,
+      externalCoil: externalCoilEnabled,
+      externalCoilType: externalCoilEnabled ? externalCoilType : undefined,
+      externalCoilPipeSize: (externalCoilEnabled && externalCoilType === 'Half-pipe coil') ? externalCoilPipeSize : undefined,
+      externalCoilCoverage: externalCoilEnabled ? externalCoilCoverage : undefined,
+      insulated,
+      insulationType: insulated ? (insulationType === 'Other' ? insulationOther : insulationType) : undefined,
+      insulationThickness: insulated && insulationThickness ? parseFloat(insulationThickness) : undefined,
+      insulationJacket: insulated ? insulationJacket : undefined,
+      insulationShell: insulated ? insulationShell : undefined,
+      insulationHeads: insulated ? insulationHeads : undefined,
+      ...(['SA-240-304', 'SA-240-304L', 'SA-240-316', 'SA-240-316L'].includes(form.shellMaterial)
+        ? { finishType }
+        : { surfacePrep, primer, topcoat }
+      ),
+    }
+  }
+
+  function buildHxBody() {
+    return {
+      vesselType: 'heat_exchanger',
+      title: hxForm.title.trim(),
+      orientation: hxForm.orientation,
+      shellOd: hxForm.shellOd || undefined,
+      shellLength: hxForm.shellLength || undefined,
+      shellMaterial: hxForm.shellMaterial || undefined,
+      tubesheetMaterial: hxForm.tubesheetMaterial || undefined,
+      temaFront: hxForm.temaFront || undefined,
+      temaShell: hxForm.temaShell || undefined,
+      temaRear: hxForm.temaRear || undefined,
+      shellsInSeries: hxForm.shellsInSeries || undefined,
+      shellsInParallel: hxForm.shellsInParallel || undefined,
+      tubeCount: hxForm.tubeCount || undefined,
+      tubeOd: hxForm.tubeOd || undefined,
+      tubeBwg: hxForm.tubeBwg || undefined,
+      tubeLength: hxForm.tubeLength || undefined,
+      tubeMaterial: hxForm.tubeMaterial || undefined,
+      tubeLayout: hxForm.tubeLayout || undefined,
+      tubePitch: hxForm.tubePitch || undefined,
+      tubeJoint: hxForm.tubeJoint || undefined,
+      baffleType: hxForm.baffleType || undefined,
+      baffleCut: hxForm.baffleCut || undefined,
+      baffleSpacing: hxForm.baffleSpacing || undefined,
+      impingementPlate: hxForm.impingementPlate,
+      supportType: hxForm.supportType || undefined,
+      saddleHeight: hxForm.saddleHeight || undefined,
+      saddleWidth: hxForm.saddleWidth || undefined,
+      shellMawp: hxForm.shellMawp || undefined,
+      shellDesignTemp: hxForm.shellDesignTemp || undefined,
+      shellCorrosionAllowance: hxForm.shellCorrosionAllowance || undefined,
+      shellFluid: hxForm.shellFluid || undefined,
+      tubeMawp: hxForm.tubeMawp || undefined,
+      tubeDesignTemp: hxForm.tubeDesignTemp || undefined,
+      tubeCorrosionAllowance: hxForm.tubeCorrosionAllowance || undefined,
+      tubeFluid: hxForm.tubeFluid || undefined,
+      fabricatorId: shopId || undefined,
+      notes: hxForm.notes || undefined,
+      nozzles: hxForm.nozzles.map(n => ({
+        ...n,
+        material: n.material === NOZZLE_MATERIAL_SENTINEL ? n.materialCustom : n.material,
+      })),
+    }
+  }
+
+  // ── Submit ─────────────────────────────────────────────────────────────────
+
   async function handleSubmit() {
     setError('')
     const title = vesselType === 'tank' ? form.title : hxForm.title
@@ -784,47 +877,18 @@ export default function VesselDesignerPage() {
                                                                      return setError('Shell side corrosion allowance is required')
     }
 
+    // Direct buyers choose routing via the modal
+    if (isDirectBuyer) {
+      setShowSubmitModal(true)
+      return
+    }
+
+    // Embed path — submit immediately as before
     setSubmitting(true)
     try {
       let result: { rfq: { id: number; title: string; vesselType?: string } }
       if (vesselType === 'tank') {
-        result = await api.post('/rfqs', {
-          vesselType: 'tank',
-          title: form.title.trim(),
-          shellOd: form.shellOd || undefined,
-          shellLength: form.shellLength || undefined,
-          shellMaterial: form.shellMaterial || undefined,
-          headType: form.headType || undefined,
-          mawp: form.mawp || undefined,
-          designTemp: form.designTemp || undefined,
-          corrosionAllowance: form.corrosionAllowance || undefined,
-          supportType: form.supportType || undefined,
-          saddleHeight: form.saddleHeight || undefined,
-          saddleWidth: form.saddleWidth || undefined,
-          fabricatorId: shopId || undefined,
-          notes: form.notes || undefined,
-          nozzles: form.nozzles.map(n => ({
-            ...n,
-            material: n.material === NOZZLE_MATERIAL_SENTINEL ? n.materialCustom : n.material,
-          })),
-          internalCoil: internalCoilEnabled,
-          internalCoilPipeSize: internalCoilEnabled ? internalCoilPipeSize : undefined,
-          internalCoilTurns: internalCoilEnabled ? internalCoilTurns : undefined,
-          externalCoil: externalCoilEnabled,
-          externalCoilType: externalCoilEnabled ? externalCoilType : undefined,
-          externalCoilPipeSize: (externalCoilEnabled && externalCoilType === 'Half-pipe coil') ? externalCoilPipeSize : undefined,
-          externalCoilCoverage: externalCoilEnabled ? externalCoilCoverage : undefined,
-          insulated,
-          insulationType: insulated ? (insulationType === 'Other' ? insulationOther : insulationType) : undefined,
-          insulationThickness: insulated && insulationThickness ? parseFloat(insulationThickness) : undefined,
-          insulationJacket: insulated ? insulationJacket : undefined,
-          insulationShell: insulated ? insulationShell : undefined,
-          insulationHeads: insulated ? insulationHeads : undefined,
-          ...(['SA-240-304', 'SA-240-304L', 'SA-240-316', 'SA-240-316L'].includes(form.shellMaterial)
-            ? { finishType }
-            : { surfacePrep, primer, topcoat }
-          ),
-        })
+        result = await api.post('/rfqs', buildTankBody())
         navigate('/rfq-submitted', {
           state: {
             rfqId:       result.rfq.id,
@@ -838,50 +902,8 @@ export default function VesselDesignerPage() {
           },
         })
       } else {
-        result = await api.post('/rfqs', {
-          vesselType: 'heat_exchanger',
-          title: hxForm.title.trim(),
-          orientation: hxForm.orientation,
-          shellOd: hxForm.shellOd || undefined,
-          shellLength: hxForm.shellLength || undefined,
-          shellMaterial: hxForm.shellMaterial || undefined,
-          tubesheetMaterial: hxForm.tubesheetMaterial || undefined,
-          temaFront: hxForm.temaFront || undefined,
-          temaShell: hxForm.temaShell || undefined,
-          temaRear: hxForm.temaRear || undefined,
-          shellsInSeries: hxForm.shellsInSeries || undefined,
-          shellsInParallel: hxForm.shellsInParallel || undefined,
-          tubeCount: hxForm.tubeCount || undefined,
-          tubeOd: hxForm.tubeOd || undefined,
-          tubeBwg: hxForm.tubeBwg || undefined,
-          tubeLength: hxForm.tubeLength || undefined,
-          tubeMaterial: hxForm.tubeMaterial || undefined,
-          tubeLayout: hxForm.tubeLayout || undefined,
-          tubePitch: hxForm.tubePitch || undefined,
-          tubeJoint: hxForm.tubeJoint || undefined,
-          baffleType: hxForm.baffleType || undefined,
-          baffleCut: hxForm.baffleCut || undefined,
-          baffleSpacing: hxForm.baffleSpacing || undefined,
-          impingementPlate: hxForm.impingementPlate,
-          supportType: hxForm.supportType || undefined,
-          saddleHeight: hxForm.saddleHeight || undefined,
-          saddleWidth: hxForm.saddleWidth || undefined,
-          shellMawp: hxForm.shellMawp || undefined,
-          shellDesignTemp: hxForm.shellDesignTemp || undefined,
-          shellCorrosionAllowance: hxForm.shellCorrosionAllowance || undefined,
-          shellFluid: hxForm.shellFluid || undefined,
-          tubeMawp: hxForm.tubeMawp || undefined,
-          tubeDesignTemp: hxForm.tubeDesignTemp || undefined,
-          tubeCorrosionAllowance: hxForm.tubeCorrosionAllowance || undefined,
-          tubeFluid: hxForm.tubeFluid || undefined,
-          fabricatorId: shopId || undefined,
-          notes: hxForm.notes || undefined,
-          nozzles: hxForm.nozzles.map(n => ({
-            ...n,
-            material: n.material === NOZZLE_MATERIAL_SENTINEL ? n.materialCustom : n.material,
-          })),
-        })
-        const temaCode = (hxForm.temaFront && hxForm.temaShell && hxForm.temaRear)
+        result = await api.post('/rfqs', buildHxBody())
+        const temaCodeNav = (hxForm.temaFront && hxForm.temaShell && hxForm.temaRear)
           ? `${hxForm.temaFront}-${hxForm.temaShell}-${hxForm.temaRear}`
           : undefined
         navigate('/rfq-submitted', {
@@ -892,7 +914,52 @@ export default function VesselDesignerPage() {
             shellOd:     hxForm.shellOd || undefined,
             shellLength: hxForm.shellLength || undefined,
             mawp:        hxForm.shellMawp || undefined,
-            temaCode,
+            temaCode:    temaCodeNav,
+            nozzleCount: hxForm.nozzles.length,
+          },
+        })
+      }
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Submission failed. Please try again.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  async function handleMarketplaceSubmit(installCity: string, installState: string, deadlineDays: number) {
+    setSubmitting(true)
+    try {
+      let result: { rfq: { id: number; title: string; vesselType?: string } }
+      if (vesselType === 'tank') {
+        result = await api.post('/rfqs', buildTankBody())
+        await api.post('/marketplace/rfqs', { rfqId: result.rfq.id, installCity, installState, deadlineDays })
+        navigate('/rfq-submitted', {
+          state: {
+            rfqId:       result.rfq.id,
+            title:       form.title.trim(),
+            vesselType:  'tank',
+            shellOd:     form.shellOd || undefined,
+            shellLength: form.shellLength || undefined,
+            headType:    form.headType || undefined,
+            mawp:        form.mawp || undefined,
+            nozzleCount: form.nozzles.length,
+          },
+        })
+      } else {
+        result = await api.post('/rfqs', buildHxBody())
+        await api.post('/marketplace/rfqs', { rfqId: result.rfq.id, installCity, installState, deadlineDays })
+        const temaCodeNav = (hxForm.temaFront && hxForm.temaShell && hxForm.temaRear)
+          ? `${hxForm.temaFront}-${hxForm.temaShell}-${hxForm.temaRear}`
+          : undefined
+        navigate('/rfq-submitted', {
+          state: {
+            rfqId:       result.rfq.id,
+            title:       hxForm.title.trim(),
+            vesselType:  'heat_exchanger',
+            shellOd:     hxForm.shellOd || undefined,
+            shellLength: hxForm.shellLength || undefined,
+            mawp:        hxForm.shellMawp || undefined,
+            temaCode:    temaCodeNav,
             nozzleCount: hxForm.nozzles.length,
           },
         })
@@ -2142,6 +2209,14 @@ export default function VesselDesignerPage() {
           </div>
         </div>
       </div>
+
+      <MarketplaceSubmitModal
+        isOpen={showSubmitModal}
+        onClose={() => setShowSubmitModal(false)}
+        onSubmitMarketplace={handleMarketplaceSubmit}
+        onSubmitDirect={() => setShowSubmitModal(false)}
+        submitting={submitting}
+      />
     </div>
   )
 }
