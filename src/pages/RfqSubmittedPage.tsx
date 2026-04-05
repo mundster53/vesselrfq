@@ -12,6 +12,7 @@ interface SubmittedState {
   mawp?: string
   temaCode?: string
   nozzleCount: number
+  marketplaceSubmit?: boolean
 }
 
 export default function RfqSubmittedPage() {
@@ -82,10 +83,21 @@ export default function RfqSubmittedPage() {
         {/* Info box */}
         <div className="rounded-xl bg-blue-50 border border-blue-200 px-5 py-4 mb-8">
           <p className="text-sm text-blue-800 leading-relaxed">
-            <span className="font-semibold">What happens next?</span> Your RFQ has been
-            submitted to <span className="font-semibold">{import.meta.env.VITE_FABRICATOR_NAME ?? 'your fabricator'}</span>.
-            They will review your specifications and contact you with a quote.
-            A confirmation has been sent to your email.
+            {state.marketplaceSubmit ? (
+              <>
+                <span className="font-semibold">What happens next?</span> Your RFQ has been
+                submitted to the VesselRFQ marketplace. Qualified fabricators will be notified
+                and will submit competitive bids. You will receive quotes in your dashboard
+                before your bid deadline.
+              </>
+            ) : (
+              <>
+                <span className="font-semibold">What happens next?</span> Your RFQ has been
+                submitted to <span className="font-semibold">{import.meta.env.VITE_FABRICATOR_NAME ?? 'your fabricator'}</span>.
+                They will review your specifications and contact you with a quote.
+                A confirmation has been sent to your email.
+              </>
+            )}
           </p>
         </div>
 

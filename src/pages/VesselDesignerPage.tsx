@@ -593,7 +593,6 @@ export default function VesselDesignerPage() {
   const navigate = useNavigate()
   const { shopId } = useEmbed()
   const isDirectBuyer = !shopId
-  console.log('[VesselDesigner] shopId:', shopId, 'isDirectBuyer:', isDirectBuyer)
 
   const [vesselType, setVesselType] = useState<VesselType>('tank')
   const [form, setForm]             = useState<VesselDesignState>(initialTankState)
@@ -936,14 +935,15 @@ export default function VesselDesignerPage() {
         await api.post('/marketplace/rfqs', { rfqId: result.rfq.id, installCity, installState, deadlineDays })
         navigate('/rfq-submitted', {
           state: {
-            rfqId:       result.rfq.id,
-            title:       form.title.trim(),
-            vesselType:  'tank',
-            shellOd:     form.shellOd || undefined,
-            shellLength: form.shellLength || undefined,
-            headType:    form.headType || undefined,
-            mawp:        form.mawp || undefined,
-            nozzleCount: form.nozzles.length,
+            rfqId:            result.rfq.id,
+            title:            form.title.trim(),
+            vesselType:       'tank',
+            shellOd:          form.shellOd || undefined,
+            shellLength:      form.shellLength || undefined,
+            headType:         form.headType || undefined,
+            mawp:             form.mawp || undefined,
+            nozzleCount:      form.nozzles.length,
+            marketplaceSubmit: true,
           },
         })
       } else {
@@ -954,14 +954,15 @@ export default function VesselDesignerPage() {
           : undefined
         navigate('/rfq-submitted', {
           state: {
-            rfqId:       result.rfq.id,
-            title:       hxForm.title.trim(),
-            vesselType:  'heat_exchanger',
-            shellOd:     hxForm.shellOd || undefined,
-            shellLength: hxForm.shellLength || undefined,
-            mawp:        hxForm.shellMawp || undefined,
-            temaCode:    temaCodeNav,
-            nozzleCount: hxForm.nozzles.length,
+            rfqId:            result.rfq.id,
+            title:            hxForm.title.trim(),
+            vesselType:       'heat_exchanger',
+            shellOd:          hxForm.shellOd || undefined,
+            shellLength:      hxForm.shellLength || undefined,
+            mawp:             hxForm.shellMawp || undefined,
+            temaCode:         temaCodeNav,
+            nozzleCount:      hxForm.nozzles.length,
+            marketplaceSubmit: true,
           },
         })
       }
