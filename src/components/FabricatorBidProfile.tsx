@@ -165,9 +165,15 @@ export default function FabricatorBidProfile() {
   }, [])
 
   useEffect(() => {
+    console.log('[BidProfile] fetching bid profile...')
     api.get<BidProfileGetResponse>('/fabricator/bid-profile')
       .then(data => {
-        if (!data.exists) return
+        console.log('[BidProfile] response:', data)
+        if (!data.exists) {
+          console.log('[BidProfile] exists: false — leaving form at defaults')
+          return
+        }
+        console.log('[BidProfile] exists: true — populating form')
         setForm({
           equipmentTypes:    data.equipmentTypes    ?? [],
           materials:         data.materials         ?? [],
@@ -178,7 +184,9 @@ export default function FabricatorBidProfile() {
           acceptingWork:     data.acceptingWork      ?? true,
         })
       })
-      .catch(() => { /* leave form at defaults */ })
+      .catch((err: unknown) => {
+        console.log('[BidProfile] fetch failed:', err)
+      })
   }, [])
 
   const allEligible = !!(

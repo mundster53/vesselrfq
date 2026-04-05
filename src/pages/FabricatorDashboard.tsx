@@ -803,9 +803,18 @@ export default function FabricatorDashboard() {
   const [fetchError, setFetchError] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [filter, setFilter] = useState<FilterState>('all')
+  const [shopName, setShopName] = useState('')
   const [view, setView] = useState<'inbox' | 'settings'>('inbox')
   const [searchParams] = useSearchParams()
   const rfqParam = searchParams.get('rfq')
+
+  useEffect(() => {
+    api.get<{ exists: boolean; profile?: { shopName: string } }>('/fabricator/profile')
+      .then(({ exists, profile }) => {
+        if (exists && profile?.shopName) setShopName(profile.shopName)
+      })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     api.get<{ rfqs: ApiRfq[] }>('/rfqs/all')
@@ -863,7 +872,9 @@ export default function FabricatorDashboard() {
             <span style={{ color: '#f8fafc' }}>Vessel</span>
             <span style={{ color: '#60a5fa' }}>RFQ</span>
           </div>
-          <div style={{ fontSize: 11, color: '#475569', marginTop: 3 }}>Smith Fabrication, Inc.</div>
+          {shopName && (
+            <div style={{ fontSize: 11, color: '#475569', marginTop: 3 }}>{shopName}</div>
+          )}
         </div>
 
         <nav>
