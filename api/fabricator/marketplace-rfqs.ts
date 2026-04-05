@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { and, eq, inArray, sql } from 'drizzle-orm'
+import { and, eq, inArray } from 'drizzle-orm'
 import { db } from '../_lib/db.js'
 import {
   marketplaceRfqs, marketplaceQuotes, rfqs,
@@ -58,7 +58,70 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         designTemp:       rfqs.designTemp,
         headType:         rfqs.headType,
         supportType:      rfqs.supportType,
+        corrosionAllowance: rfqs.corrosionAllowance,
+        notes:            rfqs.notes,
         buyerCompany:     buyerProfiles.companyName,
+
+        // Painting & surface prep
+        surfacePrep:  rfqs.surfacePrep,
+        primer:       rfqs.primer,
+        topcoat:      rfqs.topcoat,
+        finishType:   rfqs.finishType,
+
+        // Insulation
+        insulated:           rfqs.insulated,
+        insulationType:      rfqs.insulationType,
+        insulationThickness: rfqs.insulationThickness,
+        insulationJacket:    rfqs.insulationJacket,
+        insulationShell:     rfqs.insulationShell,
+        insulationHeads:     rfqs.insulationHeads,
+
+        // Coils
+        internalCoil:         rfqs.internalCoil,
+        internalCoilPipeSize: rfqs.internalCoilPipeSize,
+        internalCoilTurns:    rfqs.internalCoilTurns,
+        externalCoil:         rfqs.externalCoil,
+        externalCoilType:     rfqs.externalCoilType,
+        externalCoilPipeSize: rfqs.externalCoilPipeSize,
+        externalCoilCoverage: rfqs.externalCoilCoverage,
+
+        // HX — TEMA
+        temaFront: rfqs.temaFront,
+        temaShell: rfqs.temaShell,
+        temaRear:  rfqs.temaRear,
+
+        // HX — shell configuration
+        orientation:      rfqs.orientation,
+        shellsInSeries:   rfqs.shellsInSeries,
+        shellsInParallel: rfqs.shellsInParallel,
+
+        // HX — tube bundle
+        tubeCount:    rfqs.tubeCount,
+        tubeOd:       rfqs.tubeOd,
+        tubeBwg:      rfqs.tubeBwg,
+        tubeLength:   rfqs.tubeLength,
+        tubeMaterial: rfqs.tubeMaterial,
+        tubeLayout:   rfqs.tubeLayout,
+        tubePitch:    rfqs.tubePitch,
+        tubeJoint:    rfqs.tubeJoint,
+
+        // HX — baffles
+        baffleType:       rfqs.baffleType,
+        baffleCut:        rfqs.baffleCut,
+        baffleSpacing:    rfqs.baffleSpacing,
+        impingementPlate: rfqs.impingementPlate,
+
+        // HX — shell side
+        shellMawp:               rfqs.shellMawp,
+        shellDesignTemp:         rfqs.shellDesignTemp,
+        shellCorrosionAllowance: rfqs.shellCorrosionAllowance,
+        shellFluid:              rfqs.shellFluid,
+
+        // HX — tube side
+        tubeMawp:               rfqs.tubeMawp,
+        tubeDesignTemp:         rfqs.tubeDesignTemp,
+        tubeCorrosionAllowance: rfqs.tubeCorrosionAllowance,
+        tubeFluid:              rfqs.tubeFluid,
       })
       .from(marketplaceRfqs)
       .innerJoin(rfqs, eq(rfqs.id, marketplaceRfqs.rfqId))
@@ -76,18 +139,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (matched.length === 0) return res.status(200).json({ rfqs: [] })
 
-    // ── Nozzle counts for matched RFQs ────────────────────────────────────────
+    // ── Nozzles for matched RFQs ──────────────────────────────────────────────
     const matchedRfqIds = matched.map(r => r.rfqId)
-    const nozzleCounts = await db
-      .select({
-        rfqId: nozzles.rfqId,
-        count: sql<number>`cast(count(*) as int)`,
-      })
+    const allNozzles = await db
+      .select()
       .from(nozzles)
       .where(inArray(nozzles.rfqId, matchedRfqIds))
-      .groupBy(nozzles.rfqId)
 
-    const nozzleCountMap = new Map(nozzleCounts.map(n => [n.rfqId, n.count]))
+    const nozzlesByRfq = new Map<number, typeof allNozzles>()
+    for (const n of allNozzles) {
+      const arr = nozzlesByRfq.get(n.rfqId) ?? []
+      arr.push(n)
+      nozzlesByRfq.set(n.rfqId, arr)
+    }
 
     // ── Existing quotes by this fabricator ────────────────────────────────────
     const matchedMarketplaceRfqIds = matched.map(r => r.marketplaceRfqId)
@@ -108,26 +172,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // ── Build response ────────────────────────────────────────────────────────
     const result = matched.map(r => ({
-      marketplaceRfqId: r.marketplaceRfqId,
-      rfqId:            r.rfqId,
-      status:           r.status,
-      installCity:      r.installCity,
-      installState:     r.installState,
-      deadlineAt:       r.deadlineAt,
-      createdAt:        r.createdAt,
-      title:            r.title,
-      vesselType:       r.vesselType,
-      shellOd:          r.shellOd,
-      shellLength:      r.shellLength,
-      shellMaterial:    r.shellMaterial,
-      mawp:             r.mawp,
-      designTemp:       r.designTemp,
-      headType:         r.headType,
-      supportType:      r.supportType,
-      nozzleCount:      nozzleCountMap.get(r.rfqId) ?? 0,
-      buyerCompany:     r.buyerCompany ?? null,
-      alreadyQuoted:    quoteMap.has(r.marketplaceRfqId),
-      quoteId:          quoteMap.get(r.marketplaceRfqId) ?? null,
+      ...r,
+      nozzles:       nozzlesByRfq.get(r.rfqId) ?? [],
+      alreadyQuoted: quoteMap.has(r.marketplaceRfqId),
+      quoteId:       quoteMap.get(r.marketplaceRfqId) ?? null,
     }))
 
     return res.status(200).json({ rfqs: result })
