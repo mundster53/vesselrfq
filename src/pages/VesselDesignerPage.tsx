@@ -593,6 +593,7 @@ export default function VesselDesignerPage() {
   const navigate = useNavigate()
   const { shopId } = useEmbed()
   const isDirectBuyer = !shopId
+  console.log('[VesselDesigner] shopId:', shopId, 'isDirectBuyer:', isDirectBuyer)
 
   const [vesselType, setVesselType] = useState<VesselType>('tank')
   const [form, setForm]             = useState<VesselDesignState>(initialTankState)
