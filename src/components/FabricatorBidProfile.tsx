@@ -11,6 +11,17 @@ interface EligibilityStatus {
   lastEmbedCheck: string | null
 }
 
+interface BidProfileGetResponse {
+  exists: boolean
+  equipmentTypes?:    string[]
+  materials?:         string[]
+  maxDiameterInches?: string | null
+  maxLengthInches?:   string | null
+  maxWeightLbs?:      string | null
+  shipToStates?:      string[]
+  acceptingWork?:     boolean
+}
+
 interface BidProfileForm {
   equipmentTypes: string[]
   materials: string[]
@@ -142,14 +153,32 @@ export default function FabricatorBidProfile() {
     shipToStates:      '',
     acceptingWork:     true,
   })
-  const [saving, setSaving] = useState(false)
-  const [saved,  setSaved]  = useState(false)
+  const [saving,    setSaving]    = useState(false)
+  const [saved,     setSaved]     = useState(false)
+  const [saveError, setSaveError] = useState('')
 
   useEffect(() => {
     api.get<EligibilityStatus>('/fabricator/eligibility')
       .then(data  => setEligibility(data))
       .catch(()   => setEligibility(null))
       .finally(() => setEligibilityLoading(false))
+  }, [])
+
+  useEffect(() => {
+    api.get<BidProfileGetResponse>('/fabricator/bid-profile')
+      .then(data => {
+        if (!data.exists) return
+        setForm({
+          equipmentTypes:    data.equipmentTypes    ?? [],
+          materials:         data.materials         ?? [],
+          maxDiameterInches: data.maxDiameterInches ?? '',
+          maxLengthInches:   data.maxLengthInches   ?? '',
+          maxWeightLbs:      data.maxWeightLbs       ?? '',
+          shipToStates:      (data.shipToStates      ?? []).join(', '),
+          acceptingWork:     data.acceptingWork      ?? true,
+        })
+      })
+      .catch(() => { /* leave form at defaults */ })
   }, [])
 
   const allEligible = !!(
@@ -164,24 +193,34 @@ export default function FabricatorBidProfile() {
 
   function handleSave() {
     setSaving(true)
-    // POST to /api/fabricator/bid-profile — endpoint to be created
-    console.log('[FabricatorBidProfile] save payload:', {
+    setSaveError('')
+
+    const payload = {
       equipmentTypes:    form.equipmentTypes,
       materials:         form.materials,
-      maxDiameterInches: form.maxDiameterInches || null,
-      maxLengthInches:   form.maxLengthInches   || null,
-      maxWeightLbs:      form.maxWeightLbs       || null,
-      shipToStates:      form.shipToStates
-        .split(',')
-        .map(s => s.trim().toUpperCase())
-        .filter(Boolean),
-      acceptingWork: form.acceptingWork,
-    })
-    setTimeout(() => {
-      setSaving(false)
-      setSaved(true)
-      setTimeout(() => setSaved(false), 3000)
-    }, 400)
+      maxDiameterInches: form.maxDiameterInches ? parseFloat(form.maxDiameterInches) : null,
+      maxLengthInches:   form.maxLengthInches   ? parseFloat(form.maxLengthInches)   : null,
+      maxWeightLbs:      form.maxWeightLbs       ? parseFloat(form.maxWeightLbs)       : null,
+      shipToStates:      form.shipToStates.split(',').map(s => s.trim().toUpperCase()).filter(Boolean),
+      acceptingWork:     form.acceptingWork,
+    }
+
+    api.post<BidProfileGetResponse>('/fabricator/bid-profile', payload)
+      .then(() => {
+        setSaving(false)
+        setSaved(true)
+        setTimeout(() => setSaved(false), 3000)
+        // Re-fetch eligibility so "Bid profile complete" updates immediately
+        api.get<EligibilityStatus>('/fabricator/eligibility')
+          .then(data  => setEligibility(data))
+          .catch(()   => {})
+      })
+      .catch((err: unknown) => {
+        setSaving(false)
+        const msg = err instanceof Error ? err.message : 'Failed to save'
+        setSaveError(msg)
+        setTimeout(() => setSaveError(''), 5000)
+      })
   }
 
   // ── Shared styles ──────────────────────────────────────────────────────────
@@ -405,6 +444,12 @@ export default function FabricatorBidProfile() {
         >
           {saved ? 'Saved' : saving ? 'Saving…' : 'Save Bid Profile'}
         </button>
+
+        {saveError && (
+          <div style={{ marginTop: 8, fontSize: 12, color: '#f87171' }}>
+            {saveError}
+          </div>
+        )}
       </div>
 
     </div>
