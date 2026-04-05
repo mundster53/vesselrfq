@@ -116,10 +116,11 @@ function StatCard({ label, value, color }: { label: string; value: number; color
 
 function Section({ label, children, noDivider }: { label: string; children: ReactNode; noDivider?: boolean }) {
   return (
-    <div style={{ padding: '16px 20px', borderBottom: noDivider ? 'none' : '0.5px solid #334155' }}>
+    <div style={{ marginBottom: noDivider ? 0 : 24 }}>
       <div style={{
         fontSize: 10, fontWeight: 500, letterSpacing: '0.08em',
-        textTransform: 'uppercase', color: '#475569', marginBottom: 12,
+        textTransform: 'uppercase', color: '#475569', marginBottom: 10,
+        paddingBottom: 6, borderBottom: '0.5px solid #1e293b',
       }}>
         {label}
       </div>
@@ -136,7 +137,7 @@ function SpecGrid({ items }: { items: { label: string; value: string; fullWidth?
           key={item.label}
           style={{
             gridColumn: item.fullWidth ? '1 / -1' : undefined,
-            background: '#0f172a', border: '0.5px solid #334155',
+            background: '#1e293b', border: '0.5px solid #334155',
             borderRadius: 6, padding: '7px 10px',
           }}
         >
@@ -151,9 +152,9 @@ function SpecGrid({ items }: { items: { label: string; value: string; fullWidth?
 function NTh({ children }: { children: ReactNode }) {
   return (
     <th style={{
-      padding: '4px 8px', textAlign: 'left', fontSize: 10, fontWeight: 500,
+      padding: '5px 10px', textAlign: 'left', fontSize: 10, fontWeight: 500,
       color: '#475569', letterSpacing: '0.06em', textTransform: 'uppercase',
-      borderBottom: '0.5px solid #334155',
+      borderBottom: '0.5px solid #334155', whiteSpace: 'nowrap',
     }}>
       {children}
     </th>
@@ -165,9 +166,9 @@ function fmtDate(iso: string | null): string {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-// ── Detail panel ───────────────────────────────────────────────────────────────
+// ── Detail modal ───────────────────────────────────────────────────────────────
 
-function DetailPanel({ rfq, onClose, onQuoteSubmitted }: {
+function DetailModal({ rfq, onClose, onQuoteSubmitted }: {
   rfq:              MarketplaceRfqItem
   onClose:          () => void
   onQuoteSubmitted: (marketplaceRfqId: number, quoteId: number) => void
@@ -190,9 +191,10 @@ function DetailPanel({ rfq, onClose, onQuoteSubmitted }: {
     outline: 'none', width: '100%', boxSizing: 'border-box',
   }
 
-  const isHx       = rfq.vesselType === 'heat_exchanger'
+  const isHx        = rfq.vesselType === 'heat_exchanger'
   const vesselLabel = isHx ? 'Heat Exchanger' : 'Pressure Vessel'
   const isPastDue   = rfq.deadlineAt ? new Date(rfq.deadlineAt).getTime() < Date.now() : false
+  const temaDesig   = [rfq.temaFront, rfq.temaShell, rfq.temaRear].filter(Boolean).join('-')
 
   async function handleSubmitQuote() {
     if (!fabricatedPrice || !estimatedFreight || !leadTimeWeeks) {
@@ -220,321 +222,381 @@ function DetailPanel({ rfq, onClose, onQuoteSubmitted }: {
   }
 
   // ── HX geometry items ────────────────────────────────────────────────────────
-  const temaDesig = [rfq.temaFront, rfq.temaShell, rfq.temaRear].filter(Boolean).join('-')
-
   const hxGeomItems = [
-    temaDesig                    ? { label: 'TEMA Type',         value: temaDesig }                        : null,
-    rfq.orientation              ? { label: 'Orientation',       value: rfq.orientation }                  : null,
-    rfq.shellsInSeries  != null  ? { label: 'Shells in Series',  value: String(rfq.shellsInSeries) }       : null,
-    rfq.shellsInParallel != null ? { label: 'Shells Parallel',   value: String(rfq.shellsInParallel) }     : null,
-    rfq.shellOd                  ? { label: 'Shell OD',          value: `${rfq.shellOd}"` }                : null,
-    rfq.shellLength              ? { label: 'T/T Length',        value: `${rfq.shellLength}"` }            : null,
-    rfq.shellMaterial            ? { label: 'Shell Material',    value: rfq.shellMaterial }                : null,
-    rfq.headType                 ? { label: 'Channel/Head Type', value: rfq.headType }                     : null,
-    rfq.tubeCount       != null  ? { label: 'Tube Count',        value: String(rfq.tubeCount) }            : null,
-    rfq.tubeOd                   ? { label: 'Tube OD',           value: rfq.tubeOd }                       : null,
-    rfq.tubeBwg                  ? { label: 'Tube BWG',          value: rfq.tubeBwg }                      : null,
-    rfq.tubeLength               ? { label: 'Tube Length',       value: rfq.tubeLength }                   : null,
-    rfq.tubeMaterial             ? { label: 'Tube Material',     value: rfq.tubeMaterial }                 : null,
-    rfq.tubeLayout               ? { label: 'Tube Layout',       value: rfq.tubeLayout }                   : null,
-    rfq.tubePitch                ? { label: 'Tube Pitch',        value: rfq.tubePitch }                    : null,
-    rfq.tubeJoint                ? { label: 'Tube Joint',        value: rfq.tubeJoint }                    : null,
-    rfq.baffleType               ? { label: 'Baffle Type',       value: rfq.baffleType }                   : null,
-    rfq.baffleCut                ? { label: 'Baffle Cut',        value: `${rfq.baffleCut}%` }              : null,
-    rfq.baffleSpacing            ? { label: 'Baffle Spacing',    value: `${rfq.baffleSpacing}"` }          : null,
-    rfq.impingementPlate         ? { label: 'Impingement Plate', value: rfq.impingementPlate }             : null,
+    temaDesig                     ? { label: 'TEMA Type',         value: temaDesig }                    : null,
+    rfq.orientation               ? { label: 'Orientation',       value: rfq.orientation }              : null,
+    rfq.shellsInSeries  != null   ? { label: 'Shells in Series',  value: String(rfq.shellsInSeries) }   : null,
+    rfq.shellsInParallel != null  ? { label: 'Shells Parallel',   value: String(rfq.shellsInParallel) } : null,
+    rfq.shellOd                   ? { label: 'Shell OD',          value: `${rfq.shellOd}"` }            : null,
+    rfq.shellLength               ? { label: 'T/T Length',        value: `${rfq.shellLength}"` }        : null,
+    rfq.shellMaterial             ? { label: 'Shell Material',    value: rfq.shellMaterial }            : null,
+    rfq.headType                  ? { label: 'Channel/Head Type', value: rfq.headType }                 : null,
+    rfq.tubeCount       != null   ? { label: 'Tube Count',        value: String(rfq.tubeCount) }        : null,
+    rfq.tubeOd                    ? { label: 'Tube OD',           value: rfq.tubeOd }                   : null,
+    rfq.tubeBwg                   ? { label: 'Tube BWG',          value: rfq.tubeBwg }                  : null,
+    rfq.tubeLength                ? { label: 'Tube Length',       value: rfq.tubeLength }               : null,
+    rfq.tubeMaterial              ? { label: 'Tube Material',     value: rfq.tubeMaterial }             : null,
+    rfq.tubeLayout                ? { label: 'Tube Layout',       value: rfq.tubeLayout }               : null,
+    rfq.tubePitch                 ? { label: 'Tube Pitch',        value: rfq.tubePitch }                : null,
+    rfq.tubeJoint                 ? { label: 'Tube Joint',        value: rfq.tubeJoint }                : null,
+    rfq.baffleType                ? { label: 'Baffle Type',       value: rfq.baffleType }               : null,
+    rfq.baffleCut                 ? { label: 'Baffle Cut',        value: `${rfq.baffleCut}%` }          : null,
+    rfq.baffleSpacing             ? { label: 'Baffle Spacing',    value: `${rfq.baffleSpacing}"` }      : null,
+    rfq.impingementPlate          ? { label: 'Impingement Plate', value: rfq.impingementPlate }         : null,
   ].filter(Boolean) as { label: string; value: string }[]
 
-  // ── HX shell/tube side conditions ────────────────────────────────────────────
-  const hxShellItems = [
-    rfq.shellMawp               ? { label: 'Shell MAWP',    value: `${rfq.shellMawp} psig` }           : null,
-    rfq.shellDesignTemp != null ? { label: 'Shell Temp',    value: `${rfq.shellDesignTemp}°F` }         : null,
-    rfq.shellCorrosionAllowance ? { label: 'Shell CA',      value: `${rfq.shellCorrosionAllowance}"` }  : null,
-    rfq.shellFluid              ? { label: 'Shell Fluid',   value: rfq.shellFluid }                     : null,
-    rfq.tubeMawp                ? { label: 'Tube MAWP',     value: `${rfq.tubeMawp} psig` }             : null,
-    rfq.tubeDesignTemp != null  ? { label: 'Tube Temp',     value: `${rfq.tubeDesignTemp}°F` }          : null,
-    rfq.tubeCorrosionAllowance  ? { label: 'Tube CA',       value: `${rfq.tubeCorrosionAllowance}"` }   : null,
-    rfq.tubeFluid               ? { label: 'Tube Fluid',    value: rfq.tubeFluid }                      : null,
+  const hxCondItems = [
+    rfq.shellMawp                ? { label: 'Shell MAWP',  value: `${rfq.shellMawp} psig` }           : null,
+    rfq.shellDesignTemp != null  ? { label: 'Shell Temp',  value: `${rfq.shellDesignTemp}°F` }         : null,
+    rfq.shellCorrosionAllowance  ? { label: 'Shell CA',    value: `${rfq.shellCorrosionAllowance}"` }  : null,
+    rfq.shellFluid               ? { label: 'Shell Fluid', value: rfq.shellFluid }                     : null,
+    rfq.tubeMawp                 ? { label: 'Tube MAWP',   value: `${rfq.tubeMawp} psig` }             : null,
+    rfq.tubeDesignTemp != null   ? { label: 'Tube Temp',   value: `${rfq.tubeDesignTemp}°F` }          : null,
+    rfq.tubeCorrosionAllowance   ? { label: 'Tube CA',     value: `${rfq.tubeCorrosionAllowance}"` }   : null,
+    rfq.tubeFluid                ? { label: 'Tube Fluid',  value: rfq.tubeFluid }                      : null,
   ].filter(Boolean) as { label: string; value: string }[]
 
-  // ── PV geometry items ────────────────────────────────────────────────────────
+  // ── PV geometry / design items ───────────────────────────────────────────────
   const pvGeomItems = [
-    rfq.shellOd            ? { label: 'Shell OD',           value: `${rfq.shellOd}"` }              : null,
-    rfq.shellLength        ? { label: 'T/T Length',         value: `${rfq.shellLength}"` }           : null,
-    rfq.shellMaterial      ? { label: 'Material',           value: rfq.shellMaterial }               : null,
-    rfq.headType           ? { label: 'Head Type',          value: rfq.headType }                    : null,
-    rfq.orientation        ? { label: 'Orientation',        value: rfq.orientation }                 : null,
-    rfq.supportType        ? { label: 'Support Type',       value: rfq.supportType }                 : null,
-    rfq.corrosionAllowance ? { label: 'Corrosion Allow.',   value: `${rfq.corrosionAllowance}"` }    : null,
+    rfq.shellOd            ? { label: 'Shell OD',         value: `${rfq.shellOd}"` }           : null,
+    rfq.shellLength        ? { label: 'T/T Length',       value: `${rfq.shellLength}"` }        : null,
+    rfq.shellMaterial      ? { label: 'Material',         value: rfq.shellMaterial }            : null,
+    rfq.headType           ? { label: 'Head Type',        value: rfq.headType }                 : null,
+    rfq.orientation        ? { label: 'Orientation',      value: rfq.orientation }              : null,
+    rfq.supportType        ? { label: 'Support Type',     value: rfq.supportType }              : null,
+    rfq.corrosionAllowance ? { label: 'Corrosion Allow.', value: `${rfq.corrosionAllowance}"` } : null,
   ].filter(Boolean) as { label: string; value: string }[]
 
   const pvDesignItems = [
-    rfq.mawp               ? { label: 'MAWP',         value: `${rfq.mawp} psig` }   : null,
-    rfq.designTemp != null ? { label: 'Design Temp',  value: `${rfq.designTemp}°F` } : null,
+    rfq.mawp               ? { label: 'MAWP',        value: `${rfq.mawp} psig` }   : null,
+    rfq.designTemp != null ? { label: 'Design Temp', value: `${rfq.designTemp}°F` } : null,
+  ].filter(Boolean) as { label: string; value: string }[]
+
+  // ── Quick reference items for right column ───────────────────────────────────
+  const quickRefItems = [
+    rfq.shellOd                       ? { label: 'Shell OD',  value: `${rfq.shellOd}"` }      : null,
+    isHx && temaDesig                 ? { label: 'TEMA Type', value: temaDesig }               : null,
+    !isHx && rfq.mawp                 ? { label: 'MAWP',      value: `${rfq.mawp} psig` }     : null,
+    { label: 'Install', value: `${rfq.installCity}, ${rfq.installState}` },
+    { label: 'Deadline', value: fmtDate(rfq.deadlineAt) },
   ].filter(Boolean) as { label: string; value: string }[]
 
   return (
-    <aside style={{
-      width: 340, flexShrink: 0, background: '#1e293b',
-      borderLeft: '0.5px solid #334155', display: 'flex',
-      flexDirection: 'column', overflow: 'hidden',
-    }}>
+    <div
+      style={{
+        position: 'fixed', inset: 0, zIndex: 100,
+        background: 'rgba(2, 6, 23, 0.85)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          maxWidth: 1100, width: 'calc(100vw - 48px)', maxHeight: 'calc(100vh - 48px)',
+          background: '#0f172a', border: '0.5px solid #334155', borderRadius: 12,
+          overflow: 'hidden', display: 'flex', flexDirection: 'column',
+        }}
+        onClick={e => e.stopPropagation()}
+      >
 
-      {/* Header */}
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '14px 20px', borderBottom: '0.5px solid #334155', flexShrink: 0,
-      }}>
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: '#f1f5f9' }}>{rfq.title}</div>
-          <div style={{ fontSize: 11, color: '#475569', marginTop: 1 }}>RFQ #{rfq.rfqId} · {vesselLabel}</div>
+        {/* Header */}
+        <div style={{
+          height: 48, flexShrink: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '0 24px', borderBottom: '0.5px solid #1e293b',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#f1f5f9' }}>{rfq.title}</span>
+            <span style={{ fontSize: 12, color: '#475569' }}>RFQ #{rfq.rfqId} · {vesselLabel}</span>
+          </div>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            style={{
+              background: 'none', border: 'none', color: '#475569',
+              cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center', borderRadius: 4,
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
         </div>
-        <button
-          onClick={onClose}
-          aria-label="Close"
-          style={{ background: 'none', border: 'none', color: '#475569', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center', borderRadius: 4 }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
-      </div>
 
-      {/* Body */}
-      <div style={{ overflowY: 'auto', flex: 1 }}>
+        {/* Body */}
+        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
 
-        {/* ── HX geometry ────────────────────────────────────────────────── */}
-        {isHx && hxGeomItems.length > 0 && (
-          <Section label="Heat Exchanger Geometry">
-            <SpecGrid items={hxGeomItems} />
-          </Section>
-        )}
+          {/* ── Left column: spec sheet ──────────────────────────────────────── */}
+          <div style={{
+            flex: '0 0 60%', overflowY: 'auto', padding: 24,
+            borderRight: '0.5px solid #1e293b',
+          }}>
 
-        {/* ── HX shell/tube side ─────────────────────────────────────────── */}
-        {isHx && hxShellItems.length > 0 && (
-          <Section label="Shell & Tube Side Conditions">
-            <SpecGrid items={hxShellItems} />
-          </Section>
-        )}
+            {/* HX geometry */}
+            {isHx && hxGeomItems.length > 0 && (
+              <Section label="Heat Exchanger Geometry">
+                <SpecGrid items={hxGeomItems} />
+              </Section>
+            )}
 
-        {/* ── PV geometry ────────────────────────────────────────────────── */}
-        {!isHx && pvGeomItems.length > 0 && (
-          <Section label="Vessel Geometry">
-            <SpecGrid items={pvGeomItems} />
-          </Section>
-        )}
+            {/* HX shell & tube side */}
+            {isHx && hxCondItems.length > 0 && (
+              <Section label="Shell & Tube Side Conditions">
+                <SpecGrid items={hxCondItems} />
+              </Section>
+            )}
 
-        {/* ── PV design conditions ───────────────────────────────────────── */}
-        {!isHx && pvDesignItems.length > 0 && (
-          <Section label="Design Conditions">
-            <SpecGrid items={pvDesignItems} />
-          </Section>
-        )}
+            {/* PV geometry */}
+            {!isHx && pvGeomItems.length > 0 && (
+              <Section label="Vessel Geometry">
+                <SpecGrid items={pvGeomItems} />
+              </Section>
+            )}
 
-        {/* ── Nozzle schedule ────────────────────────────────────────────── */}
-        <Section label="Nozzle Schedule">
-          {rfq.nozzles.length === 0 ? (
-            <div style={{ fontSize: 12, color: '#475569' }}>No nozzles specified</div>
-          ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
-              <thead>
-                <tr>
-                  <NTh>Mark</NTh>
-                  <NTh>Size</NTh>
-                  <NTh>Rating</NTh>
-                  <NTh>Qty</NTh>
-                  <NTh>Location</NTh>
-                </tr>
-              </thead>
-              <tbody>
-                {rfq.nozzles.map((n, i) => (
-                  <>
-                    <tr key={`${n.mark}-a`} style={{ background: i % 2 === 0 ? '#0f172a' : '#1e293b' }}>
-                      <td style={{ padding: '5px 8px 2px', color: '#60a5fa', fontWeight: 500 }}>{n.mark}</td>
-                      <td style={{ padding: '5px 8px 2px', color: '#cbd5e1' }}>{n.size}</td>
-                      <td style={{ padding: '5px 8px 2px', color: '#cbd5e1' }}>{n.rating ?? '—'}</td>
-                      <td style={{ padding: '5px 8px 2px', color: '#cbd5e1' }}>{n.quantity}</td>
-                      <td style={{ padding: '5px 8px 2px', color: '#94a3b8' }}>{n.location?.replace('_', ' ') ?? '—'}</td>
-                    </tr>
-                    <tr key={`${n.mark}-b`} style={{ background: i % 2 === 0 ? '#0f172a' : '#1e293b' }}>
-                      <td colSpan={5} style={{ padding: '0 8px 5px', color: '#475569', fontSize: 10 }}>
-                        {[
-                          n.flangeType ? `Flange: ${n.flangeType}` : null,
-                          n.facing     ? `Facing: ${n.facing}`     : null,
-                          n.material   ? `Mtl: ${n.material}`      : null,
-                          n.service    ? `Svc: ${n.service}`       : null,
-                        ].filter(Boolean).join(' · ') || '—'}
-                      </td>
-                    </tr>
-                  </>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </Section>
+            {/* PV design conditions */}
+            {!isHx && pvDesignItems.length > 0 && (
+              <Section label="Design Conditions">
+                <SpecGrid items={pvDesignItems} />
+              </Section>
+            )}
 
-        {/* ── Painting & surface prep ────────────────────────────────────── */}
-        {(rfq.surfacePrep || rfq.primer || rfq.topcoat || rfq.finishType) && (
-          <Section label="Painting & Surface Prep">
-            <SpecGrid items={[
-              ...(rfq.surfacePrep ? [{ label: 'Surface Prep', value: rfq.surfacePrep }] : []),
-              ...(rfq.primer      ? [{ label: 'Primer',       value: rfq.primer }]      : []),
-              ...(rfq.topcoat     ? [{ label: 'Topcoat',      value: rfq.topcoat }]     : []),
-              ...(rfq.finishType  ? [{ label: 'Finish',       value: rfq.finishType }]  : []),
-            ]} />
-          </Section>
-        )}
-
-        {/* ── Insulation ────────────────────────────────────────────────── */}
-        {rfq.insulated && (
-          <Section label="Insulation">
-            <SpecGrid items={[
-              ...(rfq.insulationType      ? [{ label: 'Type',      value: rfq.insulationType }]                       : []),
-              ...(rfq.insulationThickness ? [{ label: 'Thickness', value: rfq.insulationThickness }]                  : []),
-              ...(rfq.insulationJacket    ? [{ label: 'Jacket',    value: rfq.insulationJacket }]                     : []),
-              ...(rfq.insulationShell != null ? [{ label: 'Shell', value: rfq.insulationShell ? 'Yes' : 'No' }]       : []),
-              ...(rfq.insulationHeads != null ? [{ label: 'Heads', value: rfq.insulationHeads ? 'Yes' : 'No' }]       : []),
-            ]} />
-          </Section>
-        )}
-
-        {/* ── Coils ─────────────────────────────────────────────────────── */}
-        {(rfq.internalCoil || rfq.externalCoil) && (
-          <Section label="Coils">
-            <SpecGrid items={[
-              ...(rfq.internalCoil         ? [{ label: 'Internal Coil',   value: 'Yes' }]                                : []),
-              ...(rfq.internalCoilPipeSize  ? [{ label: 'Int. Pipe Size',  value: rfq.internalCoilPipeSize }]             : []),
-              ...(rfq.internalCoilTurns != null ? [{ label: 'Int. Turns', value: String(rfq.internalCoilTurns) }]        : []),
-              ...(rfq.externalCoil         ? [{ label: 'External Coil',   value: 'Yes' }]                                : []),
-              ...(rfq.externalCoilType     ? [{ label: 'Ext. Type',       value: rfq.externalCoilType }]                 : []),
-              ...(rfq.externalCoilPipeSize ? [{ label: 'Ext. Pipe Size',  value: rfq.externalCoilPipeSize }]             : []),
-              ...(rfq.externalCoilCoverage ? [{ label: 'Ext. Coverage',   value: rfq.externalCoilCoverage }]             : []),
-            ]} />
-          </Section>
-        )}
-
-        {/* ── Remarks ───────────────────────────────────────────────────── */}
-        {rfq.notes && (
-          <Section label="Remarks">
-            <div style={{
-              fontSize: 12, color: '#cbd5e1', lineHeight: 1.6,
-              background: '#0f172a', border: '0.5px solid #334155',
-              borderRadius: 6, padding: '8px 10px',
-            }}>
-              {rfq.notes}
-            </div>
-          </Section>
-        )}
-
-        {/* ── Install info ──────────────────────────────────────────────── */}
-        <Section label="Install Info">
-          <SpecGrid items={[
-            { label: 'Install Location', value: `${rfq.installCity}, ${rfq.installState}` },
-            { label: 'Bid Deadline',     value: fmtDate(rfq.deadlineAt) },
-            ...(rfq.buyerCompany ? [{ label: 'Buyer', value: rfq.buyerCompany, fullWidth: true }] : []),
-          ]} />
-          {isPastDue && (
-            <div style={{ marginTop: 8, fontSize: 11, color: '#f87171' }}>
-              This RFQ is past its bid deadline.
-            </div>
-          )}
-        </Section>
-
-        {/* ── Quote ─────────────────────────────────────────────────────── */}
-        {submitted ? (
-          <Section label="Quote" noDivider>
-            <div style={{
-              borderRadius: 6, padding: '10px 14px',
-              background: '#052e16', border: '0.5px solid #16a34a',
-              color: '#86efac', fontSize: 13, fontWeight: 500,
-            }}>
-              ✓ Quote submitted
-            </div>
-          </Section>
-        ) : (
-          <Section label="Submit Quote" noDivider>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <div>
-                <div style={{ fontSize: 11, color: '#475569', marginBottom: 5 }}>Fabricated Price ($)</div>
-                <input
-                  type="number" min={0} placeholder="e.g. 48500"
-                  value={fabricatedPrice}
-                  onChange={e => setFabricatedPrice(e.target.value)}
-                  style={inputBase}
-                />
-              </div>
-              <div>
-                <div style={{ fontSize: 11, color: '#475569', marginBottom: 5 }}>Estimated Freight ($)</div>
-                <input
-                  type="number" min={0} placeholder="e.g. 2200"
-                  value={estimatedFreight}
-                  onChange={e => setEstimatedFreight(e.target.value)}
-                  style={inputBase}
-                />
-              </div>
-              <div>
-                <div style={{ fontSize: 11, color: '#475569', marginBottom: 5 }}>Total Delivered</div>
-                <div style={{
-                  background: '#0f172a', border: '0.5px solid #334155', borderRadius: 6,
-                  padding: '8px 10px', fontSize: 13, fontWeight: 500,
-                  color: totalDelivered > 0 ? '#f1f5f9' : '#334155',
-                }}>
-                  {totalDelivered > 0
-                    ? `$${totalDelivered.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                    : '—'
-                  }
+            {/* Nozzle schedule */}
+            <Section label="Nozzle Schedule">
+              {rfq.nozzles.length === 0 ? (
+                <div style={{ fontSize: 12, color: '#475569' }}>No nozzles specified</div>
+              ) : (
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                    <thead>
+                      <tr>
+                        <NTh>Mark</NTh>
+                        <NTh>Size</NTh>
+                        <NTh>Rating</NTh>
+                        <NTh>Flange Type</NTh>
+                        <NTh>Facing</NTh>
+                        <NTh>Material</NTh>
+                        <NTh>Service</NTh>
+                        <NTh>Qty</NTh>
+                        <NTh>Location</NTh>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rfq.nozzles.map((n, i) => (
+                        <tr key={n.id} style={{ background: i % 2 === 0 ? '#0a1628' : '#0f172a' }}>
+                          <td style={{ padding: '6px 10px', color: '#60a5fa', fontWeight: 500 }}>{n.mark}</td>
+                          <td style={{ padding: '6px 10px', color: '#cbd5e1' }}>{n.size}</td>
+                          <td style={{ padding: '6px 10px', color: '#cbd5e1' }}>{n.rating ?? '—'}</td>
+                          <td style={{ padding: '6px 10px', color: '#cbd5e1' }}>{n.flangeType ?? '—'}</td>
+                          <td style={{ padding: '6px 10px', color: '#cbd5e1' }}>{n.facing ?? '—'}</td>
+                          <td style={{ padding: '6px 10px', color: '#cbd5e1' }}>{n.material ?? '—'}</td>
+                          <td style={{ padding: '6px 10px', color: '#94a3b8' }}>{n.service ?? '—'}</td>
+                          <td style={{ padding: '6px 10px', color: '#cbd5e1', textAlign: 'center' }}>{n.quantity}</td>
+                          <td style={{ padding: '6px 10px', color: '#94a3b8' }}>{n.location?.replace('_', ' ') ?? '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              </div>
-              <div>
-                <div style={{ fontSize: 11, color: '#475569', marginBottom: 5 }}>Lead Time (weeks)</div>
-                <input
-                  type="number" min={1} placeholder="e.g. 14"
-                  value={leadTimeWeeks}
-                  onChange={e => setLeadTimeWeeks(e.target.value)}
-                  style={inputBase}
-                />
-              </div>
-              <div>
-                <div style={{ fontSize: 11, color: '#475569', marginBottom: 5 }}>
-                  Qualifications / Notes{' '}
-                  <span style={{ fontWeight: 400 }}>(optional)</span>
-                </div>
-                <textarea
-                  rows={3}
-                  placeholder="Any relevant qualifications, exceptions, or notes…"
-                  value={qualifications}
-                  onChange={e => setQualifications(e.target.value)}
-                  style={{ ...inputBase, resize: 'vertical', lineHeight: 1.5 } as CSSProperties}
-                />
-              </div>
-              {submitError && (
-                <div style={{ fontSize: 12, color: '#f87171' }}>{submitError}</div>
               )}
-              <button
-                onClick={handleSubmitQuote}
-                disabled={submitting}
-                style={{
-                  padding: '9px 0',
-                  background:   submitting ? '#0f172a' : '#1d4ed8',
-                  border:       `0.5px solid ${submitting ? '#1e293b' : '#2563eb'}`,
-                  borderRadius: 6,
-                  color:        submitting ? '#334155' : '#f1f5f9',
-                  fontSize:     13,
-                  fontWeight:   500,
-                  cursor:       submitting ? 'default' : 'pointer',
-                  fontFamily:   'inherit',
-                  transition:   'background 0.15s',
-                }}
-              >
-                {submitting ? 'Submitting…' : 'Submit Quote'}
-              </button>
-            </div>
-          </Section>
-        )}
+            </Section>
 
+            {/* Painting & surface prep */}
+            {(rfq.surfacePrep || rfq.primer || rfq.topcoat || rfq.finishType) && (
+              <Section label="Painting & Surface Prep">
+                <SpecGrid items={[
+                  ...(rfq.surfacePrep ? [{ label: 'Surface Prep', value: rfq.surfacePrep }] : []),
+                  ...(rfq.primer      ? [{ label: 'Primer',       value: rfq.primer }]      : []),
+                  ...(rfq.topcoat     ? [{ label: 'Topcoat',      value: rfq.topcoat }]     : []),
+                  ...(rfq.finishType  ? [{ label: 'Finish',       value: rfq.finishType }]  : []),
+                ]} />
+              </Section>
+            )}
+
+            {/* Insulation */}
+            {rfq.insulated && (
+              <Section label="Insulation">
+                <SpecGrid items={[
+                  ...(rfq.insulationType          ? [{ label: 'Type',      value: rfq.insulationType }]                 : []),
+                  ...(rfq.insulationThickness      ? [{ label: 'Thickness', value: rfq.insulationThickness }]            : []),
+                  ...(rfq.insulationJacket         ? [{ label: 'Jacket',    value: rfq.insulationJacket }]               : []),
+                  ...(rfq.insulationShell != null  ? [{ label: 'Shell',     value: rfq.insulationShell ? 'Yes' : 'No' }] : []),
+                  ...(rfq.insulationHeads != null  ? [{ label: 'Heads',     value: rfq.insulationHeads ? 'Yes' : 'No' }] : []),
+                ]} />
+              </Section>
+            )}
+
+            {/* Coils */}
+            {(rfq.internalCoil || rfq.externalCoil) && (
+              <Section label="Coils">
+                <SpecGrid items={[
+                  ...(rfq.internalCoil              ? [{ label: 'Internal Coil',  value: 'Yes' }]                          : []),
+                  ...(rfq.internalCoilPipeSize       ? [{ label: 'Int. Pipe Size', value: rfq.internalCoilPipeSize }]        : []),
+                  ...(rfq.internalCoilTurns != null  ? [{ label: 'Int. Turns',     value: String(rfq.internalCoilTurns) }]  : []),
+                  ...(rfq.externalCoil              ? [{ label: 'External Coil',  value: 'Yes' }]                          : []),
+                  ...(rfq.externalCoilType           ? [{ label: 'Ext. Type',      value: rfq.externalCoilType }]           : []),
+                  ...(rfq.externalCoilPipeSize       ? [{ label: 'Ext. Pipe Size', value: rfq.externalCoilPipeSize }]       : []),
+                  ...(rfq.externalCoilCoverage       ? [{ label: 'Ext. Coverage',  value: rfq.externalCoilCoverage }]       : []),
+                ]} />
+              </Section>
+            )}
+
+            {/* Remarks */}
+            {rfq.notes && (
+              <Section label="Remarks">
+                <div style={{
+                  fontSize: 12, color: '#cbd5e1', lineHeight: 1.6,
+                  background: '#1e293b', border: '0.5px solid #334155',
+                  borderRadius: 6, padding: '8px 10px',
+                }}>
+                  {rfq.notes}
+                </div>
+              </Section>
+            )}
+
+            {/* Install info */}
+            <Section label="Install Info" noDivider>
+              <SpecGrid items={[
+                { label: 'Install Location', value: `${rfq.installCity}, ${rfq.installState}` },
+                { label: 'Bid Deadline',     value: fmtDate(rfq.deadlineAt) },
+                ...(rfq.buyerCompany ? [{ label: 'Buyer', value: rfq.buyerCompany, fullWidth: true }] : []),
+              ]} />
+              {isPastDue && (
+                <div style={{ marginTop: 8, fontSize: 11, color: '#f87171' }}>
+                  This RFQ is past its bid deadline.
+                </div>
+              )}
+            </Section>
+
+          </div>
+
+          {/* ── Right column: quote panel ────────────────────────────────────── */}
+          <div style={{
+            flex: '0 0 40%', overflowY: 'auto', padding: 24,
+            background: '#0a1628', display: 'flex', flexDirection: 'column', gap: 20,
+          }}>
+
+            {/* Quick reference card */}
+            <div style={{
+              background: '#0f172a', border: '0.5px solid #334155',
+              borderRadius: 8, padding: '14px 16px',
+            }}>
+              <div style={{
+                fontSize: 10, fontWeight: 500, letterSpacing: '0.08em',
+                textTransform: 'uppercase', color: '#475569', marginBottom: 10,
+              }}>
+                Quick Reference
+              </div>
+              <SpecGrid items={quickRefItems} />
+            </div>
+
+            {/* Quote form or submitted state */}
+            {submitted ? (
+              <div style={{
+                borderRadius: 8, padding: '14px 16px',
+                background: '#052e16', border: '0.5px solid #16a34a',
+                color: '#86efac', fontSize: 13, fontWeight: 500,
+              }}>
+                ✓ Quote submitted
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div style={{
+                  fontSize: 10, fontWeight: 500, letterSpacing: '0.08em',
+                  textTransform: 'uppercase', color: '#475569',
+                  paddingBottom: 6, borderBottom: '0.5px solid #1e293b',
+                }}>
+                  Submit Quote
+                </div>
+
+                <div>
+                  <div style={{ fontSize: 11, color: '#475569', marginBottom: 5 }}>Fabricated Price ($)</div>
+                  <input
+                    type="number" min={0} placeholder="e.g. 48500"
+                    value={fabricatedPrice}
+                    onChange={e => setFabricatedPrice(e.target.value)}
+                    style={inputBase}
+                  />
+                </div>
+
+                <div>
+                  <div style={{ fontSize: 11, color: '#475569', marginBottom: 5 }}>Estimated Freight ($)</div>
+                  <input
+                    type="number" min={0} placeholder="e.g. 2200"
+                    value={estimatedFreight}
+                    onChange={e => setEstimatedFreight(e.target.value)}
+                    style={inputBase}
+                  />
+                </div>
+
+                <div>
+                  <div style={{ fontSize: 11, color: '#475569', marginBottom: 5 }}>Total Delivered</div>
+                  <div style={{
+                    background: '#0f172a', border: '0.5px solid #334155', borderRadius: 6,
+                    padding: '8px 10px', fontSize: 13, fontWeight: 500,
+                    color: totalDelivered > 0 ? '#f1f5f9' : '#334155',
+                  }}>
+                    {totalDelivered > 0
+                      ? `$${totalDelivered.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                      : '—'
+                    }
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ fontSize: 11, color: '#475569', marginBottom: 5 }}>Lead Time (weeks)</div>
+                  <input
+                    type="number" min={1} placeholder="e.g. 14"
+                    value={leadTimeWeeks}
+                    onChange={e => setLeadTimeWeeks(e.target.value)}
+                    style={inputBase}
+                  />
+                </div>
+
+                <div>
+                  <div style={{ fontSize: 11, color: '#475569', marginBottom: 5 }}>
+                    Qualifications / Notes{' '}
+                    <span style={{ fontWeight: 400 }}>(optional)</span>
+                  </div>
+                  <textarea
+                    rows={4}
+                    placeholder="Any relevant qualifications, exceptions, or notes…"
+                    value={qualifications}
+                    onChange={e => setQualifications(e.target.value)}
+                    style={{ ...inputBase, resize: 'vertical', lineHeight: 1.5 } as CSSProperties}
+                  />
+                </div>
+
+                {submitError && (
+                  <div style={{ fontSize: 12, color: '#f87171' }}>{submitError}</div>
+                )}
+
+                <button
+                  onClick={handleSubmitQuote}
+                  disabled={submitting}
+                  style={{
+                    padding: '10px 0',
+                    background:   submitting ? '#0f172a' : '#1d4ed8',
+                    border:       `0.5px solid ${submitting ? '#1e293b' : '#2563eb'}`,
+                    borderRadius: 6,
+                    color:        submitting ? '#334155' : '#f1f5f9',
+                    fontSize:     13,
+                    fontWeight:   600,
+                    cursor:       submitting ? 'default' : 'pointer',
+                    fontFamily:   'inherit',
+                    transition:   'background 0.15s',
+                    width:        '100%',
+                  }}
+                >
+                  {submitting ? 'Submitting…' : 'Submit Quote'}
+                </button>
+              </div>
+            )}
+
+          </div>
+        </div>
       </div>
-    </aside>
+    </div>
   )
 }
 
@@ -637,7 +699,7 @@ export default function FabricatorMarketplaceView() {
   return (
     <div style={{ display: 'flex', flex: 1, overflow: 'hidden', minWidth: 0 }}>
 
-      {/* Table area */}
+      {/* Table area — full width */}
       <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', minWidth: 0 }}>
 
         {/* Header */}
@@ -679,7 +741,7 @@ export default function FabricatorMarketplaceView() {
                 return (
                   <tr
                     key={row.marketplaceRfqId}
-                    onClick={() => setSelectedId(isSelected ? null : row.marketplaceRfqId)}
+                    onClick={() => setSelectedId(row.marketplaceRfqId)}
                     style={{
                       borderBottom: '0.5px solid #1e293b',
                       background:   isSelected ? '#1e293b' : 'transparent',
@@ -690,7 +752,7 @@ export default function FabricatorMarketplaceView() {
                     onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent' }}
                   >
                     <td style={{ padding: '10px 16px', color: '#60a5fa', fontWeight: 500 }}>#{row.rfqId}</td>
-                    <td style={{ padding: '10px 16px', color: '#f1f5f9', maxWidth: 180 }}>
+                    <td style={{ padding: '10px 16px', color: '#f1f5f9', maxWidth: 260 }}>
                       <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.title}</div>
                     </td>
                     <td style={{ padding: '10px 16px', color: '#94a3b8' }}>{vesselLabel}</td>
@@ -715,9 +777,9 @@ export default function FabricatorMarketplaceView() {
         </div>
       </div>
 
-      {/* Detail panel */}
+      {/* Modal overlay */}
       {selected && (
-        <DetailPanel
+        <DetailModal
           key={selected.marketplaceRfqId}
           rfq={selected}
           onClose={() => setSelectedId(null)}
