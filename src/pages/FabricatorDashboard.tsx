@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { api } from '../lib/api'
 import FabricatorBidProfile from '../components/FabricatorBidProfile'
+import FabricatorMarketplaceView from '../components/FabricatorMarketplaceView'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -804,7 +805,7 @@ export default function FabricatorDashboard() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [filter, setFilter] = useState<FilterState>('all')
   const [shopName, setShopName] = useState('')
-  const [view, setView] = useState<'inbox' | 'settings'>('inbox')
+  const [view, setView] = useState<'inbox' | 'marketplace' | 'settings'>('inbox')
   const [searchParams] = useSearchParams()
   const rfqParam = searchParams.get('rfq')
 
@@ -830,6 +831,15 @@ export default function FabricatorDashboard() {
       .finally(() => setLoading(false))
   // rfqParam intentionally omitted — only run on mount
   // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    function handleFabricatorNav(e: Event) {
+      const detail = (e as CustomEvent<string>).detail
+      if (detail === 'settings') setView('settings')
+    }
+    window.addEventListener('fabricator-nav', handleFabricatorNav)
+    return () => window.removeEventListener('fabricator-nav', handleFabricatorNav)
   }, [])
 
   const filtered = filter === 'all' ? rfqs : rfqs.filter(r => r.status === filter)
@@ -900,6 +910,28 @@ export default function FabricatorDashboard() {
             RFQ Inbox
           </div>
 
+          {/* Marketplace */}
+          <div
+            onClick={() => setView('marketplace')}
+            style={{
+              display:     'flex',
+              alignItems:  'center',
+              gap:         10,
+              padding:     '9px 20px',
+              background:  view === 'marketplace' ? '#1e293b' : 'transparent',
+              borderRight: view === 'marketplace' ? '2px solid #60a5fa' : '2px solid transparent',
+              color:       view === 'marketplace' ? '#f1f5f9' : '#475569',
+              cursor:      'pointer',
+              fontSize:    13,
+            }}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+            Marketplace
+          </div>
+
           {/* Configurator */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 20px', color: '#475569', cursor: 'pointer', fontSize: 13 }}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -942,7 +974,8 @@ export default function FabricatorDashboard() {
         borderRight: selected && view === 'inbox' ? '0.5px solid #1e293b' : 'none',
         minWidth: 0,
       }}>
-      {view === 'settings' ? <FabricatorBidProfile /> : (<>
+      {view === 'settings'    ? <FabricatorBidProfile /> :
+       view === 'marketplace' ? <FabricatorMarketplaceView /> : (<>
         {/* Header */}
         <div style={{ padding: '20px 24px 0', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -1043,6 +1076,7 @@ export default function FabricatorDashboard() {
         </div>
       </>)}
       </main>
+
 
       {/* ── Detail Panel ─────────────────────────────────────────────────── */}
       {selected && view === 'inbox' && (
