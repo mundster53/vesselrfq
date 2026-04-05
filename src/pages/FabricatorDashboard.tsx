@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { api } from '../lib/api'
+import FabricatorBidProfile from '../components/FabricatorBidProfile'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -802,6 +803,7 @@ export default function FabricatorDashboard() {
   const [fetchError, setFetchError] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [filter, setFilter] = useState<FilterState>('all')
+  const [view, setView] = useState<'inbox' | 'settings'>('inbox')
   const [searchParams] = useSearchParams()
   const rfqParam = searchParams.get('rfq')
 
@@ -865,18 +867,21 @@ export default function FabricatorDashboard() {
         </div>
 
         <nav>
-          {/* Active */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            padding: '9px 20px',
-            background: '#1e293b',
-            borderRight: '2px solid #60a5fa',
-            color: '#f1f5f9',
-            cursor: 'pointer',
-            fontSize: 13,
-          }}>
+          {/* RFQ Inbox */}
+          <div
+            onClick={() => setView('inbox')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              padding: '9px 20px',
+              background: view === 'inbox' ? '#1e293b' : 'transparent',
+              borderRight: view === 'inbox' ? '2px solid #60a5fa' : '2px solid transparent',
+              color: view === 'inbox' ? '#f1f5f9' : '#475569',
+              cursor: 'pointer',
+              fontSize: 13,
+            }}
+          >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
               <path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z" />
@@ -894,7 +899,20 @@ export default function FabricatorDashboard() {
           </div>
 
           {/* Settings */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 20px', color: '#475569', cursor: 'pointer', fontSize: 13 }}>
+          <div
+            onClick={() => setView('settings')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              padding: '9px 20px',
+              background: view === 'settings' ? '#1e293b' : 'transparent',
+              borderRight: view === 'settings' ? '2px solid #60a5fa' : '2px solid transparent',
+              color: view === 'settings' ? '#f1f5f9' : '#475569',
+              cursor: 'pointer',
+              fontSize: 13,
+            }}
+          >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="3" />
               <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
@@ -904,15 +922,16 @@ export default function FabricatorDashboard() {
         </nav>
       </aside>
 
-      {/* ── RFQ List ─────────────────────────────────────────────────────── */}
+      {/* ── Main content ─────────────────────────────────────────────── */}
       <main style={{
         flex: 1,
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
-        borderRight: selected ? '0.5px solid #1e293b' : 'none',
+        borderRight: selected && view === 'inbox' ? '0.5px solid #1e293b' : 'none',
         minWidth: 0,
       }}>
+      {view === 'settings' ? <FabricatorBidProfile /> : (<>
         {/* Header */}
         <div style={{ padding: '20px 24px 0', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -1011,10 +1030,11 @@ export default function FabricatorDashboard() {
             </tbody>
           </table>
         </div>
+      </>)}
       </main>
 
       {/* ── Detail Panel ─────────────────────────────────────────────────── */}
-      {selected && (
+      {selected && view === 'inbox' && (
         <DetailPanel
           key={selected.id}
           rfq={selected}
