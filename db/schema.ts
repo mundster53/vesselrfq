@@ -1,4 +1,5 @@
 import { pgTable, serial, text, timestamp, integer, numeric, boolean, unique } from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm'
 
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
@@ -143,4 +144,71 @@ export const nozzles = pgTable('nozzles', {
   service: text('service'),
   quantity: integer('quantity').default(1).notNull(),
   location: text('location', { enum: ['shell', 'left_head', 'right_head'] }),
+})
+
+// ── Marketplace tables ────────────────────────────────────────────────────────
+
+export const fabricatorBidProfiles = pgTable('fabricator_bid_profiles', {
+  id:                  serial('id').primaryKey(),
+  userId:              integer('user_id').references(() => users.id).notNull(),
+  equipmentTypes:      text('equipment_types').array().notNull().default([]),
+  materials:           text('materials').array().notNull().default([]),
+  maxDiameterInches:   numeric('max_diameter_inches'),
+  maxLengthInches:     numeric('max_length_inches'),
+  maxWeightLbs:        numeric('max_weight_lbs'),
+  shipToStates:        text('ship_to_states').array().notNull().default([]),
+  acceptingWork:       boolean('accepting_work').notNull().default(true),
+  profileComplete:     boolean('profile_complete').notNull().default(false),
+  createdAt:           timestamp('created_at').defaultNow().notNull(),
+  updatedAt:           timestamp('updated_at').defaultNow().notNull(),
+}, (t) => [unique().on(t.userId)])
+
+export const embedVerifications = pgTable('embed_verifications', {
+  id:            serial('id').primaryKey(),
+  userId:        integer('user_id').references(() => users.id).notNull(),
+  embedUrl:      text('embed_url').notNull(),
+  verified:      boolean('verified').notNull(),
+  checkedAt:     timestamp('checked_at').defaultNow().notNull(),
+  failureReason: text('failure_reason'),
+})
+
+export const marketplaceRfqs = pgTable('marketplace_rfqs', {
+  id:             serial('id').primaryKey(),
+  buyerId:        integer('buyer_id').references(() => users.id).notNull(),
+  rfqId:          integer('rfq_id').references(() => rfqs.id).notNull(),
+  status:         text('status', { enum: ['open', 'closed', 'awarded', 'cancelled'] }).notNull().default('open'),
+  installCity:    text('install_city').notNull(),
+  installState:   text('install_state').notNull(),
+  deadlineAt:     timestamp('deadline_at'),
+  // FK to marketplace_quotes.id — circular dep, constraint added separately in migration
+  awardedQuoteId: integer('awarded_quote_id'),
+  createdAt:      timestamp('created_at').defaultNow().notNull(),
+  updatedAt:      timestamp('updated_at').defaultNow().notNull(),
+})
+
+export const marketplaceQuotes = pgTable('marketplace_quotes', {
+  id:                  serial('id').primaryKey(),
+  marketplaceRfqId:    integer('marketplace_rfq_id').references(() => marketplaceRfqs.id).notNull(),
+  fabricatorId:        integer('fabricator_id').references(() => users.id).notNull(),
+  fabricatedPrice:       numeric('fabricated_price').notNull(),
+  estimatedFreight:      numeric('estimated_freight').notNull(),
+  totalDeliveredPrice:   numeric('total_delivered_price').generatedAlwaysAs(
+    sql`fabricated_price + estimated_freight`
+  ),
+  leadTimeWeeks:         integer('lead_time_weeks').notNull(),
+  qualifications:      text('qualifications'),
+  status:              text('status', { enum: ['submitted', 'withdrawn', 'awarded', 'not_awarded'] }).notNull().default('submitted'),
+  submittedAt:         timestamp('submitted_at').defaultNow().notNull(),
+  updatedAt:           timestamp('updated_at').defaultNow().notNull(),
+})
+
+export const marketplaceNotifications = pgTable('marketplace_notifications', {
+  id:               serial('id').primaryKey(),
+  marketplaceRfqId: integer('marketplace_rfq_id').references(() => marketplaceRfqs.id).notNull(),
+  fabricatorId:     integer('fabricator_id').references(() => users.id).notNull(),
+  notificationType: text('notification_type', {
+    enum: ['new_rfq', 'rfq_deadline_reminder', 'rfq_awarded', 'rfq_not_awarded', 'rfq_cancelled'],
+  }).notNull(),
+  sentAt:       timestamp('sent_at').defaultNow().notNull(),
+  emailSentTo:  text('email_sent_to').notNull(),
 })

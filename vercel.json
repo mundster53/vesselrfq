@@ -5,5 +5,11 @@
     { "source": "/app/(.*)", "destination": "/app/index.html" },
     { "source": "/fabricators", "destination": "/fabricators/index.html" },
     { "source": "/fabricators/success", "destination": "/fabricators/success.html" }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron-verify-embeds",
+      "schedule": "0 2 * * 0"
+    }
   ]
 }
