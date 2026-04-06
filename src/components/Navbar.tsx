@@ -19,6 +19,11 @@ export default function Navbar() {
         {user && (
           <div className="flex items-center gap-5 text-sm">
             {user.role === 'buyer' && (
+              <Link to="/dashboard" className="text-slate-300 hover:text-white transition-colors">
+                Dashboard
+              </Link>
+            )}
+            {user.role === 'buyer' && (
               <Link to="/designer" className="text-slate-300 hover:text-white transition-colors">
                 New RFQ
               </Link>

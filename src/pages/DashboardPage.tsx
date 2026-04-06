@@ -186,6 +186,7 @@ function RfqDetailPanel({ rfq, onClose }: { rfq: RfqFull; onClose: () => void })
                 <SpecRow label="Saddle Width" value={rfq.saddleWidth ? `${rfq.saddleWidth}"` : null} />
               </>
             )}
+            <SpecRow label="Quantity" value={String(rfq.quantity)} />
           </div>
 
           {/* Design Conditions */}

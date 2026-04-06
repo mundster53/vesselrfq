@@ -94,6 +94,7 @@ export interface RfqSummary {
   title: string
   status: RfqStatus
   vesselType: string | null
+  quantity: number
   shellOd: string | null
   shellLength: string | null
   shellMaterial: string | null

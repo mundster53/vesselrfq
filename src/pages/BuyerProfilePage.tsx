@@ -1,5 +1,5 @@
 import { useState, useEffect, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { api, ApiError } from '../lib/api'
 import Navbar from '../components/Navbar'
@@ -97,6 +97,9 @@ export default function BuyerProfilePage() {
 
       <main className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-10">
         <div className="mb-8">
+          <Link to="/dashboard" className="inline-flex items-center text-sm text-slate-500 hover:text-slate-900 transition-colors mb-3">
+            ← Back to Dashboard
+          </Link>
           <h1 className="text-xl font-semibold text-slate-900">
             {isNew ? 'Complete your profile' : 'My profile'}
           </h1>
