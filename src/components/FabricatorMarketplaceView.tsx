@@ -27,6 +27,7 @@ interface MarketplaceRfqItem {
   createdAt:        string
   title:            string
   vesselType:       string | null
+  quantity:         number
   shellOd:          string | null
   shellLength:      string | null
   shellMaterial:    string | null
@@ -265,6 +266,7 @@ function DetailModal({ rfq, onClose, onQuoteSubmitted }: {
     rfq.orientation        ? { label: 'Orientation',      value: rfq.orientation }              : null,
     rfq.supportType        ? { label: 'Support Type',     value: rfq.supportType }              : null,
     rfq.corrosionAllowance ? { label: 'Corrosion Allow.', value: `${rfq.corrosionAllowance}"` } : null,
+    { label: 'Quantity',     value: String(rfq.quantity) },
   ].filter(Boolean) as { label: string; value: string }[]
 
   const pvDesignItems = [

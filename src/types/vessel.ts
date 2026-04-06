@@ -66,6 +66,7 @@ export type Orientation = 'horizontal' | 'vertical'
 export interface VesselDesignState {
   orientation: Orientation
   title: string
+  quantity: number
   shellOd: string
   shellLength: string
   shellMaterial: string  // ShellMaterial or any custom string
@@ -126,6 +127,7 @@ export type BaffleType =
 
 export interface HxDesignState {
   title: string
+  quantity: number
   orientation: Orientation
   supportType: SupportType | ''
   saddleHeight: string

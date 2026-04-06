@@ -270,6 +270,7 @@ function getHxArrangements(duty: string, hazardous: string, shellCleaning: strin
 const initialTankState: VesselDesignState = {
   orientation: 'horizontal',
   title: '',
+  quantity: 1,
   shellOd: '',
   shellLength: '',
   shellMaterial: '',
@@ -286,6 +287,7 @@ const initialTankState: VesselDesignState = {
 
 const initialHxState: HxDesignState = {
   title: '',
+  quantity: 1,
   orientation: 'horizontal',
   supportType: 'saddles',
   saddleHeight: '',
@@ -769,6 +771,7 @@ export default function VesselDesignerPage() {
     return {
       vesselType: 'tank',
       title: form.title.trim(),
+      quantity: form.quantity,
       shellOd: form.shellOd || undefined,
       shellLength: form.shellLength || undefined,
       shellMaterial: form.shellMaterial || undefined,
@@ -809,6 +812,7 @@ export default function VesselDesignerPage() {
     return {
       vesselType: 'heat_exchanger',
       title: hxForm.title.trim(),
+      quantity: hxForm.quantity,
       orientation: hxForm.orientation,
       shellOd: hxForm.shellOd || undefined,
       shellLength: hxForm.shellLength || undefined,
@@ -1031,6 +1035,18 @@ export default function VesselDesignerPage() {
                   className="w-full text-base font-semibold border-0 border-b-2 border-slate-200 focus:border-blue-500 focus:outline-none bg-transparent pb-1 placeholder:text-slate-300 placeholder:font-normal"
                 />
                 <p className="text-xs text-slate-400 mt-1">Give this RFQ a descriptive title</p>
+              </div>
+              <div className="shrink-0">
+                <label className="block text-xs text-slate-500 mb-1">Quantity</label>
+                <input
+                  type="number" min="1"
+                  value={vesselType === 'tank' ? form.quantity : hxForm.quantity}
+                  onChange={e => {
+                    const v = Math.max(1, parseInt(e.target.value) || 1)
+                    vesselType === 'tank' ? setField('quantity', v) : setHxField('quantity', v)
+                  }}
+                  className="w-20 border border-slate-200 rounded-lg px-2 py-2 text-sm text-center"
+                />
               </div>
               <button onClick={handleSubmit}
                 disabled={submitting || (vesselType === 'tank' ? !tankCanSubmit : !hxCanSubmit)}

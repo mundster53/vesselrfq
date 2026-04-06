@@ -51,6 +51,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         createdAt:        marketplaceRfqs.createdAt,
         title:            rfqs.title,
         vesselType:       rfqs.vesselType,
+        quantity:         rfqs.quantity,
         shellOd:          rfqs.shellOd,
         shellLength:      rfqs.shellLength,
         shellMaterial:    rfqs.shellMaterial,

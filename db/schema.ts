@@ -19,6 +19,7 @@ export const rfqs = pgTable('rfqs', {
 
   // Vessel type: 'tank' | 'heat_exchanger'
   vesselType: text('vessel_type'),
+  quantity: integer('quantity').notNull().default(1),
 
   // Shell (shared by tank and HX)
   shellOd: numeric('shell_od'),

@@ -55,6 +55,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         status:       marketplaceRfqs.status,
         rfqTitle:     rfqs.title,
         vesselType:   rfqs.vesselType,
+        quantity:     rfqs.quantity,
         shellOd:      rfqs.shellOd,
         shellLength:  rfqs.shellLength,
         mawp:         rfqs.mawp,
@@ -176,6 +177,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           <tr><td style="padding:8px 14px;color:#64748b;font-size:13px;white-space:nowrap;background:#f8fafc;border-bottom:1px solid #e2e8f0">RFQ</td><td style="padding:8px 14px;color:#1e293b;font-size:13px;font-weight:500;border-bottom:1px solid #e2e8f0">${mrfq.rfqTitle}</td></tr>
           <tr><td style="padding:8px 14px;color:#64748b;font-size:13px;white-space:nowrap;background:#f8fafc;border-bottom:1px solid #e2e8f0">Vessel Type</td><td style="padding:8px 14px;color:#1e293b;font-size:13px;font-weight:500;border-bottom:1px solid #e2e8f0">${vesselLabel}</td></tr>
           ${mrfq.shellOd ? `<tr><td style="padding:8px 14px;color:#64748b;font-size:13px;white-space:nowrap;background:#f8fafc;border-bottom:1px solid #e2e8f0">Shell OD</td><td style="padding:8px 14px;color:#1e293b;font-size:13px;font-weight:500;border-bottom:1px solid #e2e8f0">${mrfq.shellOd}"</td></tr>` : ''}
+          <tr><td style="padding:8px 14px;color:#64748b;font-size:13px;white-space:nowrap;background:#f8fafc;border-bottom:1px solid #e2e8f0">Quantity</td><td style="padding:8px 14px;color:#1e293b;font-size:13px;font-weight:500;border-bottom:1px solid #e2e8f0">${mrfq.quantity}</td></tr>
           <tr><td style="padding:8px 14px;color:#64748b;font-size:13px;white-space:nowrap;background:#f8fafc;border-bottom:1px solid #e2e8f0">Install Location</td><td style="padding:8px 14px;color:#1e293b;font-size:13px;font-weight:500;border-bottom:1px solid #e2e8f0">${mrfq.installCity}, ${mrfq.installState}</td></tr>
           <tr><td style="padding:8px 14px;color:#64748b;font-size:13px;white-space:nowrap;background:#f8fafc;border-bottom:1px solid #e2e8f0">Bid Deadline</td><td style="padding:8px 14px;color:#1e293b;font-size:13px;font-weight:500;border-bottom:1px solid #e2e8f0">${deadlineStr}</td></tr>
           <tr><td style="padding:8px 14px;color:#64748b;font-size:13px;white-space:nowrap;background:#f8fafc">Bids Received</td><td style="padding:8px 14px;color:#1e293b;font-size:13px;font-weight:500">${quotes.length}</td></tr>
@@ -275,6 +277,7 @@ Please find below the bid tabulation for the following project. Quotes are ranke
 PROJECT SUMMARY
 RFQ: ${mrfq.rfqTitle}
 Vessel Type: ${vesselLabel}${mrfq.shellOd ? `\nShell OD: ${mrfq.shellOd}"` : ''}
+Quantity: ${mrfq.quantity}
 Install Location: ${mrfq.installCity}, ${mrfq.installState}
 Bid Deadline: ${deadlineStr}
 Bids Received: ${quotes.length}

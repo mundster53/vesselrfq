@@ -32,6 +32,7 @@ interface Buyer {
 interface RfqRecord {
   id: string
   vesselType: string
+  quantity: number
   shellId: string
   ttLength: string
   orientation: string
@@ -96,6 +97,7 @@ interface ApiRfq {
   title: string
   status: string
   vesselType: string | null
+  quantity: number
   shellOd: string | null
   shellLength: string | null
   shellMaterial: string | null
@@ -150,6 +152,7 @@ function mapApiRfq(r: ApiRfq): RfqRecord {
   return {
     id: `RFQ-${r.id}`,
     vesselType: r.vesselType === 'heat_exchanger' ? 'Heat Exchanger' : 'Pressure Vessel',
+    quantity: r.quantity,
     shellId:           r.shellOd        ? `${r.shellOd}"` : '—',
     ttLength:          r.shellLength    ? `${r.shellLength}"` : '—',
     orientation:       r.orientation   ?? '—',
@@ -591,6 +594,7 @@ function DetailPanel({
             { label: 'Orientation',  value: rfq.orientation },
             { label: 'Head Type',    value: rfq.headType },
             { label: 'Support Type', value: rfq.supportType },
+            { label: 'Quantity',     value: String(rfq.quantity) },
           ]} />
         </Section>
 

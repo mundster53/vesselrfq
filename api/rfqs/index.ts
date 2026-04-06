@@ -20,6 +20,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         title: rfqs.title,
         status: rfqs.status,
         vesselType: rfqs.vesselType,
+        quantity: rfqs.quantity,
         shellOd: rfqs.shellOd,
         shellLength: rfqs.shellLength,
         shellMaterial: rfqs.shellMaterial,
@@ -76,6 +77,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const body = req.body as {
       vesselType?: string
       title?: string
+      quantity?: number
 
       // Tank fields
       shellOd?: string
@@ -166,6 +168,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           title:     body.title!.trim(),
           status:    'submitted',
           vesselType: body.vesselType || 'tank',
+          quantity:   typeof body.quantity === 'number' ? body.quantity : 1,
 
           // Shell (shared)
           shellOd:       body.shellOd || null,
