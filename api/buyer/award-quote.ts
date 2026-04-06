@@ -142,6 +142,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       <p style="margin:0 0 16px;font-size:14px;color:#475569;line-height:1.6">
         The buyer will be in contact with you directly to discuss next steps and proceed with the order.
       </p>
+      <div style="margin:0 0 20px;padding:16px;background:#fffbeb;border-left:4px solid #f59e0b;border-radius:0 8px 8px 0">
+        <p style="margin:0;font-size:13px;color:#92400e;line-height:1.6">
+          <strong>Please note:</strong> This award notification is not a purchase order. Formal paperwork and a purchase order will be issued by the buyer's purchasing department before fabrication should begin. Do not begin work until you have received an official purchase order.
+        </p>
+      </div>
       <p style="margin:24px 0 0">
         <a href="${fabDashUrl}" style="display:inline-block;background:#2563eb;color:#ffffff;font-size:14px;font-weight:600;padding:10px 20px;border-radius:8px;text-decoration:none">View in Dashboard →</a>
       </p>
@@ -156,7 +161,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 </body>
 </html>`
 
-      const text = `Congratulations — You've Been Awarded\n${mrfq.rfqTitle}\n\nThe buyer has selected your quote.\nTotal Delivered: ${totalStr} · ${location}\n\nThe buyer will be in contact with you directly to discuss next steps and proceed with the order.\n\nView your dashboard: ${fabDashUrl}\n\nVesselRFQ · ASME Pressure Vessel Marketplace · vesselrfq.com`
+      const text = `Congratulations — You've Been Awarded\n${mrfq.rfqTitle}\n\nThe buyer has selected your quote.\nTotal Delivered: ${totalStr} · ${location}\n\nThe buyer will be in contact with you directly to discuss next steps and proceed with the order.\n\nPlease note: This award notification is not a purchase order. Formal paperwork and a purchase order will be issued by the buyer's purchasing department before fabrication should begin. Do not begin work until you have received an official purchase order.\n\nView your dashboard: ${fabDashUrl}\n\nVesselRFQ · ASME Pressure Vessel Marketplace · vesselrfq.com`
 
       sends.push(
         sendEmail(to, subject, html, text).catch((err: unknown) =>

@@ -101,6 +101,11 @@ interface BidTabModalState {
   rfqTitle:         string
 }
 
+interface ReopenModalState {
+  marketplaceRfqId: number
+  rfqTitle:         string
+}
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-US', {
     month: 'short',
@@ -298,11 +303,12 @@ function RfqDetailPanel({ rfq, onClose }: { rfq: RfqFull; onClose: () => void })
   )
 }
 
-function MarketplaceQuotesView({ rfqs, loading, error, onAward }: {
-  rfqs:    MarketplaceRfqWithQuotes[]
-  loading: boolean
-  error:   string
-  onAward: (marketplaceRfqId: number, winningQuoteId: number) => void
+function MarketplaceQuotesView({ rfqs, loading, error, onAward, onReopen }: {
+  rfqs:     MarketplaceRfqWithQuotes[]
+  loading:  boolean
+  error:    string
+  onAward:  (marketplaceRfqId: number, winningQuoteId: number) => void
+  onReopen: (marketplaceRfqId: number, newDeadline: string) => void
 }) {
   const [bidTabModal,    setBidTabModal]    = useState<BidTabModalState | null>(null)
   const [recipientName,  setRecipientName]  = useState('')
@@ -312,6 +318,10 @@ function MarketplaceQuotesView({ rfqs, loading, error, onAward }: {
   const [bidTabError,    setBidTabError]    = useState('')
   const [awarding,       setAwarding]       = useState<number | null>(null)
   const [awardError,     setAwardError]     = useState('')
+  const [reopenModal,    setReopenModal]    = useState<ReopenModalState | null>(null)
+  const [reopenDays,     setReopenDays]     = useState(14)
+  const [reopening,      setReopening]      = useState(false)
+  const [reopenError,    setReopenError]    = useState('')
 
   function closeModal() {
     setBidTabModal(null)
@@ -320,6 +330,31 @@ function MarketplaceQuotesView({ rfqs, loading, error, onAward }: {
     setSendingBidTab(false)
     setBidTabSent(false)
     setBidTabError('')
+  }
+
+  function closeReopenModal() {
+    setReopenModal(null)
+    setReopenDays(14)
+    setReopening(false)
+    setReopenError('')
+  }
+
+  async function handleReopen() {
+    if (!reopenModal) return
+    setReopening(true)
+    setReopenError('')
+    try {
+      const { newDeadline } = await api.post<{ reopened: boolean; newDeadline: string; notified: number }>(
+        '/buyer/reopen-rfq',
+        { marketplaceRfqId: reopenModal.marketplaceRfqId, deadlineDays: reopenDays }
+      )
+      onReopen(reopenModal.marketplaceRfqId, newDeadline)
+      closeReopenModal()
+    } catch (err) {
+      setReopenError(err instanceof ApiError ? err.message : 'Failed to reopen RFQ')
+    } finally {
+      setReopening(false)
+    }
   }
 
   async function handleAward(marketplaceRfqId: number, quoteId: number) {
@@ -418,14 +453,24 @@ function MarketplaceQuotesView({ rfqs, loading, error, onAward }: {
                   <span>{mrfq.quotes.length} {mrfq.quotes.length === 1 ? 'quote' : 'quotes'} received</span>
                 </div>
               </div>
-              {mrfq.quotes.length > 0 && (
-                <button
-                  onClick={() => setBidTabModal({ marketplaceRfqId: mrfq.marketplaceRfqId, rfqTitle: mrfq.rfqTitle })}
-                  className="shrink-0 border border-slate-200 text-slate-600 text-sm rounded-lg px-3 py-1.5 hover:bg-slate-50 transition-colors"
-                >
-                  Send Bid Tab
-                </button>
-              )}
+              <div className="flex items-center gap-2 shrink-0">
+                {mrfq.status === 'closed' && (
+                  <button
+                    onClick={() => setReopenModal({ marketplaceRfqId: mrfq.marketplaceRfqId, rfqTitle: mrfq.rfqTitle })}
+                    className="border border-slate-200 text-slate-600 text-sm rounded-lg px-3 py-1.5 hover:bg-slate-50 transition-colors"
+                  >
+                    Reopen
+                  </button>
+                )}
+                {mrfq.quotes.length > 0 && (
+                  <button
+                    onClick={() => setBidTabModal({ marketplaceRfqId: mrfq.marketplaceRfqId, rfqTitle: mrfq.rfqTitle })}
+                    className="border border-slate-200 text-slate-600 text-sm rounded-lg px-3 py-1.5 hover:bg-slate-50 transition-colors"
+                  >
+                    Send Bid Tab
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Quotes */}
@@ -569,6 +614,60 @@ function MarketplaceQuotesView({ rfqs, loading, error, onAward }: {
           </div>
         </div>
       )}
+      {/* Reopen modal */}
+      {reopenModal && (
+        <div
+          className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center"
+          onClick={closeReopenModal}
+        >
+          <div
+            className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4"
+            onClick={e => e.stopPropagation()}
+          >
+            <h2 className="text-base font-semibold text-slate-900 mb-1">Reopen RFQ</h2>
+            <p className="text-sm text-slate-500 mb-5">{reopenModal.rfqTitle}</p>
+
+            <div className="flex flex-col gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">New bid deadline</label>
+                <select
+                  value={reopenDays}
+                  onChange={e => setReopenDays(Number(e.target.value))}
+                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value={7}>7 days</option>
+                  <option value={14}>14 days</option>
+                  <option value={21}>21 days</option>
+                  <option value={30}>30 days</option>
+                </select>
+              </div>
+
+              <p className="text-xs text-slate-400">
+                This RFQ can only be reopened within 30 days of closing. Eligible fabricators will be notified of the new deadline.
+              </p>
+
+              {reopenError && (
+                <div className="text-red-600 text-sm">{reopenError}</div>
+              )}
+
+              <button
+                onClick={handleReopen}
+                disabled={reopening}
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium text-sm rounded-lg px-4 py-2.5 transition-colors"
+              >
+                {reopening ? 'Reopening…' : 'Reopen RFQ'}
+              </button>
+
+              <button
+                onClick={closeReopenModal}
+                className="text-center text-sm text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -601,6 +700,12 @@ export default function DashboardPage() {
   }, [])
 
   const totalQuoteCount = mktRfqs.reduce((sum, r) => sum + r.quotes.length, 0)
+
+  function handleReopenLocal(marketplaceRfqId: number, newDeadline: string) {
+    setMktRfqs(prev => prev.map(r =>
+      r.marketplaceRfqId !== marketplaceRfqId ? r : { ...r, status: 'open', deadlineAt: newDeadline }
+    ))
+  }
 
   function handleAwardLocal(marketplaceRfqId: number, winningQuoteId: number) {
     setMktRfqs(prev => prev.map(r => {
@@ -726,7 +831,7 @@ export default function DashboardPage() {
             )}
           </>
         ) : (
-          <MarketplaceQuotesView rfqs={mktRfqs} loading={mktLoading} error={mktError} onAward={handleAwardLocal} />
+          <MarketplaceQuotesView rfqs={mktRfqs} loading={mktLoading} error={mktError} onAward={handleAwardLocal} onReopen={handleReopenLocal} />
         )}
       </main>
 
