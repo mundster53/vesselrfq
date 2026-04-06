@@ -792,7 +792,9 @@ export default function DashboardPage() {
                   <thead>
                     <tr className="border-b border-slate-200 bg-slate-50">
                       <th className="text-left px-4 py-3 font-medium text-slate-600">Title</th>
+                      <th className="text-left px-4 py-3 font-medium text-slate-600">Type</th>
                       <th className="text-left px-4 py-3 font-medium text-slate-600">Shell OD</th>
+                      <th className="text-left px-4 py-3 font-medium text-slate-600">Qty</th>
                       <th className="text-left px-4 py-3 font-medium text-slate-600">MAWP</th>
                       <th className="text-left px-4 py-3 font-medium text-slate-600">Nozzles</th>
                       <th className="text-left px-4 py-3 font-medium text-slate-600">Status</th>
@@ -808,8 +810,12 @@ export default function DashboardPage() {
                       >
                         <td className="px-4 py-3 font-medium text-slate-900">{rfq.title}</td>
                         <td className="px-4 py-3 text-slate-600">
+                          {rfq.vesselType === 'heat_exchanger' ? 'Heat Exchanger' : 'Pressure Vessel'}
+                        </td>
+                        <td className="px-4 py-3 text-slate-600">
                           {rfq.shellOd ? `${rfq.shellOd}"` : '—'}
                         </td>
+                        <td className="px-4 py-3 text-slate-600">{rfq.quantity}</td>
                         <td className="px-4 py-3 text-slate-600">
                           {rfq.mawp ? `${rfq.mawp} psi` : '—'}
                         </td>
