@@ -68,12 +68,46 @@ interface RfqFull extends RfqSummary {
   nozzles: RfqNozzle[]
 }
 
+interface MarketplaceQuote {
+  quoteId:             number
+  fabricatorId:        number
+  shopName:            string
+  city:                string
+  state:               string
+  fabricatedPrice:     string
+  estimatedFreight:    string
+  totalDeliveredPrice: string | null
+  leadTimeWeeks:       number
+  qualifications:      string | null
+  status:              string
+  submittedAt:         string
+}
+
+interface MarketplaceRfqWithQuotes {
+  marketplaceRfqId: number
+  rfqId:            number
+  rfqTitle:         string
+  vesselType:       string | null
+  shellOd:          string | null
+  installCity:      string
+  installState:     string
+  deadlineAt:       string | null
+  status:           string
+  quotes:           MarketplaceQuote[]
+}
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
   })
+}
+
+function fmtPrice(val: string | null): string {
+  if (!val) return '—'
+  const n = parseFloat(val)
+  return isNaN(n) ? '—' : `$${n.toLocaleString('en-US', { maximumFractionDigits: 0 })}`
 }
 
 function SpecRow({ label, value }: { label: string; value: string | number | null | undefined }) {
@@ -258,11 +292,139 @@ function RfqDetailPanel({ rfq, onClose }: { rfq: RfqFull; onClose: () => void })
   )
 }
 
+function MarketplaceQuotesView({ rfqs, loading, error }: {
+  rfqs:    MarketplaceRfqWithQuotes[]
+  loading: boolean
+  error:   string
+}) {
+  if (loading) {
+    return <div className="text-slate-500 text-sm">Loading…</div>
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+        {error}
+      </div>
+    )
+  }
+
+  if (rfqs.length === 0) {
+    return (
+      <div className="bg-white border border-slate-200 rounded-xl p-12 text-center">
+        <p className="text-slate-500 text-sm mb-4">
+          You haven&apos;t submitted any marketplace RFQs yet.
+        </p>
+        <Link
+          to="/designer"
+          className="inline-block bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
+        >
+          Start by creating a New RFQ
+        </Link>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      {rfqs.map(mrfq => {
+        const vesselLabel = mrfq.vesselType === 'heat_exchanger' ? 'Heat Exchanger' : 'Pressure Vessel'
+        const statusStyle =
+          mrfq.status === 'open'    ? 'bg-blue-50 text-blue-700'   :
+          mrfq.status === 'awarded' ? 'bg-green-50 text-green-700' :
+          'bg-slate-100 text-slate-600'
+        const statusLabel = mrfq.status.charAt(0).toUpperCase() + mrfq.status.slice(1)
+
+        return (
+          <div key={mrfq.marketplaceRfqId} className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+
+            {/* Card header */}
+            <div className="px-5 py-4 border-b border-slate-100">
+              <div className="flex items-center gap-2 mb-1">
+                <h2 className="font-semibold text-slate-900 text-sm">{mrfq.rfqTitle}</h2>
+                <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
+                  {vesselLabel}
+                </span>
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusStyle}`}>
+                  {statusLabel}
+                </span>
+              </div>
+              <div className="text-xs text-slate-400 flex items-center gap-1.5">
+                <span>{mrfq.installCity}, {mrfq.installState}</span>
+                <span>·</span>
+                <span>Deadline: {mrfq.deadlineAt ? formatDate(mrfq.deadlineAt) : '—'}</span>
+                <span>·</span>
+                <span>{mrfq.quotes.length} {mrfq.quotes.length === 1 ? 'quote' : 'quotes'} received</span>
+              </div>
+            </div>
+
+            {/* Quotes */}
+            {mrfq.quotes.length === 0 ? (
+              <div className="px-5 py-4 text-sm text-slate-400">
+                No quotes received yet. Check back before your deadline.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-100 bg-slate-50">
+                      <th className="text-left px-4 py-2.5 font-medium text-slate-500 text-xs uppercase tracking-wide">Rank</th>
+                      <th className="text-left px-4 py-2.5 font-medium text-slate-500 text-xs uppercase tracking-wide">Fabricator</th>
+                      <th className="text-right px-4 py-2.5 font-medium text-slate-500 text-xs uppercase tracking-wide">Fab Price</th>
+                      <th className="text-right px-4 py-2.5 font-medium text-slate-500 text-xs uppercase tracking-wide">Est. Freight</th>
+                      <th className="text-right px-4 py-2.5 font-medium text-slate-500 text-xs uppercase tracking-wide">Total Delivered</th>
+                      <th className="text-left px-4 py-2.5 font-medium text-slate-500 text-xs uppercase tracking-wide">Lead Time</th>
+                      <th className="text-left px-4 py-2.5 font-medium text-slate-500 text-xs uppercase tracking-wide">Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {mrfq.quotes.map((q, i) => (
+                      <tr
+                        key={q.quoteId}
+                        className={`border-b border-slate-100 last:border-0 ${i === 0 ? 'border-l-2 border-l-green-400' : 'border-l-2 border-l-transparent'}`}
+                      >
+                        <td className="px-4 py-3">
+                          <span className={`text-xs font-semibold ${i === 0 ? 'text-green-600' : 'text-slate-400'}`}>
+                            #{i + 1}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="font-medium text-slate-900">{q.shopName}</div>
+                          <div className="text-xs text-slate-400">{q.city}, {q.state}</div>
+                        </td>
+                        <td className="px-4 py-3 text-right text-slate-600">{fmtPrice(q.fabricatedPrice)}</td>
+                        <td className="px-4 py-3 text-right text-slate-600">{fmtPrice(q.estimatedFreight)}</td>
+                        <td className="px-4 py-3 text-right font-semibold text-slate-900">{fmtPrice(q.totalDeliveredPrice)}</td>
+                        <td className="px-4 py-3 text-slate-600">{q.leadTimeWeeks} wks</td>
+                        <td className="px-4 py-3 text-slate-400 text-xs max-w-[200px]">
+                          {q.qualifications
+                            ? q.qualifications.slice(0, 60) + (q.qualifications.length > 60 ? '…' : '')
+                            : '—'
+                          }
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 export default function DashboardPage() {
-  const [rfqs, setRfqs] = useState<RfqFull[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [rfqs, setRfqs]         = useState<RfqFull[]>([])
+  const [loading, setLoading]   = useState(true)
+  const [error, setError]       = useState('')
   const [selectedRfq, setSelectedRfq] = useState<RfqFull | null>(null)
+
+  const [activeTab,  setActiveTab]  = useState<'rfqs' | 'marketplace'>('rfqs')
+  const [mktRfqs,    setMktRfqs]    = useState<MarketplaceRfqWithQuotes[]>([])
+  const [mktLoading, setMktLoading] = useState(true)
+  const [mktError,   setMktError]   = useState('')
 
   useEffect(() => {
     api
@@ -272,13 +434,52 @@ export default function DashboardPage() {
       .finally(() => setLoading(false))
   }, [])
 
+  useEffect(() => {
+    api
+      .get<{ rfqs: MarketplaceRfqWithQuotes[] }>('/buyer/marketplace-quotes')
+      .then(({ rfqs }) => setMktRfqs(rfqs))
+      .catch((err) => setMktError(err instanceof ApiError ? err.message : 'Failed to load marketplace quotes'))
+      .finally(() => setMktLoading(false))
+  }, [])
+
+  const totalQuoteCount = mktRfqs.reduce((sum, r) => sum + r.quotes.length, 0)
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <Navbar />
 
       <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 py-8">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-xl font-semibold text-slate-900">My RFQs</h1>
+          <div className="flex items-center gap-6">
+            <h1 className="text-xl font-semibold text-slate-900">Dashboard</h1>
+            <div className="flex gap-1 bg-slate-100 rounded-lg p-1">
+              <button
+                onClick={() => setActiveTab('rfqs')}
+                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  activeTab === 'rfqs'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                My RFQs
+              </button>
+              <button
+                onClick={() => setActiveTab('marketplace')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  activeTab === 'marketplace'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                Marketplace Quotes
+                {totalQuoteCount > 0 && (
+                  <span className="bg-blue-100 text-blue-700 text-xs font-semibold px-1.5 py-0.5 rounded-full">
+                    {totalQuoteCount}
+                  </span>
+                )}
+              </button>
+            </div>
+          </div>
           <Link
             to="/designer"
             className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
@@ -287,67 +488,73 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 mb-4">
-            {error}
-          </div>
-        )}
+        {activeTab === 'rfqs' ? (
+          <>
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 mb-4">
+                {error}
+              </div>
+            )}
 
-        {loading ? (
-          <div className="text-slate-500 text-sm">Loading…</div>
-        ) : rfqs.length === 0 ? (
-          <div className="bg-white border border-slate-200 rounded-xl p-12 text-center">
-            <p className="text-slate-500 text-sm mb-4">No RFQs yet.</p>
-            <Link
-              to="/designer"
-              className="inline-block bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
-            >
-              Design your first vessel
-            </Link>
-          </div>
-        ) : (
-          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-            <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50">
-                  <th className="text-left px-4 py-3 font-medium text-slate-600">Title</th>
-                  <th className="text-left px-4 py-3 font-medium text-slate-600">Shell OD</th>
-                  <th className="text-left px-4 py-3 font-medium text-slate-600">MAWP</th>
-                  <th className="text-left px-4 py-3 font-medium text-slate-600">Nozzles</th>
-                  <th className="text-left px-4 py-3 font-medium text-slate-600">Status</th>
-                  <th className="text-left px-4 py-3 font-medium text-slate-600">Submitted</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rfqs.map((rfq, i) => (
-                  <tr
-                    key={rfq.id}
-                    onClick={() => setSelectedRfq(rfq)}
-                    className={`cursor-pointer hover:bg-slate-50 transition-colors ${i < rfqs.length - 1 ? 'border-b border-slate-100' : ''}`}
-                  >
-                    <td className="px-4 py-3 font-medium text-slate-900">{rfq.title}</td>
-                    <td className="px-4 py-3 text-slate-600">
-                      {rfq.shellOd ? `${rfq.shellOd}"` : '—'}
-                    </td>
-                    <td className="px-4 py-3 text-slate-600">
-                      {rfq.mawp ? `${rfq.mawp} psi` : '—'}
-                    </td>
-                    <td className="px-4 py-3 text-slate-600">{rfq.nozzleCount}</td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLOR[rfq.status] ?? 'bg-slate-100 text-slate-600'}`}
+            {loading ? (
+              <div className="text-slate-500 text-sm">Loading…</div>
+            ) : rfqs.length === 0 ? (
+              <div className="bg-white border border-slate-200 rounded-xl p-12 text-center">
+                <p className="text-slate-500 text-sm mb-4">No RFQs yet.</p>
+                <Link
+                  to="/designer"
+                  className="inline-block bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
+                >
+                  Design your first vessel
+                </Link>
+              </div>
+            ) : (
+              <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-200 bg-slate-50">
+                      <th className="text-left px-4 py-3 font-medium text-slate-600">Title</th>
+                      <th className="text-left px-4 py-3 font-medium text-slate-600">Shell OD</th>
+                      <th className="text-left px-4 py-3 font-medium text-slate-600">MAWP</th>
+                      <th className="text-left px-4 py-3 font-medium text-slate-600">Nozzles</th>
+                      <th className="text-left px-4 py-3 font-medium text-slate-600">Status</th>
+                      <th className="text-left px-4 py-3 font-medium text-slate-600">Submitted</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rfqs.map((rfq, i) => (
+                      <tr
+                        key={rfq.id}
+                        onClick={() => setSelectedRfq(rfq)}
+                        className={`cursor-pointer hover:bg-slate-50 transition-colors ${i < rfqs.length - 1 ? 'border-b border-slate-100' : ''}`}
                       >
-                        {STATUS_LABEL[rfq.status] ?? rfq.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-slate-500">{formatDate(rfq.createdAt)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            </div>
-          </div>
+                        <td className="px-4 py-3 font-medium text-slate-900">{rfq.title}</td>
+                        <td className="px-4 py-3 text-slate-600">
+                          {rfq.shellOd ? `${rfq.shellOd}"` : '—'}
+                        </td>
+                        <td className="px-4 py-3 text-slate-600">
+                          {rfq.mawp ? `${rfq.mawp} psi` : '—'}
+                        </td>
+                        <td className="px-4 py-3 text-slate-600">{rfq.nozzleCount}</td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLOR[rfq.status] ?? 'bg-slate-100 text-slate-600'}`}
+                          >
+                            {STATUS_LABEL[rfq.status] ?? rfq.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-slate-500">{formatDate(rfq.createdAt)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <MarketplaceQuotesView rfqs={mktRfqs} loading={mktLoading} error={mktError} />
         )}
       </main>
 
