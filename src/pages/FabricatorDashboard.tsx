@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 import { api } from '../lib/api'
 import FabricatorBidProfile from '../components/FabricatorBidProfile'
 import FabricatorMarketplaceView from '../components/FabricatorMarketplaceView'
@@ -803,6 +804,8 @@ function DetailPanel({
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function FabricatorDashboard() {
+  const { user, loading: authLoading, logout } = useAuth()
+  const navigate = useNavigate()
   const [rfqs, setRfqs] = useState<RfqRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [fetchError, setFetchError] = useState('')
@@ -812,6 +815,10 @@ export default function FabricatorDashboard() {
   const [view, setView] = useState<'inbox' | 'marketplace' | 'settings'>('inbox')
   const [searchParams] = useSearchParams()
   const rfqParam = searchParams.get('rfq')
+
+  useEffect(() => {
+    if (!authLoading && !user) navigate('/login', { replace: true })
+  }, [authLoading, user, navigate])
 
   useEffect(() => {
     api.get<{ exists: boolean; profile?: { shopName: string } }>('/fabricator/profile')
@@ -967,6 +974,29 @@ export default function FabricatorDashboard() {
             Settings
           </div>
         </nav>
+
+        {/* Sign Out */}
+        <div style={{ marginTop: 'auto', padding: '0 0 12px' }}>
+          <div
+            onClick={() => { logout(); navigate('/login') }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              padding: '9px 20px',
+              color: '#475569',
+              cursor: 'pointer',
+              fontSize: 13,
+            }}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            Sign out
+          </div>
+        </div>
       </aside>
 
       {/* ── Main content ─────────────────────────────────────────────── */}

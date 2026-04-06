@@ -37,6 +37,7 @@ export default function FabricatorRoute() {
   }, [needsPayment])
 
   if (!user) return <Navigate to="/login" replace />
+  if (user.role !== 'fabricator') return <Navigate to="/dashboard" replace />
 
   if (needsPayment) {
     return (

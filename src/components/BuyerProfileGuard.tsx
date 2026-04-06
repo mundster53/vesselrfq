@@ -9,7 +9,6 @@ export default function BuyerProfileGuard() {
   const [hasProfile, setHasProfile] = useState(false)
 
   useEffect(() => {
-    // Only buyers need a profile — fabricators pass through
     if (!user || user.role !== 'buyer') {
       setChecking(false)
       return
@@ -29,7 +28,11 @@ export default function BuyerProfileGuard() {
     )
   }
 
-  if (user?.role === 'buyer' && !hasProfile) {
+  if (user?.role !== 'buyer') {
+    return <Navigate to="/fabricator-dashboard" replace />
+  }
+
+  if (!hasProfile) {
     return <Navigate to="/buyer-profile" replace />
   }
 
