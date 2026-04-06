@@ -96,6 +96,11 @@ interface MarketplaceRfqWithQuotes {
   quotes:           MarketplaceQuote[]
 }
 
+interface BidTabModalState {
+  marketplaceRfqId: number
+  rfqTitle:         string
+}
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-US', {
     month: 'short',
@@ -297,6 +302,41 @@ function MarketplaceQuotesView({ rfqs, loading, error }: {
   loading: boolean
   error:   string
 }) {
+  const [bidTabModal,    setBidTabModal]    = useState<BidTabModalState | null>(null)
+  const [recipientName,  setRecipientName]  = useState('')
+  const [recipientEmail, setRecipientEmail] = useState('')
+  const [sendingBidTab,  setSendingBidTab]  = useState(false)
+  const [bidTabSent,     setBidTabSent]     = useState(false)
+  const [bidTabError,    setBidTabError]    = useState('')
+
+  function closeModal() {
+    setBidTabModal(null)
+    setRecipientName('')
+    setRecipientEmail('')
+    setSendingBidTab(false)
+    setBidTabSent(false)
+    setBidTabError('')
+  }
+
+  async function handleSendBidTab() {
+    if (!bidTabModal) return
+    setSendingBidTab(true)
+    setBidTabError('')
+    try {
+      await api.post('/buyer/send-bid-tab', {
+        marketplaceRfqId: bidTabModal.marketplaceRfqId,
+        recipientName,
+        recipientEmail,
+      })
+      setBidTabSent(true)
+      setTimeout(() => closeModal(), 3000)
+    } catch (err) {
+      setBidTabError(err instanceof ApiError ? err.message : 'Failed to send bid tab')
+    } finally {
+      setSendingBidTab(false)
+    }
+  }
+
   if (loading) {
     return <div className="text-slate-500 text-sm">Loading…</div>
   }
@@ -339,23 +379,33 @@ function MarketplaceQuotesView({ rfqs, loading, error }: {
           <div key={mrfq.marketplaceRfqId} className="bg-white border border-slate-200 rounded-xl overflow-hidden">
 
             {/* Card header */}
-            <div className="px-5 py-4 border-b border-slate-100">
-              <div className="flex items-center gap-2 mb-1">
-                <h2 className="font-semibold text-slate-900 text-sm">{mrfq.rfqTitle}</h2>
-                <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
-                  {vesselLabel}
-                </span>
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusStyle}`}>
-                  {statusLabel}
-                </span>
+            <div className="px-5 py-4 border-b border-slate-100 flex items-start justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <h2 className="font-semibold text-slate-900 text-sm">{mrfq.rfqTitle}</h2>
+                  <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
+                    {vesselLabel}
+                  </span>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusStyle}`}>
+                    {statusLabel}
+                  </span>
+                </div>
+                <div className="text-xs text-slate-400 flex items-center gap-1.5">
+                  <span>{mrfq.installCity}, {mrfq.installState}</span>
+                  <span>·</span>
+                  <span>Deadline: {mrfq.deadlineAt ? formatDate(mrfq.deadlineAt) : '—'}</span>
+                  <span>·</span>
+                  <span>{mrfq.quotes.length} {mrfq.quotes.length === 1 ? 'quote' : 'quotes'} received</span>
+                </div>
               </div>
-              <div className="text-xs text-slate-400 flex items-center gap-1.5">
-                <span>{mrfq.installCity}, {mrfq.installState}</span>
-                <span>·</span>
-                <span>Deadline: {mrfq.deadlineAt ? formatDate(mrfq.deadlineAt) : '—'}</span>
-                <span>·</span>
-                <span>{mrfq.quotes.length} {mrfq.quotes.length === 1 ? 'quote' : 'quotes'} received</span>
-              </div>
+              {mrfq.quotes.length > 0 && (
+                <button
+                  onClick={() => setBidTabModal({ marketplaceRfqId: mrfq.marketplaceRfqId, rfqTitle: mrfq.rfqTitle })}
+                  className="shrink-0 border border-slate-200 text-slate-600 text-sm rounded-lg px-3 py-1.5 hover:bg-slate-50 transition-colors"
+                >
+                  Send Bid Tab
+                </button>
+              )}
             </div>
 
             {/* Quotes */}
@@ -411,6 +461,70 @@ function MarketplaceQuotesView({ rfqs, loading, error }: {
           </div>
         )
       })}
+
+      {/* Bid tab modal */}
+      {bidTabModal && (
+        <div
+          className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center"
+          onClick={closeModal}
+        >
+          <div
+            className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4"
+            onClick={e => e.stopPropagation()}
+          >
+            <h2 className="text-base font-semibold text-slate-900 mb-1">Send Bid Tabulation</h2>
+            <p className="text-sm text-slate-500 mb-5">{bidTabModal.rfqTitle}</p>
+
+            {bidTabSent ? (
+              <div className="bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg px-4 py-3">
+                ✓ Bid tab sent to {recipientEmail}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Recipient Name</label>
+                  <input
+                    type="text"
+                    value={recipientName}
+                    onChange={e => setRecipientName(e.target.value)}
+                    placeholder="e.g. John Smith"
+                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Recipient Email</label>
+                  <input
+                    type="email"
+                    value={recipientEmail}
+                    onChange={e => setRecipientEmail(e.target.value)}
+                    placeholder="e.g. jsmith@company.com"
+                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                {bidTabError && (
+                  <div className="text-red-600 text-sm">{bidTabError}</div>
+                )}
+
+                <button
+                  onClick={handleSendBidTab}
+                  disabled={sendingBidTab}
+                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium text-sm rounded-lg px-4 py-2.5 transition-colors"
+                >
+                  {sendingBidTab ? 'Sending…' : 'Send Bid Tab'}
+                </button>
+
+                <button
+                  onClick={closeModal}
+                  className="text-center text-sm text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
