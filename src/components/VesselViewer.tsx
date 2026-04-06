@@ -589,25 +589,28 @@ function buildVessel(
     supportExtent = legVertH
     extraRadial   = 10
 
+    const legW = Math.min(Math.max(4, r * 0.14), 8)
+
     // Miter wedge: triangular prism (4" tall) replacing the top 4" of the column.
-    // Local coords: x∈[−2,+2] radial (−2=inner/vessel, +2=outer),
-    //               y∈[0,4] vertical, z∈[−2,+2] tangential.
+    // Local coords: x∈[−hw,+hw] radial (−hw=inner/vessel, +hw=outer),
+    //               y∈[0,4] vertical, z∈[−hw,+hw] tangential.
     // 45° cut: inner edge rises to y=4, outer edge stays at y=0.
     const makeLegWedge = (): THREE.BufferGeometry => {
+      const hw = legW / 2
       const p = new Float32Array([
-        // Front face (z=−2): triangle
-        -2,0,-2,  +2,0,-2,  -2,4,-2,
-        // Back face (z=+2): triangle
-        -2,0,+2,  -2,4,+2,  +2,0,+2,
-        // Inner face (x=−2): rectangle
-        -2,0,-2,  -2,4,-2,  -2,4,+2,
-        -2,0,-2,  -2,4,+2,  -2,0,+2,
+        // Front face (z=−hw): triangle
+        -hw,0,-hw,  +hw,0,-hw,  -hw,4,-hw,
+        // Back face (z=+hw): triangle
+        -hw,0,+hw,  -hw,4,+hw,  +hw,0,+hw,
+        // Inner face (x=−hw): rectangle
+        -hw,0,-hw,  -hw,4,-hw,  -hw,4,+hw,
+        -hw,0,-hw,  -hw,4,+hw,  -hw,0,+hw,
         // Bottom face (y=0): rectangle
-        -2,0,-2,  -2,0,+2,  +2,0,+2,
-        -2,0,-2,  +2,0,+2,  +2,0,-2,
+        -hw,0,-hw,  -hw,0,+hw,  +hw,0,+hw,
+        -hw,0,-hw,  +hw,0,+hw,  +hw,0,-hw,
         // Slanted face: diagonal from inner-top to outer-bottom
-        -2,4,-2,  +2,0,-2,  +2,0,+2,
-        -2,4,-2,  +2,0,+2,  -2,4,+2,
+        -hw,4,-hw,  +hw,0,-hw,  +hw,0,+hw,
+        -hw,4,-hw,  +hw,0,+hw,  -hw,4,+hw,
       ])
       const geo = new THREE.BufferGeometry()
       geo.setAttribute('position', new THREE.BufferAttribute(p, 3))
@@ -624,7 +627,7 @@ function buildVessel(
 
       // Straight column (bottom portion, 4" shorter than full height for the miter wedge)
       const colH = legActualH - 4
-      const col = new THREE.Mesh(new THREE.BoxGeometry(4, colH, 4), saddleSolid)
+      const col = new THREE.Mesh(new THREE.BoxGeometry(legW, colH, legW), saddleSolid)
       col.position.set(cx, (legBottomY + legAttachY - 4) / 2, cz)
       grp.add(col)
 
@@ -634,8 +637,8 @@ function buildVessel(
       wedge.position.set(cx, legAttachY - 4, cz)
       grp.add(wedge)
 
-      // Base plate: 12×1×12 at grade
-      const bp = new THREE.Mesh(new THREE.BoxGeometry(12, 1, 12), saddleSolid)
+      // Base plate: legW*2 × 1 × legW*2 at grade
+      const bp = new THREE.Mesh(new THREE.BoxGeometry(legW * 2, 1, legW * 2), saddleSolid)
       bp.position.set(cx, legBottomY - 0.5, cz)
       grp.add(bp)
 

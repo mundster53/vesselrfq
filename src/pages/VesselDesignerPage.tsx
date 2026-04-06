@@ -870,6 +870,9 @@ export default function VesselDesignerPage() {
       if (!form.designTemp || parseFloat(form.designTemp) <= 0)     return setError('Design temperature is required')
       if (!form.corrosionAllowance || parseFloat(form.corrosionAllowance) <= 0)
                                                                      return setError('Corrosion allowance is required')
+      if (!form.headType)                                            return setError('Head type is required')
+      if (!form.supportType)                                         return setError('Support type is required')
+      if (form.quantity < 1)                                         return setError('Quantity must be at least 1')
     } else {
       if (!hxForm.shellOd || parseFloat(hxForm.shellOd) <= 0)       return setError('Shell diameter is required')
       if (!hxForm.shellLength || parseFloat(hxForm.shellLength) <= 0) return setError('Shell length is required')
@@ -879,6 +882,19 @@ export default function VesselDesignerPage() {
                                                                      return setError('Shell side design temperature is required')
       if (!hxForm.shellCorrosionAllowance || parseFloat(hxForm.shellCorrosionAllowance) <= 0)
                                                                      return setError('Shell side corrosion allowance is required')
+      if (hxForm.quantity < 1)                                       return setError('Quantity must be at least 1')
+      if (!hxForm.temaFront || !hxForm.temaShell || !hxForm.temaRear)
+                                                                     return setError('TEMA designation is required (front, shell, and rear head types)')
+      if (!hxForm.orientation)                                       return setError('Orientation (horizontal or vertical) is required')
+      if (!hxForm.tubeMawp || parseFloat(hxForm.tubeMawp) <= 0)     return setError('Tube side MAWP is required')
+      if (!hxForm.tubeDesignTemp || parseFloat(hxForm.tubeDesignTemp) <= 0)
+                                                                     return setError('Tube side design temperature is required')
+      if (!hxForm.tubeCorrosionAllowance || parseFloat(hxForm.tubeCorrosionAllowance) <= 0)
+                                                                     return setError('Tube side corrosion allowance is required')
+      if (!hxForm.tubeOd)                                            return setError('Tube OD is required')
+      if (!hxForm.tubeBwg)                                           return setError('Tube wall thickness (BWG) is required')
+      if (!hxForm.tubeLength)                                        return setError('Tube length is required')
+      if (!hxForm.tubeMaterial)                                      return setError('Tube material is required')
     }
 
     // Direct buyers choose routing via the modal
