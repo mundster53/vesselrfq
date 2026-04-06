@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { asc, eq } from 'drizzle-orm'
 import { db } from '../_lib/db.js'
 import {
-  marketplaceRfqs, marketplaceQuotes, rfqs, fabricatorProfiles,
+  marketplaceRfqs, marketplaceQuotes, rfqs, fabricatorProfiles, users,
 } from '../../db/schema.js'
 import { requireAuth } from '../_lib/auth.js'
 import { sendEmail } from '../_lib/email.js'
@@ -68,6 +68,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(404).json({ error: 'Marketplace RFQ not found' })
     }
 
+    // ── Fetch buyer email for CC ──────────────────────────────────────────────
+    const [buyer] = await db
+      .select({ email: users.email })
+      .from(users)
+      .where(eq(users.id, auth.userId))
+      .limit(1)
+
     // ── Fetch quotes ordered by total delivered price asc ─────────────────────
     const quotes = await db
       .select({
@@ -79,6 +86,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         shopName:            fabricatorProfiles.shopName,
         city:                fabricatorProfiles.city,
         state:               fabricatorProfiles.state,
+        phone:               fabricatorProfiles.phone,
+        website:             fabricatorProfiles.website,
+        rfqEmail:            fabricatorProfiles.rfqEmail,
       })
       .from(marketplaceQuotes)
       .innerJoin(fabricatorProfiles, eq(fabricatorProfiles.userId, marketplaceQuotes.fabricatorId))
@@ -93,8 +103,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const quoteRows = quotes.length === 0
       ? `<tr><td colspan="8" style="padding:16px 12px;text-align:center;color:#94a3b8;font-size:13px">No quotes received</td></tr>`
       : quotes.map((q, i) => {
-          const isTop   = i === 0
-          const rowBg   = isTop ? 'background:#f0fdf4' : (i % 2 === 0 ? 'background:#ffffff' : 'background:#f8fafc')
+          const isTop    = i === 0
+          const rowBg    = isTop ? 'background:#f0fdf4' : (i % 2 === 0 ? 'background:#ffffff' : 'background:#f8fafc')
           const rankCell = isTop
             ? `<td style="padding:10px 12px;${rowBg};color:#16a34a;font-weight:700;font-size:13px">#1 ✓</td>`
             : `<td style="padding:10px 12px;${rowBg};color:#94a3b8;font-size:13px">#${i + 1}</td>`
@@ -110,6 +120,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             <td style="padding:10px 12px;${rowBg};color:#1e293b;font-size:13px;font-weight:700;text-align:right">${fmtPrice(q.totalDeliveredPrice)}</td>
             <td style="padding:10px 12px;${rowBg};color:#475569;font-size:13px;text-align:center">${q.leadTimeWeeks} wks</td>
             <td style="padding:10px 12px;${rowBg};color:#94a3b8;font-size:12px;max-width:160px">${notes}</td>
+          </tr>`
+        }).join('')
+
+    const contactRows = quotes.length === 0
+      ? `<tr><td colspan="6" style="padding:16px 12px;text-align:center;color:#94a3b8;font-size:13px">No quotes received</td></tr>`
+      : quotes.map((q, i) => {
+          const rowBg      = i % 2 === 0 ? 'background:#ffffff' : 'background:#f8fafc'
+          const emailCell  = q.rfqEmail
+            ? `<a href="mailto:${q.rfqEmail}" style="color:#2563eb;text-decoration:none;font-size:13px">${q.rfqEmail}</a>`
+            : '<span style="color:#94a3b8;font-size:13px">—</span>'
+          const websiteCell = q.website
+            ? `<a href="${q.website}" style="color:#2563eb;text-decoration:none;font-size:13px">${q.website.replace(/^https?:\/\//, '')}</a>`
+            : '<span style="color:#94a3b8;font-size:13px">—</span>'
+          return `<tr>
+            <td style="padding:10px 12px;${rowBg};color:#64748b;font-size:13px">#${i + 1}</td>
+            <td style="padding:10px 12px;${rowBg};color:#1e293b;font-size:13px;font-weight:500">${q.shopName}</td>
+            <td style="padding:10px 12px;${rowBg};color:#475569;font-size:13px">${q.city}, ${q.state}</td>
+            <td style="padding:10px 12px;${rowBg};color:#475569;font-size:13px">${q.phone}</td>
+            <td style="padding:10px 12px;${rowBg}">${emailCell}</td>
+            <td style="padding:10px 12px;${rowBg}">${websiteCell}</td>
           </tr>`
         }).join('')
 
@@ -152,7 +182,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         </tbody>
       </table>
 
-      <!-- Quote table -->
+      <!-- Bid tabulation table -->
       <h2 style="margin:0 0 12px;font-size:13px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.07em">Bid Tabulation</h2>
       <div style="overflow-x:auto;margin:0 0 28px">
         <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;min-width:600px">
@@ -170,6 +200,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           </thead>
           <tbody>
             ${quoteRows}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Fabricator contact information -->
+      <h2 style="margin:0 0 12px;font-size:13px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.07em">Fabricator Contact Information</h2>
+      <div style="overflow-x:auto;margin:0 0 28px">
+        <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;min-width:500px">
+          <thead>
+            <tr>
+              <th style="${thStyle}">Rank</th>
+              <th style="${thStyle}">Shop Name</th>
+              <th style="${thStyle}">Location</th>
+              <th style="${thStyle}">Phone</th>
+              <th style="${thStyle}">Email</th>
+              <th style="${thStyle}">Website</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${contactRows}
           </tbody>
         </table>
       </div>
@@ -202,6 +252,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           (q.qualifications ? `\n       Notes: ${q.qualifications}` : '')
         ).join('\n\n')
 
+    const contactTextRows = quotes.length === 0
+      ? '  No quotes received'
+      : quotes.map((q, i) => {
+          const lines = [
+            `  #${i + 1}  ${q.shopName} (${q.city}, ${q.state})`,
+            `       Phone: ${q.phone}`,
+            ...(q.rfqEmail ? [`       Email: ${q.rfqEmail}`] : []),
+            ...(q.website  ? [`       Web:   ${q.website}`]  : []),
+          ]
+          return lines.join('\n')
+        }).join('\n\n')
+
+    const subject = `Bid Tabulation — ${mrfq.rfqTitle} — VesselRFQ`
+
     const text = `Bid Tabulation Report — VesselRFQ
 
 Dear ${name},
@@ -218,12 +282,22 @@ Bids Received: ${quotes.length}
 BID TABULATION
 ${textRows}
 
+FABRICATOR CONTACT INFORMATION
+${contactTextRows}
+
 ---
 This bid tabulation was generated by VesselRFQ (vesselrfq.com). Prices shown are fabricator estimates and subject to formal quotation.
 
 VesselRFQ · ASME Pressure Vessel Marketplace · vesselrfq.com`
 
-    await sendEmail(recipientEmail, `Bid Tabulation — ${mrfq.rfqTitle} — VesselRFQ`, html, text)
+    // Send to recipient + CC buyer (second send since sendEmail has no CC param)
+    const sends: Promise<unknown>[] = [
+      sendEmail(recipientEmail, subject, html, text),
+    ]
+    if (buyer && buyer.email !== recipientEmail) {
+      sends.push(sendEmail(buyer.email, subject, html, text))
+    }
+    await Promise.all(sends)
 
     return res.status(200).json({ sent: true, recipientEmail })
   } catch (err) {
