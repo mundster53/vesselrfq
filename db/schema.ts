@@ -182,6 +182,7 @@ export const marketplaceRfqs = pgTable('marketplace_rfqs', {
   deadlineAt:     timestamp('deadline_at'),
   // FK to marketplace_quotes.id — circular dep, constraint added separately in migration
   awardedQuoteId: integer('awarded_quote_id'),
+  closedAt:       timestamp('closed_at'),
   createdAt:      timestamp('created_at').defaultNow().notNull(),
   updatedAt:      timestamp('updated_at').defaultNow().notNull(),
 })

@@ -10,6 +10,10 @@
     {
       "path": "/api/cron-verify-embeds",
       "schedule": "0 2 * * 0"
+    },
+    {
+      "path": "/api/cron-close-rfqs",
+      "schedule": "0 6 * * *"
     }
   ]
 }
