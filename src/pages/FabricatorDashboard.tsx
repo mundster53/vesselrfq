@@ -888,14 +888,22 @@ export default function FabricatorDashboard() {
         flexDirection: 'column',
         paddingTop: 20,
       }}>
-        <div style={{ padding: '0 20px 24px' }}>
-          <div style={{ fontSize: 16, fontWeight: 700, letterSpacing: '-0.3px' }}>
-            <span style={{ color: '#f8fafc' }}>Vessel</span>
-            <span style={{ color: '#60a5fa' }}>RFQ</span>
+        <div style={{ padding: '0 20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <div style={{ fontSize: 16, fontWeight: 700, letterSpacing: '-0.3px' }}>
+              <span style={{ color: '#f8fafc' }}>Vessel</span>
+              <span style={{ color: '#60a5fa' }}>RFQ</span>
+            </div>
+            {shopName && (
+              <div style={{ fontSize: 11, color: '#475569', marginTop: 3 }}>{shopName}</div>
+            )}
           </div>
-          {shopName && (
-            <div style={{ fontSize: 11, color: '#475569', marginTop: 3 }}>{shopName}</div>
-          )}
+          <button
+            onClick={() => { logout(); navigate('/login') }}
+            style={{ background: 'none', border: 'none', padding: 0, color: '#475569', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}
+          >
+            Sign out
+          </button>
         </div>
 
         <nav>
@@ -975,28 +983,6 @@ export default function FabricatorDashboard() {
           </div>
         </nav>
 
-        {/* Sign Out */}
-        <div style={{ marginTop: 'auto', padding: '0 0 12px' }}>
-          <div
-            onClick={() => { logout(); navigate('/login') }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-              padding: '9px 20px',
-              color: '#475569',
-              cursor: 'pointer',
-              fontSize: 13,
-            }}
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" y1="12" x2="9" y2="12" />
-            </svg>
-            Sign out
-          </div>
-        </div>
       </aside>
 
       {/* ── Main content ─────────────────────────────────────────────── */}
