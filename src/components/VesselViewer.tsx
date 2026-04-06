@@ -350,7 +350,7 @@ function buildVessel(
 
   // When vertical vessel has lugs, offset auto-distributed nozzles by 45° so they
   // land between lugs (at 45°/135°/225°/315°) rather than on them (0°/90°/180°/270°).
-  const lugAngleOffset = (isV && form.supportType === 'lugs') ? 45 : 0
+  const lugAngleOffset = (isV && (form.supportType === 'lugs' || form.supportType === 'legs')) ? 45 : 0
 
   shellNzls.forEach((nz, i) => {
     const count = shellNzls.length
@@ -368,7 +368,7 @@ function buildVessel(
       // Horizontal: manways on the side (theta=π/2), never on top (theta=0)
       // Vertical: apply same lug offset as standard nozzles; also shift elevation below lug zone
       const mTheta = !isV ? Math.PI / 2 : theta
-      const mAxisPos = (isV && form.supportType === 'lugs') ? -(L * 0.35) : axisPos
+      const mAxisPos = (isV && (form.supportType === 'lugs' || form.supportType === 'legs')) ? -(L * 0.35) : axisPos
       if (isV) addShellNozzle_V(mAxisPos, mTheta, od)
       else     addShellNozzle_H(axisPos, mTheta, od)
     } else {
@@ -396,7 +396,7 @@ function buildVessel(
       } else if (nz.nozzleType === 'manway' && isV) {
         // Vertical vessels: redirect head manways to shell side rather than top/bottom heads
         const od = manwayOD(nz)
-        const baseAngle = form.supportType === 'lugs' ? Math.PI / 4 : Math.PI / 2
+        const baseAngle = (form.supportType === 'lugs' || form.supportType === 'legs') ? Math.PI / 4 : Math.PI / 2
         const mTheta = (vHeadManwayIdx % 2 === 0) ? baseAngle : baseAngle + Math.PI
         const mY = -(L / 4) - Math.floor(vHeadManwayIdx / 2) * L * 0.12
         addShellNozzle_V(mY, mTheta, od)
