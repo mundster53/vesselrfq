@@ -298,10 +298,11 @@ function RfqDetailPanel({ rfq, onClose }: { rfq: RfqFull; onClose: () => void })
   )
 }
 
-function MarketplaceQuotesView({ rfqs, loading, error }: {
+function MarketplaceQuotesView({ rfqs, loading, error, onAward }: {
   rfqs:    MarketplaceRfqWithQuotes[]
   loading: boolean
   error:   string
+  onAward: (marketplaceRfqId: number, winningQuoteId: number) => void
 }) {
   const [bidTabModal,    setBidTabModal]    = useState<BidTabModalState | null>(null)
   const [recipientName,  setRecipientName]  = useState('')
@@ -309,6 +310,8 @@ function MarketplaceQuotesView({ rfqs, loading, error }: {
   const [sendingBidTab,  setSendingBidTab]  = useState(false)
   const [bidTabSent,     setBidTabSent]     = useState(false)
   const [bidTabError,    setBidTabError]    = useState('')
+  const [awarding,       setAwarding]       = useState<number | null>(null)
+  const [awardError,     setAwardError]     = useState('')
 
   function closeModal() {
     setBidTabModal(null)
@@ -317,6 +320,22 @@ function MarketplaceQuotesView({ rfqs, loading, error }: {
     setSendingBidTab(false)
     setBidTabSent(false)
     setBidTabError('')
+  }
+
+  async function handleAward(marketplaceRfqId: number, quoteId: number) {
+    if (!window.confirm('Award this quote? This will notify all fabricators and cannot be undone.')) return
+    setAwarding(quoteId)
+    setAwardError('')
+    try {
+      await api.post('/buyer/award-quote', { marketplaceRfqId, quoteId })
+      onAward(marketplaceRfqId, quoteId)
+    } catch (err) {
+      const msg = err instanceof ApiError ? err.message : 'Failed to award quote'
+      setAwardError(msg)
+      setTimeout(() => setAwardError(''), 5000)
+    } finally {
+      setAwarding(null)
+    }
   }
 
   async function handleSendBidTab() {
@@ -426,6 +445,9 @@ function MarketplaceQuotesView({ rfqs, loading, error }: {
                       <th className="text-right px-4 py-2.5 font-medium text-slate-500 text-xs uppercase tracking-wide">Total Delivered</th>
                       <th className="text-left px-4 py-2.5 font-medium text-slate-500 text-xs uppercase tracking-wide">Lead Time</th>
                       <th className="text-left px-4 py-2.5 font-medium text-slate-500 text-xs uppercase tracking-wide">Notes</th>
+                      {(mrfq.status === 'open' || mrfq.status === 'closed') && (
+                        <th className="text-left px-4 py-2.5 font-medium text-slate-500 text-xs uppercase tracking-wide">Action</th>
+                      )}
                     </tr>
                   </thead>
                   <tbody>
@@ -453,10 +475,31 @@ function MarketplaceQuotesView({ rfqs, loading, error }: {
                             : '—'
                           }
                         </td>
+                        {(mrfq.status === 'open' || mrfq.status === 'closed') && (
+                          <td className="px-4 py-3">
+                            {q.status === 'awarded'
+                              ? <span className="text-xs font-medium text-green-700 bg-green-50 px-2 py-1 rounded">Awarded ✓</span>
+                              : q.status === 'not_awarded'
+                              ? <span className="text-xs text-slate-400">Not awarded</span>
+                              : <button
+                                  onClick={() => handleAward(mrfq.marketplaceRfqId, q.quoteId)}
+                                  disabled={awarding === q.quoteId}
+                                  className="border border-blue-200 text-blue-700 text-xs rounded px-2 py-1 hover:bg-blue-50 disabled:opacity-50 transition-colors"
+                                >
+                                  {awarding === q.quoteId ? 'Awarding…' : 'Award'}
+                                </button>
+                            }
+                          </td>
+                        )}
                       </tr>
                     ))}
                   </tbody>
                 </table>
+                {awardError && (
+                  <div className="px-5 py-2 text-xs text-red-600 bg-red-50 border-t border-red-100">
+                    {awardError}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -558,6 +601,20 @@ export default function DashboardPage() {
   }, [])
 
   const totalQuoteCount = mktRfqs.reduce((sum, r) => sum + r.quotes.length, 0)
+
+  function handleAwardLocal(marketplaceRfqId: number, winningQuoteId: number) {
+    setMktRfqs(prev => prev.map(r => {
+      if (r.marketplaceRfqId !== marketplaceRfqId) return r
+      return {
+        ...r,
+        status: 'awarded',
+        quotes: r.quotes.map(q => ({
+          ...q,
+          status: q.quoteId === winningQuoteId ? 'awarded' : 'not_awarded',
+        })),
+      }
+    }))
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
@@ -669,7 +726,7 @@ export default function DashboardPage() {
             )}
           </>
         ) : (
-          <MarketplaceQuotesView rfqs={mktRfqs} loading={mktLoading} error={mktError} />
+          <MarketplaceQuotesView rfqs={mktRfqs} loading={mktLoading} error={mktError} onAward={handleAwardLocal} />
         )}
       </main>
 
