@@ -678,6 +678,8 @@ export default function DashboardPage() {
   const [error, setError]       = useState('')
   const [selectedRfq, setSelectedRfq] = useState<RfqFull | null>(null)
 
+  const [copyingId, setCopyingId] = useState<number | null>(null)
+
   const [activeTab,  setActiveTab]  = useState<'rfqs' | 'marketplace'>('rfqs')
   const [mktRfqs,    setMktRfqs]    = useState<MarketplaceRfqWithQuotes[]>([])
   const [mktLoading, setMktLoading] = useState(true)
@@ -705,6 +707,19 @@ export default function DashboardPage() {
     setMktRfqs(prev => prev.map(r =>
       r.marketplaceRfqId !== marketplaceRfqId ? r : { ...r, status: 'open', deadlineAt: newDeadline }
     ))
+  }
+
+  async function handleCopyRfq(rfqId: number) {
+    setCopyingId(rfqId)
+    try {
+      await api.post('/rfqs/copy', { rfqId })
+      const { rfqs: updated } = await api.get<{ rfqs: RfqFull[] }>('/rfqs')
+      setRfqs(updated)
+    } catch (err) {
+      alert(err instanceof ApiError ? err.message : 'Failed to copy RFQ')
+    } finally {
+      setCopyingId(null)
+    }
   }
 
   function handleAwardLocal(marketplaceRfqId: number, winningQuoteId: number) {
@@ -799,6 +814,7 @@ export default function DashboardPage() {
                       <th className="text-left px-4 py-3 font-medium text-slate-600">Nozzles</th>
                       <th className="text-left px-4 py-3 font-medium text-slate-600">Status</th>
                       <th className="text-left px-4 py-3 font-medium text-slate-600">Submitted</th>
+                      <th className="text-left px-4 py-3 font-medium text-slate-600">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -828,6 +844,15 @@ export default function DashboardPage() {
                           </span>
                         </td>
                         <td className="px-4 py-3 text-slate-500">{formatDate(rfq.createdAt)}</td>
+                        <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
+                          <button
+                            onClick={() => handleCopyRfq(rfq.id)}
+                            disabled={copyingId === rfq.id}
+                            className="border border-slate-200 text-slate-600 text-xs rounded px-2 py-1 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {copyingId === rfq.id ? 'Copying…' : 'Copy'}
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
