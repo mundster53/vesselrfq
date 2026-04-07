@@ -4,7 +4,8 @@
   "rewrites": [
     { "source": "/app/(.*)", "destination": "/app/index.html" },
     { "source": "/fabricators", "destination": "/fabricators/index.html" },
-    { "source": "/fabricators/success", "destination": "/fabricators/success.html" }
+    { "source": "/fabricators/success", "destination": "/fabricators/success.html" },
+    { "source": "/fabricators/embed-guide", "destination": "/fabricators/embed-guide.html" }
   ],
   "crons": [
     {

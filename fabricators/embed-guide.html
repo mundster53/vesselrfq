@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Embed VesselRFQ on Your Website — Setup Guide</title>
+  <meta name="description" content="Add the VesselRFQ vessel configurator to your fabrication shop website in minutes. One line of code. Works on WordPress, Squarespace, Wix, Webflow, or any custom site.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    html { scroll-behavior: smooth; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #0f172a;
+      color: #cbd5e1;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Base typography ──────────────────────────────────────────────────── */
+    h1 { font-size: clamp(26px, 3.5vw, 44px); font-weight: 500; line-height: 1.18; letter-spacing: -0.4px; color: #f8fafc; }
+    h2 { font-size: clamp(20px, 2.8vw, 30px); font-weight: 500; line-height: 1.22; letter-spacing: -0.3px; color: #f8fafc; }
+    h3 { font-size: 15px; font-weight: 500; color: #f8fafc; }
+    p  { font-size: 15px; color: #cbd5e1; }
+
+    a { text-decoration: none; }
+
+    .kicker {
+      display: block;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    /* ── Buttons ──────────────────────────────────────────────────────────── */
+    .btn {
+      display: inline-block;
+      padding: 10px 22px;
+      border-radius: 7px;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.15s;
+      border: none;
+    }
+    .btn:hover { opacity: 0.87; }
+    .btn-green { background: #16a34a; color: #f0fdf4; }
+    .btn-green-lg { padding: 13px 28px; font-size: 15px; border-radius: 8px; }
+
+    /* ── Nav ──────────────────────────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: #0f172a;
+      border-bottom: 0.5px solid #1e293b;
+    }
+    .nav-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 32px;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo { font-size: 17px; font-weight: 500; text-decoration: none; }
+    .logo-vessel { color: #f8fafc; }
+    .logo-rfq    { color: #60a5fa; }
+    .nav-right { display: flex; align-items: center; gap: 20px; }
+    .nav-buyers { font-size: 13px; color: #94a3b8; }
+    .nav-buyers:hover { color: #cbd5e1; }
+
+    /* ── Hero ─────────────────────────────────────────────────────────────── */
+    .hero { background: #0f172a; padding: 72px 32px 56px; text-align: center; }
+    .hero-inner { max-width: 640px; margin: 0 auto; }
+    .hero .kicker { color: #60a5fa; }
+    .hero h1 { margin-bottom: 16px; }
+    .hero-sub { font-size: 17px; color: #94a3b8; margin-bottom: 32px; }
+
+    /* ── Steps section ────────────────────────────────────────────────────── */
+    .steps-section { background: #0f172a; padding: 0 32px 56px; }
+    .steps-inner { max-width: 720px; margin: 0 auto; }
+    .steps-section .kicker { color: #60a5fa; }
+    .steps-section h2 { margin-bottom: 32px; }
+
+    .steps-list { display: flex; flex-direction: column; gap: 16px; }
+
+    .step-card {
+      background: #1e293b;
+      border: 0.5px solid #334155;
+      border-radius: 10px;
+      padding: 24px 28px;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #0f172a;
+      border: 0.5px solid #334155;
+      color: #60a5fa;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .step-body { flex: 1; min-width: 0; }
+    .step-body h3 { margin-bottom: 8px; }
+    .step-body p  { font-size: 14px; color: #94a3b8; line-height: 1.65; }
+
+    /* ── Code block ───────────────────────────────────────────────────────── */
+    .code-wrap {
+      position: relative;
+      margin-top: 16px;
+    }
+    .code-block {
+      background: #020617;
+      border: 0.5px solid #334155;
+      border-radius: 8px;
+      padding: 16px 52px 16px 16px;
+      font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
+      font-size: 12px;
+      color: #7dd3fc;
+      line-height: 1.7;
+      word-break: break-all;
+      white-space: pre-wrap;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #1e293b;
+      border: 0.5px solid #334155;
+      border-radius: 5px;
+      color: #94a3b8;
+      font-size: 11px;
+      font-family: inherit;
+      font-weight: 500;
+      padding: 4px 10px;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .copy-btn:hover { color: #f1f5f9; border-color: #475569; }
+    .copy-btn.copied { color: #4ade80; border-color: #166534; }
+
+    /* ── Platform badges ──────────────────────────────────────────────────── */
+    .platform-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .platform-badge {
+      background: #0f172a;
+      border: 0.5px solid #334155;
+      border-radius: 5px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 500;
+      color: #94a3b8;
+    }
+
+    /* ── FAQ ──────────────────────────────────────────────────────────────── */
+    .faq-section { background: #0f172a; padding: 0 32px 56px; }
+    .faq-inner { max-width: 720px; margin: 0 auto; }
+    .faq-section .kicker { color: #60a5fa; }
+    .faq-section h2 { margin-bottom: 32px; }
+
+    .faq-item { border-bottom: 0.5px solid #1e293b; }
+    .faq-q {
+      width: 100%;
+      background: none;
+      border: none;
+      text-align: left;
+      padding: 18px 0;
+      font-size: 15px;
+      font-weight: 500;
+      color: #f1f5f9;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .faq-q::after { content: '+'; font-size: 20px; font-weight: 400; color: #475569; flex-shrink: 0; }
+    .faq-q.open::after { content: '−'; }
+    .faq-a {
+      display: none;
+      font-size: 14px;
+      color: #94a3b8;
+      line-height: 1.7;
+      padding-bottom: 18px;
+    }
+    .faq-a.open { display: block; }
+
+    /* ── Footer ───────────────────────────────────────────────────────────── */
+    footer {
+      background: #020617;
+      border-top: 0.5px solid #0f172a;
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    footer span, footer a {
+      font-size: 12px;
+      color: #334155;
+      text-decoration: none;
+    }
+    footer a:hover { color: #475569; }
+
+    /* ── Responsive ───────────────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .nav-buyers { display: none; }
+      .nav-inner  { padding: 0 16px; }
+
+      .hero { padding: 48px 20px 40px; }
+
+      .steps-section { padding: 0 20px 40px; }
+      .step-card { padding: 18px 20px; gap: 14px; }
+      .step-num { width: 30px; height: 30px; font-size: 13px; }
+
+      .faq-section { padding: 0 20px 40px; }
+
+      footer { padding: 14px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Nav ──────────────────────────────────────────────────────────────── -->
+  <nav>
+    <div class="nav-inner">
+      <a href="/" class="logo">
+        <span class="logo-vessel">Vessel</span><span class="logo-rfq">RFQ</span>
+      </a>
+      <div class="nav-right">
+        <a href="https://vesselrfq.com" class="nav-buyers">For buyers</a>
+        <a href="/app/fabricator-register" class="btn btn-green">Get started</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Hero ─────────────────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-inner">
+      <span class="kicker">Setup guide</span>
+      <h1>Add VesselRFQ to your website in 5 minutes</h1>
+      <p class="hero-sub">One line of code. Works on any website.</p>
+      <a href="/app/fabricator-register" class="btn btn-green btn-green-lg">Create your account — $197/mo</a>
+    </div>
+  </section>
+
+  <!-- ── Steps ─────────────────────────────────────────────────────────────── -->
+  <section class="steps-section">
+    <div class="steps-inner">
+      <span class="kicker">How it works</span>
+      <h2>Four steps to go live</h2>
+
+      <div class="steps-list">
+
+        <!-- Step 1 -->
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h3>Create your account</h3>
+            <p>Register at vesselrfq.com/fabricators. Once your subscription is active, you'll receive your unique embed code by email.</p>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h3>Copy your embed code</h3>
+            <p>Your unique code will look like this — it's already configured for your shop.</p>
+            <div class="code-wrap">
+              <pre class="code-block" id="embed-code">&lt;iframe src="https://vesselrfq.com/app/embed?shop=YOUR_ID" width="100%" height="800" frameborder="0" style="border:none;border-radius:8px;"&gt;&lt;/iframe&gt;</pre>
+              <button class="copy-btn" id="copy-btn" onclick="copyCode()">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h3>Paste it on your website</h3>
+            <p>Paste the code anywhere on your website where you want the configurator to appear. Works with WordPress, Squarespace, Wix, Webflow, or any custom site — if it accepts HTML, it works.</p>
+            <div class="platform-badges">
+              <span class="platform-badge">WordPress</span>
+              <span class="platform-badge">Squarespace</span>
+              <span class="platform-badge">Wix</span>
+              <span class="platform-badge">Webflow</span>
+              <span class="platform-badge">Custom HTML</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step-card">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <h3>You're live</h3>
+            <p>That's it. Buyers who visit your page can immediately start configuring their vessel specs. Every completed RFQ lands in your VesselRFQ dashboard with a full spec sheet — nothing missing.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FAQ ───────────────────────────────────────────────────────────────── -->
+  <section class="faq-section">
+    <div class="faq-inner">
+      <span class="kicker">FAQ</span>
+      <h2>Common questions</h2>
+      <div style="border-top:0.5px solid #1e293b">
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">What if my website doesn't support HTML embeds?</button>
+          <div class="faq-a">Contact us and we'll help you find a solution. Most modern website builders support HTML embeds natively.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Will it match my website's design?</button>
+          <div class="faq-a">The configurator has a clean, professional appearance that works on any site. You can set the width and height to fit your layout.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">How do I know when an RFQ comes in?</button>
+          <div class="faq-a">You'll receive an email notification instantly with a direct link to the full spec in your dashboard.</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Bottom CTA ───────────────────────────────────────────────────────── -->
+  <div style="background:#0f172a;padding:0 32px 56px">
+    <div style="max-width:560px;margin:0 auto;text-align:center">
+      <a href="/app/fabricator-register" class="btn btn-green btn-green-lg" style="display:block;width:100%;text-align:center;padding:16px 28px;font-size:16px;border-radius:9px">Create your account — $197/mo</a>
+      <p style="margin-top:10px;font-size:12px;color:#475569">Founding fabricator rate — locks in permanently.</p>
+    </div>
+  </div>
+
+  <!-- ── Footer ────────────────────────────────────────────────────────────── -->
+  <footer>
+    <span>&#169; 2026 VesselRFQ</span>
+    <a href="https://vesselrfq.com">vesselrfq.com</a>
+  </footer>
+
+  <script>
+    function toggleFaq(btn) {
+      var answer = btn.nextElementSibling;
+      var isOpen = btn.classList.contains('open');
+      btn.classList.toggle('open', !isOpen);
+      answer.classList.toggle('open', !isOpen);
+    }
+
+    function copyCode() {
+      var code = document.getElementById('embed-code').textContent;
+      var btn  = document.getElementById('copy-btn');
+      navigator.clipboard.writeText(code).then(function() {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(function() {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 2000);
+      }).catch(function() {
+        btn.textContent = 'Copy failed';
+        setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>
