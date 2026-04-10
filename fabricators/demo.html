@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VesselRFQ — Demo for ASME Code Shops</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0f1623;
+  --bg2:#161e2e;
+  --bg3:#1c2640;
+  --blue:#3b82f6;
+  --green:#16a34a;
+  --green-hover:#15803d;
+  --text:#f1f5f9;
+  --muted:#94a3b8;
+  --border:#1e293b;
+  --border2:#334155;
+}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;font-size:15px}
+a{color:var(--blue);text-decoration:none}
+nav{position:sticky;top:0;z-index:100;background:rgba(15,22,35,0.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+.logo{font-size:18px;font-weight:600;letter-spacing:-0.3px}.logo span{color:var(--blue)}
+.nav-right{display:flex;align-items:center;gap:1rem}
+.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--muted);padding:6px 16px;border-radius:6px;cursor:pointer;font-family:inherit;font-size:13px;transition:color .2s,border-color .2s}
+.btn-ghost:hover{color:var(--text);border-color:var(--blue)}
+.btn-green{background:var(--green);color:#fff;border:none;padding:8px 20px;border-radius:6px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;transition:background .2s}
+.btn-green:hover{background:var(--green-hover)}
+.btn-green-lg{background:var(--green);color:#fff;border:none;padding:13px 32px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:15px;font-weight:500;transition:background .2s;display:inline-block}
+.btn-green-lg:hover{background:var(--green-hover)}
+.btn-outline-lg{background:transparent;color:var(--blue);border:1px solid var(--blue);padding:13px 32px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:15px;transition:background .2s;display:inline-block}
+.btn-outline-lg:hover{background:rgba(59,130,246,0.08)}
+.hero{padding:80px 2rem 72px;text-align:center;max-width:780px;margin:0 auto}
+.hero-label{display:inline-block;font-size:11px;font-family:'DM Mono',monospace;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue);border:1px solid rgba(59,130,246,0.3);padding:4px 12px;border-radius:4px;margin-bottom:24px}
+.hero h1{font-size:clamp(28px,4.5vw,44px);font-weight:600;line-height:1.18;letter-spacing:-0.5px;margin-bottom:20px;color:#fff}
+.hero h1 em{font-style:normal;color:var(--blue)}
+.hero p{font-size:17px;color:var(--muted);max-width:560px;margin:0 auto 36px;line-height:1.7}
+.hero-ctas{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap}
+.hero-sub{margin-top:16px;font-size:12px;color:var(--muted)}
+.hero-sub span{color:var(--text)}
+.divider{height:1px;background:var(--border);margin:0 2rem}
+.video-section{padding:64px 2rem;max-width:900px;margin:0 auto}
+.section-label{font-size:11px;font-family:'DM Mono',monospace;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue);margin-bottom:12px}
+.video-section h2{font-size:clamp(20px,3vw,28px);font-weight:600;letter-spacing:-0.3px;margin-bottom:8px}
+.video-section p{color:var(--muted);margin-bottom:32px;max-width:580px}
+.video-frame{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;overflow:hidden;position:relative;padding-top:56.25%}
+.video-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.play-btn{width:64px;height:64px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .2s,background .2s}
+.play-btn:hover{transform:scale(1.08);background:var(--green-hover)}
+.video-note{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace}
+.what-you-see{padding:0 2rem 64px;max-width:900px;margin:0 auto}
+.points-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:24px}
+.point-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px 22px}
+.point-card .check{width:22px;height:22px;border-radius:50%;background:rgba(22,163,74,0.12);display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.point-card h4{font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px}
+.point-card p{font-size:13px;color:var(--muted);line-height:1.6}
+.problem-section{background:var(--bg2);padding:64px 2rem;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.problem-inner{max-width:900px;margin:0 auto}
+.problem-section h2{font-size:clamp(20px,3vw,28px);font-weight:600;letter-spacing:-0.3px;margin-bottom:8px}
+.problem-section .sub{color:var(--muted);margin-bottom:32px}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+@media(max-width:600px){.compare-grid{grid-template-columns:1fr}}
+.compare-col h3{font-size:12px;font-family:'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.compare-col.bad h3{color:#f87171}
+.compare-col.good h3{color:#4ade80}
+.compare-item{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;font-size:13px;color:var(--muted);line-height:1.5}
+.x-mark{width:16px;height:16px;border-radius:50%;background:rgba(248,113,113,0.15);color:#f87171;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;margin-top:2px}
+.v-mark{width:16px;height:16px;border-radius:50%;background:rgba(74,222,128,0.12);color:#4ade80;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;margin-top:2px}
+.pricing-section{padding:64px 2rem;max-width:700px;margin:0 auto;text-align:center}
+.pricing-section h2{font-size:clamp(20px,3vw,28px);font-weight:600;letter-spacing:-0.3px;margin-bottom:8px}
+.pricing-section .sub{color:var(--muted);margin-bottom:40px}
+.pricing-card{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:36px;position:relative;overflow:hidden}
+.pricing-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--green))}
+.founders-badge{display:inline-block;font-size:11px;font-family:'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase;color:#fbbf24;border:1px solid rgba(251,191,36,0.3);padding:4px 12px;border-radius:4px;margin-bottom:20px}
+.price-line{display:flex;align-items:baseline;justify-content:center;gap:8px;margin-bottom:8px}
+.price-amount{font-size:48px;font-weight:600;color:#fff;letter-spacing:-1px}
+.price-period{font-size:15px;color:var(--muted)}
+.price-compare{font-size:13px;color:var(--muted);margin-bottom:28px}
+.price-compare s{color:#64748b}
+.price-features{list-style:none;text-align:left;margin-bottom:32px}
+.price-features li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--muted);padding:8px 0;border-bottom:1px solid var(--border)}
+.price-features li:last-child{border-bottom:none}
+.scarcity{font-size:12px;color:var(--muted);margin-top:16px;font-family:'DM Mono',monospace}
+.scarcity span{color:#fbbf24}
+.cred-section{background:var(--bg3);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:64px 2rem}
+.cred-inner{max-width:700px;margin:0 auto}
+.cred-section h2{font-size:clamp(18px,2.5vw,24px);font-weight:600;letter-spacing:-0.3px;margin-bottom:16px;color:var(--text)}
+.cred-section p{color:var(--muted);font-size:15px;line-height:1.75;margin-bottom:16px}
+.cred-section p.closer{color:var(--text);font-weight:500}
+.cred-section p:last-child{margin-bottom:0}
+.closing{padding:72px 2rem;text-align:center;max-width:600px;margin:0 auto}
+.closing h2{font-size:clamp(22px,3.5vw,34px);font-weight:600;letter-spacing:-0.4px;margin-bottom:12px}
+.closing p{color:var(--muted);margin-bottom:36px;font-size:16px}
+.closing-ctas{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap}
+.closing-note{margin-top:20px;font-size:13px;color:var(--muted)}
+footer{border-top:1px solid var(--border);padding:24px 2rem;text-align:center}
+footer p{font-size:12px;color:#475569}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Vessel<span>RFQ</span></div>
+  <div class="nav-right">
+    <button class="btn-ghost">Sign in</button>
+    <button class="btn-green">Get started — $197/mo</button>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-label">For ASME Code Fabricators</div>
+  <h1>Your website should be doing more than <em>sitting there.</em></h1>
+  <p>Watch a 5-minute demo of the 3D vessel configurator that turns your site into a spec-complete RFQ machine — and gives you a reason to call every past customer you've ever had.</p>
+  <div class="hero-ctas">
+    <button class="btn-green-lg">Watch the demo</button>
+    <button class="btn-outline-lg">Book a call with Bret</button>
+  </div>
+  <p class="hero-sub">Founding rate: <span>$197/month</span> — first 100 shops only</p>
+</section>
+
+<div class="divider"></div>
+
+<section class="video-section">
+  <div class="section-label">5-minute demo</div>
+  <h2>See it in 5 minutes. Decide if it belongs on your site.</h2>
+  <p>No sales pitch. No slides. Just the configurator running — and what comes out the other end when a buyer uses it.</p>
+  <div class="video-frame">
+    <div class="video-placeholder">
+      <div class="play-btn">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><polygon points="6,3 17,10 6,17" fill="white"/></svg>
+      </div>
+      <span class="video-note">Demo video — 5:10</span>
+    </div>
+  </div>
+</section>
+
+<section class="what-you-see">
+  <div class="section-label">What you just watched</div>
+  <div class="points-grid">
+    <div class="point-card">
+      <div class="check"><svg width="10" height="10" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" stroke="#4ade80" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
+      <h4>Buyers design their own vessel</h4>
+      <p>Geometry, orientation, nozzles, design conditions — all captured before they ever contact you.</p>
+    </div>
+    <div class="point-card">
+      <div class="check"><svg width="10" height="10" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" stroke="#4ade80" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
+      <h4>You get a spec-complete RFQ</h4>
+      <p>No back-and-forth. No missing data. Everything your estimator needs to put a number on it.</p>
+    </div>
+    <div class="point-card">
+      <div class="check"><svg width="10" height="10" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" stroke="#4ade80" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
+      <h4>It embeds on your existing site</h4>
+      <p>One line of code. Works on any website. Your branding, your domain, your customers.</p>
+    </div>
+    <div class="point-card">
+      <div class="check"><svg width="10" height="10" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" stroke="#4ade80" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
+      <h4>You have a reason to call past customers</h4>
+      <p>"We just added a vessel configurator to our site — you can design and submit online now." That's a real call to make.</p>
+    </div>
+    <div class="point-card">
+      <div class="check"><svg width="10" height="10" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" stroke="#4ade80" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
+      <h4>Buyers save thousands in engineering time</h4>
+      <p>The configurator replaces weeks of consulting engineering work to get to a biddable spec. Your customers know this. It's a differentiator for your shop.</p>
+    </div>
+    <div class="point-card">
+      <div class="check"><svg width="10" height="10" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" stroke="#4ade80" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
+      <h4>Founding shops help shape it</h4>
+      <p>The first 100 shops have input on what gets built next — and get first access to the marketplace when it launches.</p>
+    </div>
+  </div>
+</section>
+
+<section class="problem-section">
+  <div class="problem-inner">
+    <div class="section-label">The problem this solves</div>
+    <h2>Your contact form is costing you jobs.</h2>
+    <p class="sub">Every shop has one. Nobody uses it the right way. Here's what happens instead.</p>
+    <div class="compare-grid">
+      <div class="compare-col bad">
+        <h3>What your contact form gives you</h3>
+        <div class="compare-item"><div class="x-mark">✕</div><span>A name and a phone number. No shell ID, no design pressure, no nozzle schedule.</span></div>
+        <div class="compare-item"><div class="x-mark">✕</div><span>An hour of back-and-forth before you know if it's worth quoting.</span></div>
+        <div class="compare-item"><div class="x-mark">✕</div><span>Buyers who filled out the same form at four other shops.</span></div>
+        <div class="compare-item"><div class="x-mark">✕</div><span>No way to tell a serious buyer from someone kicking the tires.</span></div>
+      </div>
+      <div class="compare-col good">
+        <h3>What the configurator gives you</h3>
+        <div class="compare-item"><div class="v-mark">✓</div><span>Design conditions, geometry, orientation, nozzle schedule — everything to estimate.</span></div>
+        <div class="compare-item"><div class="v-mark">✓</div><span>A structured RFQ in your dashboard, ready to review and respond.</span></div>
+        <div class="compare-item"><div class="v-mark">✓</div><span>Buyers who spent time specifying their vessel. They're serious.</span></div>
+        <div class="compare-item"><div class="v-mark">✓</div><span>A tool your customers will talk about and come back to use.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pricing-section">
+  <div class="section-label">Founding rate</div>
+  <h2>$197/month. Limited to the first 100 shops.</h2>
+  <p class="sub">After 100 shops the rate goes to $297/month. There is no trial period — the demo is your trial.</p>
+  <div class="pricing-card">
+    <div class="founders-badge">Founders Club</div>
+    <div class="price-line">
+      <span class="price-amount">$197</span>
+      <span class="price-period">/month</span>
+    </div>
+    <p class="price-compare">Standard rate after 100 shops: <s>$297/month</s></p>
+    <ul class="price-features">
+      <li><div class="v-mark">✓</div>3D vessel configurator embedded on your website</li>
+      <li><div class="v-mark">✓</div>Spec-complete RFQs delivered to your dashboard</li>
+      <li><div class="v-mark">✓</div>Email notifications on every new RFQ</li>
+      <li><div class="v-mark">✓</div>Quote management, status tracking, PDF export</li>
+      <li><div class="v-mark">✓</div>Embed code and setup support included</li>
+      <li><div class="v-mark">✓</div>First access to the marketplace when it launches</li>
+      <li><div class="v-mark">✓</div>Input on platform development as a founding member</li>
+    </ul>
+    <button class="btn-green-lg" style="width:100%">Get started at $197/month</button>
+    <p class="scarcity">Founding rate locks in permanently as long as you stay subscribed. <span>Spots remaining: limited.</span></p>
+  </div>
+</section>
+
+<section class="cred-section">
+  <div class="cred-inner">
+    <div class="section-label">Why this is different</div>
+    <h2>Built by someone who lived every side of this problem.</h2>
+    <p>I've spent 36 years in industrial construction and manufacturing — food, chemical, petrochemical, pulp and paper. I've been the corporate project engineer writing the specs, the capital project manager managing the budgets, and the estimator at multiple ASME Code shops putting numbers on pressure vessels and piping packages worth millions.</p>
+    <p>At one point I was personally estimating $5 million worth of projects a month. I've quoted vessels in carbon steel, stainless, Hastelloy, Inconel — and I've supervised the installation of that equipment in the field. I was the first person to use the Tennessee-Tombigbee Waterway to ship a 50,000-pound Inconel 600 vessel to a manufacturer in Mississippi.</p>
+    <p>The thing that killed quote turnaround time then — and still does now — is waiting on component pricing from suppliers. Back in the early '90s I was already asking my suppliers if there was a way to get their pricing downloaded directly to my computer. Nobody had an answer.</p>
+    <p class="closer">VesselRFQ is that answer. A complete RFQ from the buyer's side so your estimator has everything they need to move fast — because I know firsthand what happens when they don't.</p>
+  </div>
+</section>
+
+<section class="closing">
+  <h2>Either it makes sense for your shop or it doesn't.</h2>
+  <p>Watch the demo. If you see it, you'll know. If you want to talk through how it fits your operation, book 15 minutes.</p>
+  <div class="closing-ctas">
+    <button class="btn-green-lg">Get started — $197/month</button>
+    <button class="btn-outline-lg">Book a call with Bret</button>
+  </div>
+  <p class="closing-note">Questions? <a href="mailto:bret@vesselrfq.com">bret@vesselrfq.com</a></p>
+</section>
+
+<footer>
+  <p>© 2026 VesselRFQ &nbsp;·&nbsp; vesselrfq.com/fabricators/demo</p>
+</footer>
+
+</body>
+</html>
