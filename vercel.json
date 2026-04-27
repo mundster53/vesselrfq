@@ -6,7 +6,8 @@
     { "source": "/fabricators", "destination": "/fabricators/index.html" },
     { "source": "/fabricators/success", "destination": "/fabricators/success.html" },
     { "source": "/fabricators/embed-guide", "destination": "/fabricators/embed-guide.html" },
-    { "source": "/fabricators/demo", "destination": "/fabricators/demo.html" }
+    { "source": "/fabricators/demo", "destination": "/fabricators/demo.html" },
+    { "source": "/beta", "destination": "/beta/index.html" }
   ],
   "crons": [
     {

@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VesselRFQ Beta — Join the Fabricator Network</title>
+  <meta name="description" content="Apply for VesselRFQ beta access. Free until RFQs go live. Protected territory. Founding member status.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-8PPBHMZ30E"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-8PPBHMZ30E');
+  </script>
+</head>
+<style>
+  :root {
+    --bg:      #0f1623;
+    --bg2:     #161e2e;
+    --bg3:     #1c2640;
+    --blue:    #3b82f6;
+    --green:   #16a34a;
+    --green-h: #15803d;
+    --text:    #f1f5f9;
+    --muted:   #94a3b8;
+    --border:  #1e293b;
+    --border2: #334155;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { text-decoration: none; color: inherit; }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .nav-logo {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+
+  .nav-cta {
+    background: var(--green);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 8px 18px;
+    border-radius: 6px;
+    transition: background 0.15s;
+  }
+
+  .nav-cta:hover { background: var(--green-h); }
+
+  /* ── SECTIONS ── */
+  .section { padding: 72px 32px; }
+  .section-inner { max-width: 760px; margin: 0 auto; }
+  .section-inner-wide { max-width: 900px; margin: 0 auto; }
+
+  .section-label {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    padding: 3px 10px;
+    margin-bottom: 20px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--bg);
+    padding: 80px 32px 64px;
+    text-align: center;
+  }
+
+  .hero-inner { max-width: 800px; margin: 0 auto; }
+
+  .hero-label {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--green);
+    border: 1px solid var(--green);
+    border-radius: 4px;
+    padding: 3px 10px;
+    margin-bottom: 28px;
+  }
+
+  .hero h1 {
+    font-size: clamp(26px, 4vw, 40px);
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    margin-bottom: 24px;
+  }
+
+  .hero-sub {
+    font-size: 17px;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 600px;
+    margin: 0 auto 36px;
+  }
+
+  .btn-green {
+    display: inline-block;
+    background: var(--green);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 13px 32px;
+    border-radius: 8px;
+    transition: background 0.15s;
+  }
+
+  .btn-green:hover { background: var(--green-h); }
+
+  /* ── STORY SECTION ── */
+  .story-section {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .story-section p {
+    font-size: 16px;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 20px;
+  }
+
+  .story-section p:last-child { margin-bottom: 0; }
+
+  .story-section p strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* ── WHAT'S DIFFERENT ── */
+  .different-section {
+    background: var(--bg);
+  }
+
+  .different-section p {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 16px;
+  }
+
+  .different-section p:last-child { margin-bottom: 0; }
+
+  .different-section strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .built-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 28px 0;
+  }
+
+  .built-item {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text);
+  }
+
+  .built-check {
+    width: 20px;
+    height: 20px;
+    background: var(--green);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .built-check svg { display: block; }
+
+  .callout-box {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-left: 3px solid var(--green);
+    border-radius: 0 8px 8px 0;
+    padding: 18px 20px;
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-top: 24px;
+  }
+
+  .callout-box strong { color: var(--text); }
+
+  /* ── BETA BENEFITS ── */
+  .benefits-section {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .benefit-list {
+    list-style: none;
+    margin: 24px 0 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .benefit-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .benefit-list li strong { color: var(--text); }
+
+  .benefit-icon {
+    width: 22px;
+    height: 22px;
+    background: rgba(22, 163, 74, 0.15);
+    border: 1px solid rgba(22, 163, 74, 0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .free-line {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    border-top: 1px solid var(--border2);
+    padding-top: 24px;
+    margin-top: 8px;
+  }
+
+  /* ── FORM SECTION ── */
+  .form-section {
+    background: var(--bg);
+  }
+
+  .form-section h2 {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+
+  .form-section .form-sub {
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: 36px;
+  }
+
+  .form-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 36px;
+  }
+
+  .form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+
+  .form-group:last-child { margin-bottom: 0; }
+
+  label.field-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  label.field-label .req {
+    color: #ef4444;
+    margin-left: 2px;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  select,
+  textarea {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: var(--text);
+    font-family: inherit;
+    width: 100%;
+    transition: border-color 0.15s;
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  input[type="tel"]:focus,
+  select:focus,
+  textarea:focus {
+    border-color: var(--blue);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #475569;
+  }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2394a3b8' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+    cursor: pointer;
+  }
+
+  select option { background: #1c2640; }
+
+  textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+
+  .form-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 28px 0;
+  }
+
+  .form-section-heading {
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 14px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 8px;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .checkbox-label:hover {
+    border-color: var(--border2);
+    color: var(--text);
+  }
+
+  .checkbox-label input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    accent-color: var(--green);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .checkbox-label.checked {
+    border-color: var(--green);
+    color: var(--text);
+    background: rgba(22, 163, 74, 0.06);
+  }
+
+  .btn-submit {
+    width: 100%;
+    background: var(--green);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 14px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 28px;
+    transition: background 0.15s;
+  }
+
+  .btn-submit:hover { background: var(--green-h); }
+  .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .form-error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #fca5a5;
+    margin-top: 16px;
+    display: none;
+  }
+
+  .form-success {
+    text-align: center;
+    padding: 48px 32px;
+    display: none;
+  }
+
+  .success-icon {
+    width: 56px;
+    height: 56px;
+    background: rgba(22, 163, 74, 0.15);
+    border: 2px solid var(--green);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+  }
+
+  .form-success h3 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+
+  .form-success p {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ── ABOUT BRET ── */
+  .about-section {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .about-section h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.3px;
+    margin-bottom: 20px;
+  }
+
+  .about-section p {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 14px;
+  }
+
+  .about-section p:last-child { margin-bottom: 0; }
+
+  .about-section strong { color: var(--text); font-weight: 500; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    padding: 28px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  footer a { color: var(--blue); }
+  footer a:hover { text-decoration: underline; }
+
+  .footer-logo { font-weight: 700; color: var(--text); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    nav { padding: 12px 20px; }
+    .hero { padding: 56px 20px 48px; }
+    .section { padding: 52px 20px; }
+    .form-card { padding: 24px 20px; }
+    .form-grid-2 { grid-template-columns: 1fr; }
+    .built-grid { grid-template-columns: 1fr; }
+    footer { flex-direction: column; gap: 8px; text-align: center; }
+  }
+</style>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="https://vesselrfq.com" class="nav-logo">VesselRFQ</a>
+    <a href="#apply" class="nav-cta">Apply for beta</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-inner">
+      <span class="hero-label">Fabricator Beta Program</span>
+      <h1>41 Pressure Vessels. No Quotes.<br>That Was My Fault.<br>This Is How I'm Fixing It.</h1>
+      <p class="hero-sub">I've been on the estimating side of this industry for over three decades. I know exactly what's broken. This time I'm building it in the right order.</p>
+      <a href="#apply" class="btn-green">Apply for beta access</a>
+    </div>
+  </section>
+
+  <!-- STORY SECTION -->
+  <section class="story-section section">
+    <div class="section-inner">
+      <span class="section-label">The backstory</span>
+      <p>In 2013, I built a platform called TanksAndEquipment.com. The idea was simple: give buyers of ASME pressure vessels a central place to post jobs, and give fabricators a way to find them. I spent months on it. Got it working. Opened it up.</p>
+      <p>Then Schlumberger posted <strong>41 pressure vessels</strong>. Real jobs. Real specs. Real budgets. Not one fabricator quoted them. Not one. I watched the RFQs age out and eventually shut the platform down. For a long time I told myself the problem was the market — that fabricators weren't ready for online RFQs, that buyers wouldn't trust the process. That wasn't true. <strong>The problem was that I had built the buyer side before I had a fabricator side.</strong> An empty marketplace with buyers and no sellers isn't a slow start. It's a dead end.</p>
+      <p>VesselRFQ is what I should have built the first time. The lesson from TanksAndEquipment wasn't that this market doesn't work online. It was that <strong>you can't have buyer demand without fabricator capacity to answer it.</strong> This time I'm building it in the right order — fabricator network first, marketplace second.</p>
+    </div>
+  </section>
+
+  <!-- WHAT'S DIFFERENT -->
+  <section class="different-section section">
+    <div class="section-inner">
+      <span class="section-label">What's already built</span>
+      <p>The platform itself is done. Buyers configure a complete vessel spec — geometry, design conditions, full nozzle schedule — before they can submit. Nothing arrives incomplete.</p>
+
+      <div class="built-grid">
+        <div class="built-item">
+          <div class="built-check">
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          Vessel configurator
+        </div>
+        <div class="built-item">
+          <div class="built-check">
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          RFQ marketplace
+        </div>
+        <div class="built-item">
+          <div class="built-check">
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          Freight leveling
+        </div>
+        <div class="built-item">
+          <div class="built-check">
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          Quote comparison
+        </div>
+      </div>
+
+      <p>Freight leveling means every quote shows fabricated price, estimated freight, and total delivered cost — so a buyer in Houston can compare a quote from Tulsa against a quote from Beaumont on equal footing. That's built. Quote comparison is built.</p>
+      <p><strong>What I'm building right now is the fabricator network.</strong> That's what this beta is for. I'm not going to open the marketplace to buyers until there are qualified shops behind it ready to quote.</p>
+
+      <div class="callout-box">
+        <strong>The TanksAndEquipment lesson in one sentence:</strong> Never show a buyer an open RFQ if you don't already know which fabricator is going to answer it.
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT BETA MEMBERS GET -->
+  <section class="benefits-section section">
+    <div class="section-inner">
+      <span class="section-label">Beta membership</span>
+      <ul class="benefit-list">
+        <li>
+          <div class="benefit-icon">
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="#16a34a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span><strong>Configurator embed</strong> — a vessel configurator on your website, at your URL, under your brand. Buyers configure before they submit. You get a complete spec every time.</span>
+        </li>
+        <li>
+          <div class="benefit-icon">
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="#16a34a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span><strong>Marketplace RFQ access</strong> — when the marketplace opens to buyers, beta members get first access to open RFQs in their territory before any general-admission fabricators are added.</span>
+        </li>
+        <li>
+          <div class="benefit-icon">
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="#16a34a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span><strong>Protected territory</strong> — one fabricator per territory. Maximum three quotes per RFQ, no exceptions. Your territory is yours.</span>
+        </li>
+        <li>
+          <div class="benefit-icon">
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="#16a34a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span><strong>Founding member status</strong> — your rate and your territory lock in before the marketplace opens. Neither changes when general access begins.</span>
+        </li>
+      </ul>
+      <p class="free-line">Beta is completely free until RFQs are live on the marketplace.</p>
+    </div>
+  </section>
+
+  <!-- APPLICATION FORM -->
+  <section class="form-section section" id="apply">
+    <div class="section-inner-wide">
+      <h2>Submit your application</h2>
+      <p class="form-sub">Tell me about your shop. I review every application personally.</p>
+
+      <div class="form-card">
+        <div id="form-area">
+          <form id="beta-form" novalidate>
+
+            <!-- Name + Title -->
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="field-label" for="firstName">First name <span class="req">*</span></label>
+                <input type="text" id="firstName" name="firstName" required placeholder="First">
+              </div>
+              <div class="form-group">
+                <label class="field-label" for="lastName">Last name <span class="req">*</span></label>
+                <input type="text" id="lastName" name="lastName" required placeholder="Last">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="field-label" for="title">Title <span class="req">*</span></label>
+              <input type="text" id="title" name="title" required placeholder="e.g. President, Estimator, VP of Operations">
+            </div>
+
+            <div class="form-group">
+              <label class="field-label" for="companyName">Company name <span class="req">*</span></label>
+              <input type="text" id="companyName" name="companyName" required placeholder="Your shop name">
+            </div>
+
+            <!-- Contact -->
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="field-label" for="email">Email address <span class="req">*</span></label>
+                <input type="email" id="email" name="email" required placeholder="you@yourshop.com">
+              </div>
+              <div class="form-group">
+                <label class="field-label" for="phone">Phone number <span class="req">*</span></label>
+                <input type="tel" id="phone" name="phone" required placeholder="(555) 555-5555">
+              </div>
+            </div>
+
+            <!-- Location -->
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="field-label" for="city">Shop location — city <span class="req">*</span></label>
+                <input type="text" id="city" name="city" required placeholder="City">
+              </div>
+              <div class="form-group">
+                <label class="field-label" for="state">State <span class="req">*</span></label>
+                <select id="state" name="state" required>
+                  <option value="">Select state…</option>
+                  <option>Alabama</option>
+                  <option>Arizona</option>
+                  <option>Arkansas</option>
+                  <option>California</option>
+                  <option>Colorado</option>
+                  <option>Connecticut</option>
+                  <option>Delaware</option>
+                  <option>Florida</option>
+                  <option>Georgia</option>
+                  <option>Idaho</option>
+                  <option>Illinois</option>
+                  <option>Indiana</option>
+                  <option>Iowa</option>
+                  <option>Kansas</option>
+                  <option>Kentucky</option>
+                  <option>Louisiana</option>
+                  <option>Maine</option>
+                  <option>Maryland</option>
+                  <option>Massachusetts</option>
+                  <option>Michigan</option>
+                  <option>Minnesota</option>
+                  <option>Mississippi</option>
+                  <option>Missouri</option>
+                  <option>Montana</option>
+                  <option>Nebraska</option>
+                  <option>Nevada</option>
+                  <option>New Hampshire</option>
+                  <option>New Jersey</option>
+                  <option>New Mexico</option>
+                  <option>New York</option>
+                  <option>North Carolina</option>
+                  <option>North Dakota</option>
+                  <option>Ohio</option>
+                  <option>Oklahoma</option>
+                  <option>Oregon</option>
+                  <option>Pennsylvania</option>
+                  <option>Rhode Island</option>
+                  <option>South Carolina</option>
+                  <option>South Dakota</option>
+                  <option>Tennessee</option>
+                  <option>Texas</option>
+                  <option>Utah</option>
+                  <option>Vermont</option>
+                  <option>Virginia</option>
+                  <option>Washington</option>
+                  <option>West Virginia</option>
+                  <option>Wisconsin</option>
+                  <option>Wyoming</option>
+                </select>
+              </div>
+            </div>
+
+            <hr class="form-divider">
+
+            <!-- ASME Stamps -->
+            <div class="form-group">
+              <p class="form-section-heading">ASME stamps held</p>
+              <div class="checkbox-grid">
+                <label class="checkbox-label"><input type="checkbox" name="asmeStamps" value="U"> U stamp</label>
+                <label class="checkbox-label"><input type="checkbox" name="asmeStamps" value="U2"> U2 stamp</label>
+                <label class="checkbox-label"><input type="checkbox" name="asmeStamps" value="U3"> U3 stamp</label>
+                <label class="checkbox-label"><input type="checkbox" name="asmeStamps" value="S"> S stamp</label>
+                <label class="checkbox-label"><input type="checkbox" name="asmeStamps" value="Other"> Other</label>
+              </div>
+            </div>
+
+            <hr class="form-divider">
+
+            <!-- Vessel types fabricated -->
+            <div class="form-group">
+              <p class="form-section-heading">Vessel types fabricated</p>
+              <div class="checkbox-grid">
+                <label class="checkbox-label"><input type="checkbox" name="vesselTypesFabricated" value="Pressure Vessels"> Pressure Vessels</label>
+                <label class="checkbox-label"><input type="checkbox" name="vesselTypesFabricated" value="Heat Exchangers"> Heat Exchangers</label>
+                <label class="checkbox-label"><input type="checkbox" name="vesselTypesFabricated" value="Tanks"> Tanks</label>
+                <label class="checkbox-label"><input type="checkbox" name="vesselTypesFabricated" value="Reactors"> Reactors</label>
+                <label class="checkbox-label"><input type="checkbox" name="vesselTypesFabricated" value="Columns/Towers"> Columns/Towers</label>
+                <label class="checkbox-label"><input type="checkbox" name="vesselTypesFabricated" value="Other"> Other</label>
+              </div>
+            </div>
+
+            <!-- Vessel types preferred -->
+            <div class="form-group" style="margin-top: 20px;">
+              <p class="form-section-heading">Vessel types preferred to quote</p>
+              <div class="checkbox-grid">
+                <label class="checkbox-label"><input type="checkbox" name="vesselTypesPreferred" value="Pressure Vessels"> Pressure Vessels</label>
+                <label class="checkbox-label"><input type="checkbox" name="vesselTypesPreferred" value="Heat Exchangers"> Heat Exchangers</label>
+                <label class="checkbox-label"><input type="checkbox" name="vesselTypesPreferred" value="Tanks"> Tanks</label>
+                <label class="checkbox-label"><input type="checkbox" name="vesselTypesPreferred" value="Reactors"> Reactors</label>
+                <label class="checkbox-label"><input type="checkbox" name="vesselTypesPreferred" value="Columns/Towers"> Columns/Towers</label>
+                <label class="checkbox-label"><input type="checkbox" name="vesselTypesPreferred" value="Other"> Other</label>
+              </div>
+            </div>
+
+            <hr class="form-divider">
+
+            <!-- Materials -->
+            <div class="form-group">
+              <p class="form-section-heading">Materials regularly worked with</p>
+              <div class="checkbox-grid">
+                <label class="checkbox-label"><input type="checkbox" name="materials" value="Carbon Steel"> Carbon Steel</label>
+                <label class="checkbox-label"><input type="checkbox" name="materials" value="Stainless Steel"> Stainless Steel</label>
+                <label class="checkbox-label"><input type="checkbox" name="materials" value="Low Alloy"> Low Alloy</label>
+                <label class="checkbox-label" style="grid-column: span 2;"><input type="checkbox" name="materials" value="High Alloy/Exotic"> High Alloy / Exotic (Hastelloy, Inconel, etc.)</label>
+                <label class="checkbox-label"><input type="checkbox" name="materials" value="Other"> Other</label>
+              </div>
+            </div>
+
+            <hr class="form-divider">
+
+            <!-- Revenue + Additional info -->
+            <div class="form-group">
+              <label class="field-label" for="annualRevenue">Approximate annual vessel revenue</label>
+              <select id="annualRevenue" name="annualRevenue">
+                <option value="">Prefer not to say</option>
+                <option>Under $1M</option>
+                <option>$1M–$5M</option>
+                <option>$5M–$15M</option>
+                <option>$15M–$50M</option>
+                <option>Over $50M</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="field-label" for="additionalInfo">Anything else you want us to know</label>
+              <textarea id="additionalInfo" name="additionalInfo" placeholder="Specialties, certifications, geographic focus, questions — anything relevant."></textarea>
+            </div>
+
+            <div id="form-error" class="form-error"></div>
+
+            <button type="submit" class="btn-submit" id="submit-btn">Submit My Application</button>
+
+          </form>
+        </div>
+
+        <!-- Success state -->
+        <div class="form-success" id="form-success">
+          <div class="success-icon">
+            <svg width="24" height="20" viewBox="0 0 24 20" fill="none"><path d="M2 10l7 7L22 2" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>Application received.</h3>
+          <p>I'll be in touch shortly to discuss next steps.<br>— Bret Mundt, VesselRFQ</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ABOUT BRET -->
+  <section class="about-section section">
+    <div class="section-inner">
+      <span class="section-label">About the builder</span>
+      <h2>Built from inside the industry.</h2>
+      <p>36 years in code fabrication and industrial construction. Time on the <strong>estimating desk at an ASME code shop</strong> — which is where I learned what information an estimator actually needs to price a job, and how rarely a buyer provides all of it upfront. The required fields in VesselRFQ aren't arbitrary. Every single one came from a moment at the estimating desk where I needed that number and it wasn't there.</p>
+      <p><strong>Capital project management for chemical plants and refineries.</strong> I've been on both sides of the RFQ — the shop sending quotes and the plant owner reviewing them. I know what a well-structured process looks like and what a bad one costs.</p>
+      <p>I shipped the <strong>first 50,000-pound Inconel 600 vessel to travel the Tennessee-Tombigbee Waterway.</strong> That's not a marketing line. It's context for the kind of work this platform is built to handle.</p>
+      <p>VesselRFQ wasn't built by a software company that learned about pressure vessels. It was built by someone who spent decades in this industry and then learned enough software to fix a problem that's been there the whole time.</p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <span class="footer-logo">VesselRFQ</span>
+    <span>Questions? Email <a href="mailto:bret@vesselrfq.com">bret@vesselrfq.com</a></span>
+  </footer>
+
+  <script>
+    // Checkbox visual state
+    document.querySelectorAll('.checkbox-label input[type="checkbox"]').forEach(function(cb) {
+      cb.addEventListener('change', function() {
+        this.closest('.checkbox-label').classList.toggle('checked', this.checked)
+      })
+    })
+
+    // Form submission
+    document.getElementById('beta-form').addEventListener('submit', async function(e) {
+      e.preventDefault()
+
+      var btn = document.getElementById('submit-btn')
+      var errorEl = document.getElementById('form-error')
+      errorEl.style.display = 'none'
+      btn.disabled = true
+      btn.textContent = 'Submitting…'
+
+      function getChecked(name) {
+        return Array.from(document.querySelectorAll('input[name="' + name + '"]:checked'))
+          .map(function(el) { return el.value })
+      }
+
+      var payload = {
+        firstName:             document.getElementById('firstName').value.trim(),
+        lastName:              document.getElementById('lastName').value.trim(),
+        title:                 document.getElementById('title').value.trim(),
+        companyName:           document.getElementById('companyName').value.trim(),
+        email:                 document.getElementById('email').value.trim(),
+        phone:                 document.getElementById('phone').value.trim(),
+        city:                  document.getElementById('city').value.trim(),
+        state:                 document.getElementById('state').value,
+        asmeStamps:            getChecked('asmeStamps'),
+        vesselTypesFabricated: getChecked('vesselTypesFabricated'),
+        vesselTypesPreferred:  getChecked('vesselTypesPreferred'),
+        materials:             getChecked('materials'),
+        annualRevenue:         document.getElementById('annualRevenue').value,
+        additionalInfo:        document.getElementById('additionalInfo').value.trim(),
+      }
+
+      try {
+        var res = await fetch('/api/beta-application', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        })
+
+        if (!res.ok) {
+          var data = await res.json().catch(function() { return {} })
+          throw new Error(data.error || 'Submission failed. Please try again.')
+        }
+
+        document.getElementById('form-area').style.display = 'none'
+        var successEl = document.getElementById('form-success')
+        successEl.style.display = 'block'
+        window.scrollTo({ top: document.getElementById('apply').offsetTop - 80, behavior: 'smooth' })
+
+      } catch (err) {
+        errorEl.textContent = err.message || 'Something went wrong. Please try again or email bret@vesselrfq.com.'
+        errorEl.style.display = 'block'
+        btn.disabled = false
+        btn.textContent = 'Submit My Application'
+      }
+    })
+  </script>
+
+</body>
+</html>

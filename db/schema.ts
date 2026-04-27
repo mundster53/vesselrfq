@@ -214,3 +214,22 @@ export const marketplaceNotifications = pgTable('marketplace_notifications', {
   sentAt:       timestamp('sent_at').defaultNow().notNull(),
   emailSentTo:  text('email_sent_to').notNull(),
 })
+
+export const betaApplications = pgTable('beta_applications', {
+  id:                    serial('id').primaryKey(),
+  firstName:             text('first_name').notNull(),
+  lastName:              text('last_name').notNull(),
+  title:                 text('title').notNull(),
+  companyName:           text('company_name').notNull(),
+  email:                 text('email').notNull(),
+  phone:                 text('phone').notNull(),
+  city:                  text('city').notNull(),
+  state:                 text('state').notNull(),
+  asmeStamps:            text('asme_stamps').array().notNull().default([]),
+  vesselTypesFabricated: text('vessel_types_fabricated').array().notNull().default([]),
+  vesselTypesPreferred:  text('vessel_types_preferred').array().notNull().default([]),
+  materials:             text('materials').array().notNull().default([]),
+  annualRevenue:         text('annual_revenue'),
+  additionalInfo:        text('additional_info'),
+  createdAt:             timestamp('created_at').defaultNow().notNull(),
+})
