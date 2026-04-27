@@ -562,6 +562,19 @@
   .how-we-drive-rfqs p:last-child { margin-bottom: 0; }
   .how-we-drive-rfqs strong { color: var(--text); font-weight: 500; }
 
+  /* ── APPLICATION COMMITMENT ── */
+  .application-commitment {
+    padding-top: 20px;
+    text-align: center;
+  }
+
+  .application-commitment p {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.7;
+    opacity: 0.75;
+  }
+
   /* ── RESPONSIVE ── */
   @media (max-width: 640px) {
     nav { padding: 12px 20px; }
@@ -690,7 +703,7 @@
           <div class="benefit-icon">
             <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="#16a34a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
-          <span><strong>Founding member rate locked in</strong> — whatever monthly fee is established when the network size is set, that's your rate. It doesn't change.</span>
+          <span><strong>Founding member rate locked in</strong> — whatever monthly fee is established when the network size is set, that's your rate. It doesn't change. For context, platforms like ThomasNet and IQS charge fabricators $3,000 to $15,000 per year for a passive directory listing. VesselRFQ delivers spec-complete RFQs directly to you.</span>
         </li>
         <li>
           <div class="benefit-icon">
@@ -909,6 +922,10 @@
             </div>
 
             <div id="form-error" class="form-error"></div>
+
+            <div class="application-commitment">
+              <p>By applying you are committing to provide quotes on RFQs submitted to the marketplace for pressure vessels in your area. Accepted applicants will be notified within 5 business days.</p>
+            </div>
 
             <button type="submit" class="btn-submit" id="submit-btn">Submit My Application</button>
 
