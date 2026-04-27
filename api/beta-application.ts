@@ -53,6 +53,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       additionalInfo:        body.additionalInfo?.trim() || null,
     } as typeof betaApplications.$inferInsert)
 
+    // GHL inbound webhook
+    fetch('https://services.leadconnectorhq.com/hooks/KvDwmAsIEkRO0W8xkt2d/webhook-trigger/1d097ae4-ed7f-4642-9e09-2489d4cfd420', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        firstName,
+        lastName,
+        title,
+        companyName,
+        email,
+        phone,
+        city,
+        state,
+        asmeStamps:            body.asmeStamps,
+        vesselTypesFabricated: body.vesselTypesFabricated,
+        vesselTypesPreferred:  body.vesselTypesPreferred,
+        materials:             body.materials,
+        annualRevenue:         body.annualRevenue,
+        additionalInfo:        body.additionalInfo,
+      }),
+    }).catch((err) => console.error('[beta-application] GHL webhook error:', err))
+
     // Confirmation to applicant
     await sendEmail(
       email.trim(),
