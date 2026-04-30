@@ -91,6 +91,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       notificationText(body),
     ).catch((err) => console.error('[beta-application] notification email failed:', err))
 
+    // GHL contact creation
+    try {
+      const ghlRes = await fetch('https://services.leadconnectorhq.com/contacts/', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.GHL_API_KEY}`,
+          'Version': '2021-07-28',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          locationId:  process.env.GHL_LOCATION_ID,
+          firstName:   firstName.trim(),
+          lastName:    lastName.trim(),
+          email:       email.trim().toLowerCase(),
+          phone:       phone.trim(),
+          companyName: companyName.trim(),
+          city:        city.trim(),
+          state:       state.trim(),
+          source:      'VesselRFQ Beta Application',
+          tags:        ['Beta Applicant', 'Fabricator'],
+        }),
+      })
+      if (!ghlRes.ok) {
+        const text = await ghlRes.text().catch(() => '')
+        console.error(`[beta-application] GHL contact creation failed: ${ghlRes.status}`, text)
+      } else {
+        console.log(`[beta-application] GHL contact created for ${email.trim()}`)
+      }
+    } catch (err) {
+      console.error('[beta-application] GHL contact creation error:', err)
+    }
+
     return res.status(200).json({ ok: true })
   } catch (err) {
     console.error('[beta-application]', err)
