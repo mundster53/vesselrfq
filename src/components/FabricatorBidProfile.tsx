@@ -266,25 +266,32 @@ export default function FabricatorBidProfile() {
 
       {/* ── Section 0: Embed Code ─────────────────────────────────────── */}
       {user && (
-        <div style={{ padding: '24px 24px 20px', borderBottom: '0.5px solid #1e293b' }}>
+        <div style={{ padding: '24px 24px 24px', borderBottom: '0.5px solid #1e293b' }}>
           <h2 style={sectionHead}>Vessel Configurator Embed</h2>
-          <p style={{ fontSize: 13, color: '#94a3b8', marginTop: 0, marginBottom: 14, lineHeight: 1.6 }}>
-            Paste this code into any page on your website to embed the VesselRFQ configurator. RFQs submitted through your embed are tagged to your shop.
+          <p style={{ fontSize: 13, color: '#cbd5e1', marginTop: 0, marginBottom: 6, lineHeight: 1.6 }}>
+            Copy the code below and paste it into any page on your website. Your web developer can place it in minutes.
+          </p>
+          <p style={{ fontSize: 12, color: '#64748b', marginTop: 0, marginBottom: 16, lineHeight: 1.6 }}>
+            RFQs submitted through your embed are automatically tagged to your shop.
           </p>
           <div style={{
-            background:   '#0d1424',
-            border:       '0.5px solid #334155',
+            background:   '#08111f',
+            border:       '1px solid #2563eb',
             borderRadius: 8,
             overflow:     'hidden',
+            boxShadow:    '0 0 0 3px rgba(37,99,235,0.12)',
           }}>
             <div style={{
               display:        'flex',
               alignItems:     'center',
               justifyContent: 'space-between',
-              padding:        '8px 14px',
-              borderBottom:   '0.5px solid #1e293b',
+              padding:        '10px 16px',
+              borderBottom:   '1px solid #1e3a5f',
+              background:     '#0d1d35',
             }}>
-              <span style={{ fontSize: 11, color: '#475569', fontFamily: 'monospace' }}>iframe embed</span>
+              <span style={{ fontSize: 11, color: '#60a5fa', fontFamily: 'monospace', fontWeight: 600, letterSpacing: '0.05em' }}>
+                EMBED CODE
+              </span>
               <button
                 onClick={() => {
                   const snippet = `<iframe src="https://vesselrfq.com/app/embed?shop=${user.id}" width="100%" height="900" frameborder="0" style="border:none;"></iframe>`
@@ -294,26 +301,28 @@ export default function FabricatorBidProfile() {
                   })
                 }}
                 style={{
-                  background:   copied ? '#052e16' : '#1e293b',
-                  border:       `0.5px solid ${copied ? '#16a34a' : '#334155'}`,
-                  borderRadius: 4,
-                  color:        copied ? '#86efac' : '#94a3b8',
-                  fontSize:     11,
-                  padding:      '3px 10px',
+                  background:   copied ? '#052e16' : '#1d4ed8',
+                  border:       `1px solid ${copied ? '#16a34a' : '#2563eb'}`,
+                  borderRadius: 5,
+                  color:        copied ? '#86efac' : '#ffffff',
+                  fontSize:     12,
+                  fontWeight:   600,
+                  padding:      '5px 16px',
                   cursor:       'pointer',
                   fontFamily:   'inherit',
                   transition:   'background 0.15s, color 0.15s',
+                  letterSpacing: '0.02em',
                 }}
               >
-                {copied ? 'Copied!' : 'Copy'}
+                {copied ? '✓ Copied!' : 'Copy Code'}
               </button>
             </div>
             <pre style={{
               margin:     0,
-              padding:    '14px',
-              fontSize:   11,
-              lineHeight: 1.7,
-              color:      '#94a3b8',
+              padding:    '16px',
+              fontSize:   12,
+              lineHeight: 1.8,
+              color:      '#7dd3fc',
               fontFamily: 'monospace',
               overflowX:  'auto',
               whiteSpace: 'pre-wrap',
@@ -322,9 +331,12 @@ export default function FabricatorBidProfile() {
               {`<iframe\n  src="https://vesselrfq.com/app/embed?shop=${user.id}"\n  width="100%"\n  height="900"\n  frameborder="0"\n  style="border:none;"\n></iframe>`}
             </pre>
           </div>
-          <div style={{ fontSize: 11, color: '#475569', marginTop: 8 }}>
-            Your shop ID: <span style={{ fontFamily: 'monospace', color: '#64748b' }}>{user.id}</span>
+          <div style={{ fontSize: 12, color: '#475569', marginTop: 10, lineHeight: 1.6 }}>
+            Your shop ID: <span style={{ fontFamily: 'monospace', color: '#60a5fa' }}>{user.id}</span>
           </div>
+          <p style={{ fontSize: 12, color: '#64748b', marginTop: 12, marginBottom: 0, lineHeight: 1.6 }}>
+            Need help? Reply to your onboarding email and we'll work directly with your web team to get it placed.
+          </p>
         </div>
       )}
 
