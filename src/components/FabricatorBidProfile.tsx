@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { CSSProperties } from 'react'
 import { api } from '../lib/api'
+import { useAuth } from '../contexts/AuthContext'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -141,6 +142,8 @@ function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) =>
 // ── Main component ─────────────────────────────────────────────────────────────
 
 export default function FabricatorBidProfile() {
+  const { user } = useAuth()
+  const [copied, setCopied] = useState(false)
   const [eligibilityLoading, setEligibilityLoading] = useState(true)
   const [eligibility, setEligibility] = useState<EligibilityStatus | null>(null)
 
@@ -260,6 +263,70 @@ export default function FabricatorBidProfile() {
 
   return (
     <div style={{ overflowY: 'auto', flex: 1, background: '#0f172a' }}>
+
+      {/* ── Section 0: Embed Code ─────────────────────────────────────── */}
+      {user && (
+        <div style={{ padding: '24px 24px 20px', borderBottom: '0.5px solid #1e293b' }}>
+          <h2 style={sectionHead}>Vessel Configurator Embed</h2>
+          <p style={{ fontSize: 13, color: '#94a3b8', marginTop: 0, marginBottom: 14, lineHeight: 1.6 }}>
+            Paste this code into any page on your website to embed the VesselRFQ configurator. RFQs submitted through your embed are tagged to your shop.
+          </p>
+          <div style={{
+            background:   '#0d1424',
+            border:       '0.5px solid #334155',
+            borderRadius: 8,
+            overflow:     'hidden',
+          }}>
+            <div style={{
+              display:        'flex',
+              alignItems:     'center',
+              justifyContent: 'space-between',
+              padding:        '8px 14px',
+              borderBottom:   '0.5px solid #1e293b',
+            }}>
+              <span style={{ fontSize: 11, color: '#475569', fontFamily: 'monospace' }}>iframe embed</span>
+              <button
+                onClick={() => {
+                  const snippet = `<iframe src="https://vesselrfq.com/app/embed?shop=${user.id}" width="100%" height="900" frameborder="0" style="border:none;"></iframe>`
+                  navigator.clipboard.writeText(snippet).then(() => {
+                    setCopied(true)
+                    setTimeout(() => setCopied(false), 2500)
+                  })
+                }}
+                style={{
+                  background:   copied ? '#052e16' : '#1e293b',
+                  border:       `0.5px solid ${copied ? '#16a34a' : '#334155'}`,
+                  borderRadius: 4,
+                  color:        copied ? '#86efac' : '#94a3b8',
+                  fontSize:     11,
+                  padding:      '3px 10px',
+                  cursor:       'pointer',
+                  fontFamily:   'inherit',
+                  transition:   'background 0.15s, color 0.15s',
+                }}
+              >
+                {copied ? 'Copied!' : 'Copy'}
+              </button>
+            </div>
+            <pre style={{
+              margin:     0,
+              padding:    '14px',
+              fontSize:   11,
+              lineHeight: 1.7,
+              color:      '#94a3b8',
+              fontFamily: 'monospace',
+              overflowX:  'auto',
+              whiteSpace: 'pre-wrap',
+              wordBreak:  'break-all',
+            }}>
+              {`<iframe\n  src="https://vesselrfq.com/app/embed?shop=${user.id}"\n  width="100%"\n  height="900"\n  frameborder="0"\n  style="border:none;"\n></iframe>`}
+            </pre>
+          </div>
+          <div style={{ fontSize: 11, color: '#475569', marginTop: 8 }}>
+            Your shop ID: <span style={{ fontFamily: 'monospace', color: '#64748b' }}>{user.id}</span>
+          </div>
+        </div>
+      )}
 
       {/* ── Section 1: Marketplace Eligibility ────────────────────────── */}
       <div style={{ padding: '24px 24px 20px', borderBottom: '0.5px solid #1e293b' }}>
