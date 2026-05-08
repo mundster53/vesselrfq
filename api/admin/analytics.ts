@@ -59,7 +59,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ) latest
       WHERE latest.verified = true
     `)
-    const embedVerified = Number((embedVerifiedResult.rows[0] as { count: string | number })?.count ?? 0)
+    const embedVerified = Number((embedVerifiedResult.rows?.[0] as { count: string | number } | undefined)?.count ?? 0)
 
     // Marketplace eligible: active=true AND profile_complete=true AND latest embed verified=true
     const marketplaceEligibleResult = await db.execute(sql`
@@ -76,7 +76,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         AND fbp.profile_complete = true
         AND latest_embed.verified = true
     `)
-    const marketplaceEligible = Number((marketplaceEligibleResult.rows[0] as { count: string | number })?.count ?? 0)
+    const marketplaceEligible = Number((marketplaceEligibleResult.rows?.[0] as { count: string | number } | undefined)?.count ?? 0)
 
     // Buyer stats
     const [buyerTotalRow] = await db

@@ -1367,8 +1367,8 @@ function AnalyticsView() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
               <StatCard    label="Total RFQs"         value={data.platform.totalRfqs}    color="#f1f5f9" />
               <StatCard    label="Total Quotes"        value={data.platform.totalQuotes}  color="#f59e0b" />
-              <StatCardStr label="Avg Quotes / RFQ"    value={data.platform.avgQuotesPerRfq.toFixed(1)}   color="#60a5fa" />
-              <StatCardStr label="Quote Response Rate" value={`${(data.platform.quoteResponseRate * 100).toFixed(0)}%`} color="#4ade80" />
+              <StatCardStr label="Avg Quotes / RFQ"    value={(data.platform.avgQuotesPerRfq ?? 0).toFixed(1)}   color="#60a5fa" />
+              <StatCardStr label="Quote Response Rate" value={`${((data.platform.quoteResponseRate ?? 0) * 100).toFixed(0)}%`} color="#4ade80" />
             </div>
 
             <div style={sectionHeader}>Fabricators</div>
@@ -1383,7 +1383,7 @@ function AnalyticsView() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
               <StatCard    label="Registered"          value={data.buyers.total}       color="#f1f5f9" />
               <StatCard    label="Total RFQs Submitted" value={data.buyers.totalRfqs}   color="#60a5fa" />
-              <StatCardStr label="Avg RFQs / Buyer"     value={data.buyers.avgRfqsPerBuyer.toFixed(1)} color="#94a3b8" />
+              <StatCardStr label="Avg RFQs / Buyer"     value={(data.buyers.avgRfqsPerBuyer ?? 0).toFixed(1)} color="#94a3b8" />
             </div>
           </>
         )}
