@@ -34,6 +34,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         email:            users.email,
         active:           users.active,
         shopName:         fabricatorProfiles.shopName,
+        contactName:      fabricatorProfiles.contactName,
         city:             fabricatorProfiles.city,
         state:            fabricatorProfiles.state,
         stamps:           fabricatorProfiles.stamps,
@@ -45,6 +46,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         shipToStates:     fabricatorBidProfiles.shipToStates,
         lastEmbedCheck:   latestEmbed.checkedAt,
         lastEmbedVerified: latestEmbed.verified,
+        registeredAt:     users.createdAt,
       })
       .from(fabricatorProfiles)
       .innerJoin(users, eq(users.id, fabricatorProfiles.userId))
