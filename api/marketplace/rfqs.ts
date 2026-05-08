@@ -172,6 +172,49 @@ vesselrfq.com`
       )
     }
 
+    // ── Admin notification ────────────────────────────────────────────────────
+    try {
+      const [buyer]     = await db.select({ email: users.email }).from(users).where(eq(users.id, auth.userId)).limit(1)
+      const buyerEmail  = buyer?.email ?? 'unknown'
+      const vLabel      = rfq.vesselType === 'heat_exchanger' ? 'Heat Exchanger' : 'Pressure Vessel'
+      const dlStr       = deadlineAt.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+      const adminUrl    = 'https://vesselrfq.com/app/admin'
+      const specRows    = [
+        rfq.shellOd     ? `<tr><td style="padding:5px 12px;color:#64748b;font-size:13px;white-space:nowrap">Shell OD</td><td style="padding:5px 12px;font-size:13px;color:#1e293b;font-weight:500">${rfq.shellOd}"</td></tr>` : '',
+        rfq.shellLength ? `<tr><td style="padding:5px 12px;color:#64748b;font-size:13px;white-space:nowrap">Shell Length</td><td style="padding:5px 12px;font-size:13px;color:#1e293b;font-weight:500">${rfq.shellLength}"</td></tr>` : '',
+      ].join('')
+      const adminHtml = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
+  <div style="max-width:560px;margin:32px auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+    <div style="background:#0f172a;padding:20px 32px">
+      <div style="font-size:15px;font-weight:700;color:#ffffff">New Marketplace RFQ Submitted</div>
+    </div>
+    <div style="padding:28px 32px">
+      <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden">
+        <tbody>
+          <tr><td style="padding:5px 12px;color:#64748b;font-size:13px;white-space:nowrap">Buyer</td><td style="padding:5px 12px;font-size:13px;color:#1e293b;font-weight:500">${buyerEmail}</td></tr>
+          <tr style="background:#f8fafc"><td style="padding:5px 12px;color:#64748b;font-size:13px;white-space:nowrap">RFQ Title</td><td style="padding:5px 12px;font-size:13px;color:#1e293b;font-weight:500">${rfq.title}</td></tr>
+          <tr><td style="padding:5px 12px;color:#64748b;font-size:13px;white-space:nowrap">Vessel Type</td><td style="padding:5px 12px;font-size:13px;color:#1e293b;font-weight:500">${vLabel}</td></tr>
+          ${specRows}
+          <tr style="background:#f8fafc"><td style="padding:5px 12px;color:#64748b;font-size:13px;white-space:nowrap">Install Location</td><td style="padding:5px 12px;font-size:13px;color:#1e293b;font-weight:500">${installCity.trim()}, ${normalizedState}</td></tr>
+          <tr><td style="padding:5px 12px;color:#64748b;font-size:13px;white-space:nowrap">Bid Deadline</td><td style="padding:5px 12px;font-size:13px;color:#1e293b;font-weight:500">${dlStr}</td></tr>
+          <tr style="background:#f8fafc"><td style="padding:5px 12px;color:#64748b;font-size:13px;white-space:nowrap">Fabricators Notified</td><td style="padding:5px 12px;font-size:13px;color:#1e293b;font-weight:500">${matched.length}</td></tr>
+        </tbody>
+      </table>
+      <p style="margin:20px 0 0">
+        <a href="${adminUrl}" style="display:inline-block;background:#2563eb;color:#fff;font-size:13px;font-weight:600;padding:9px 18px;border-radius:7px;text-decoration:none">Open Admin Dashboard →</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>`
+      await sendEmail('bret@vesselrfq.com', `New Marketplace RFQ Submitted — ${rfq.title}`, adminHtml)
+    } catch (notifyErr) {
+      console.error('[marketplace/rfqs] admin notification failed:', notifyErr)
+    }
+
     return res.status(200).json({ marketplaceRfqId: marketplaceRfq.id, notified: matched.length })
   } catch (err) {
     console.error('[marketplace/rfqs]', err)
