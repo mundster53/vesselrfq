@@ -946,13 +946,13 @@ export default function VesselDesignerPage() {
     }
   }
 
-  async function handleMarketplaceSubmit(installCity: string, installState: string, deadlineDays: number) {
+  async function handleMarketplaceSubmit(installCity: string, installState: string, needQuoteBy: string) {
     setSubmitting(true)
     try {
       let result: { rfq: { id: number; title: string; vesselType?: string } }
       if (vesselType === 'tank') {
         result = await api.post('/rfqs', buildTankBody())
-        await api.post('/marketplace/rfqs', { rfqId: result.rfq.id, installCity, installState, deadlineDays })
+        await api.post('/marketplace/rfqs', { rfqId: result.rfq.id, installCity, installState, needQuoteBy })
         navigate('/rfq-submitted', {
           state: {
             rfqId:            result.rfq.id,
@@ -968,7 +968,7 @@ export default function VesselDesignerPage() {
         })
       } else {
         result = await api.post('/rfqs', buildHxBody())
-        await api.post('/marketplace/rfqs', { rfqId: result.rfq.id, installCity, installState, deadlineDays })
+        await api.post('/marketplace/rfqs', { rfqId: result.rfq.id, installCity, installState, needQuoteBy })
         const temaCodeNav = (hxForm.temaFront && hxForm.temaShell && hxForm.temaRear)
           ? `${hxForm.temaFront}-${hxForm.temaShell}-${hxForm.temaRear}`
           : undefined

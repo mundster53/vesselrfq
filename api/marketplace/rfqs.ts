@@ -19,20 +19,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const auth = await requireAuth(req, res)
     if (!auth) return
 
-    const { rfqId, installCity, installState, deadlineDays } = req.body as {
+    const { rfqId, installCity, installState, needQuoteBy } = req.body as {
       rfqId:        number
       installCity:  string
       installState: string
-      deadlineDays: number
+      needQuoteBy:  string
     }
 
     // ── Validate ─────────────────────────────────────────────────────────────
     if (!rfqId)               return res.status(400).json({ error: 'rfqId is required' })
     if (!installCity?.trim()) return res.status(400).json({ error: 'installCity is required' })
     if (!installState?.trim()) return res.status(400).json({ error: 'installState is required' })
-    if (![7, 14, 21, 30].includes(deadlineDays)) {
-      return res.status(400).json({ error: 'deadlineDays must be 7, 14, 21, or 30' })
-    }
+    if (!needQuoteBy?.trim()) return res.status(400).json({ error: 'needQuoteBy is required' })
+    const deadlineAt = new Date(needQuoteBy)
+    if (isNaN(deadlineAt.getTime())) return res.status(400).json({ error: 'needQuoteBy is not a valid date' })
+    if (deadlineAt <= new Date()) return res.status(400).json({ error: 'needQuoteBy must be a future date' })
 
     const normalizedState = installState.trim().toUpperCase()
 
@@ -46,9 +47,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!rfq) return res.status(404).json({ error: 'RFQ not found' })
 
     // ── Insert marketplace RFQ ────────────────────────────────────────────────
-    const deadlineAt = new Date()
-    deadlineAt.setDate(deadlineAt.getDate() + deadlineDays)
-
     const [marketplaceRfq] = await db
       .insert(marketplaceRfqs)
       .values({

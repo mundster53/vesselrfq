@@ -12,7 +12,7 @@ const US_STATES = [
 interface Props {
   isOpen: boolean
   onClose: () => void
-  onSubmitMarketplace: (installCity: string, installState: string, deadlineDays: number) => void
+  onSubmitMarketplace: (installCity: string, installState: string, needQuoteBy: string) => void
   onSubmitDirect: () => void
   submitting: boolean
 }
@@ -27,15 +27,18 @@ export default function MarketplaceSubmitModal({
   const [selected, setSelected] = useState<'marketplace'>('marketplace')
   const [installCity,  setInstallCity]  = useState('')
   const [installState, setInstallState] = useState('')
-  const [deadlineDays, setDeadlineDays] = useState(14)
+  const [needQuoteBy, setNeedQuoteBy] = useState('')
 
   if (!isOpen) return null
 
-  const canSubmit = installCity.trim().length > 0 && installState.length > 0
+  const tomorrow = new Date()
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  const minDate = tomorrow.toISOString().split('T')[0]
+  const canSubmit = installCity.trim().length > 0 && installState.length > 0 && needQuoteBy.length > 0
 
   function handleSubmit() {
     if (!canSubmit || submitting) return
-    onSubmitMarketplace(installCity.trim(), installState, deadlineDays)
+    onSubmitMarketplace(installCity.trim(), installState, needQuoteBy)
   }
 
   const inputBase: CSSProperties = {
@@ -246,17 +249,14 @@ export default function MarketplaceSubmitModal({
 
           {/* Deadline */}
           <div>
-            <span style={fieldLabel}>Bid Deadline</span>
-            <select
-              value={deadlineDays}
-              onChange={e => setDeadlineDays(parseInt(e.target.value))}
+            <span style={fieldLabel}>Need Quote By</span>
+            <input
+              type="date"
+              value={needQuoteBy}
+              min={minDate}
+              onChange={e => setNeedQuoteBy(e.target.value)}
               style={inputBase}
-            >
-              <option value={7}>7 days</option>
-              <option value={14}>14 days</option>
-              <option value={21}>21 days</option>
-              <option value={30}>30 days</option>
-            </select>
+            />
           </div>
         </div>
 
