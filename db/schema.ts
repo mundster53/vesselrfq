@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, integer, numeric, boolean, unique } from 'drizzle-orm/pg-core'
+import { pgTable, serial, text, timestamp, integer, numeric, boolean, unique, date } from 'drizzle-orm/pg-core'
 import { sql } from 'drizzle-orm'
 
 export const users = pgTable('users', {
@@ -199,6 +199,7 @@ export const marketplaceQuotes = pgTable('marketplace_quotes', {
   ),
   leadTimeWeeks:         integer('lead_time_weeks').notNull(),
   qualifications:      text('qualifications'),
+  quoteGoodUntil:      date('quote_good_until'),
   status:              text('status', { enum: ['submitted', 'withdrawn', 'awarded', 'not_awarded'] }).notNull().default('submitted'),
   submittedAt:         timestamp('submitted_at').defaultNow().notNull(),
   updatedAt:           timestamp('updated_at').defaultNow().notNull(),

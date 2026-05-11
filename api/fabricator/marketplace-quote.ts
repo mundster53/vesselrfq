@@ -33,12 +33,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // ── Validate input ────────────────────────────────────────────────────────
-    const { marketplaceRfqId, fabricatedPrice, estimatedFreight, leadTimeWeeks, qualifications } = req.body as {
+    const { marketplaceRfqId, fabricatedPrice, estimatedFreight, leadTimeWeeks, qualifications, quoteGoodUntil } = req.body as {
       marketplaceRfqId: unknown
       fabricatedPrice:  unknown
       estimatedFreight: unknown
       leadTimeWeeks:    unknown
       qualifications:   unknown
+      quoteGoodUntil:   unknown
     }
 
     if (
@@ -48,6 +49,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       typeof leadTimeWeeks    !== 'number' || leadTimeWeeks    <  1
     ) {
       return res.status(400).json({ error: 'marketplaceRfqId, fabricatedPrice, estimatedFreight, and leadTimeWeeks are required' })
+    }
+    if (typeof quoteGoodUntil !== 'string' || !quoteGoodUntil.trim()) {
+      return res.status(400).json({ error: 'quoteGoodUntil is required' })
     }
 
     // ── Verify the marketplace RFQ is still open ──────────────────────────────
@@ -99,6 +103,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         estimatedFreight: String(estimatedFreight),
         leadTimeWeeks,
         qualifications: typeof qualifications === 'string' && qualifications.trim() ? qualifications.trim() : null,
+        quoteGoodUntil: quoteGoodUntil.trim(),
       })
       .returning({ id: marketplaceQuotes.id })
 

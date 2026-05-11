@@ -178,6 +178,7 @@ function DetailModal({ rfq, onClose, onQuoteSubmitted }: {
   const [estimatedFreight, setEstimatedFreight] = useState('')
   const [leadTimeWeeks,    setLeadTimeWeeks]    = useState('')
   const [qualifications,   setQualifications]   = useState('')
+  const [quoteGoodUntil,   setQuoteGoodUntil]   = useState('')
   const [submitting,       setSubmitting]       = useState(false)
   const [submitError,      setSubmitError]      = useState('')
   const [submitted,        setSubmitted]        = useState(rfq.alreadyQuoted)
@@ -195,11 +196,13 @@ function DetailModal({ rfq, onClose, onQuoteSubmitted }: {
   const isHx        = rfq.vesselType === 'heat_exchanger'
   const vesselLabel = isHx ? 'Heat Exchanger' : 'Pressure Vessel'
   const isPastDue   = rfq.deadlineAt ? new Date(rfq.deadlineAt).getTime() < Date.now() : false
+  const tomorrow    = new Date(); tomorrow.setDate(tomorrow.getDate() + 1)
+  const minDate     = tomorrow.toISOString().split('T')[0]
   const temaDesig   = [rfq.temaFront, rfq.temaShell, rfq.temaRear].filter(Boolean).join('-')
 
   async function handleSubmitQuote() {
-    if (!fabricatedPrice || !estimatedFreight || !leadTimeWeeks) {
-      setSubmitError('Fabricated price, freight, and lead time are required.')
+    if (!fabricatedPrice || !estimatedFreight || !leadTimeWeeks || !quoteGoodUntil) {
+      setSubmitError('Fabricated price, freight, lead time, and quote good until date are required.')
       return
     }
     setSubmitting(true)
@@ -210,6 +213,7 @@ function DetailModal({ rfq, onClose, onQuoteSubmitted }: {
       estimatedFreight: parseFloat(estimatedFreight),
       leadTimeWeeks:    parseInt(leadTimeWeeks),
       qualifications:   qualifications || null,
+      quoteGoodUntil,
     }
     try {
       const { quoteId } = await api.post<{ quoteId: number }>('/fabricator/marketplace-quote', payload)
@@ -566,6 +570,17 @@ function DetailModal({ rfq, onClose, onQuoteSubmitted }: {
                     value={qualifications}
                     onChange={e => setQualifications(e.target.value)}
                     style={{ ...inputBase, resize: 'vertical', lineHeight: 1.5 } as CSSProperties}
+                  />
+                </div>
+
+                <div>
+                  <div style={{ fontSize: 11, color: '#475569', marginBottom: 5 }}>Quote Good Until</div>
+                  <input
+                    type="date"
+                    value={quoteGoodUntil}
+                    min={minDate}
+                    onChange={e => setQuoteGoodUntil(e.target.value)}
+                    style={inputBase}
                   />
                 </div>
 
